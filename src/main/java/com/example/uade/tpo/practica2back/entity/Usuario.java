@@ -50,4 +50,10 @@ public class Usuario {
 
     @Column
     private LocalDate dateEnd;
+
+    public void setBlack(boolean b) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+
 }

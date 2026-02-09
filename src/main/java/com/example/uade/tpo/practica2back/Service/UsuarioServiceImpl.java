@@ -20,6 +20,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findAll();
     }
 
+    @SuppressWarnings("null")
     @Override
     public Usuario registerUsuario(Usuario usuario) {
         return usuarioRepository.save(usuario);
