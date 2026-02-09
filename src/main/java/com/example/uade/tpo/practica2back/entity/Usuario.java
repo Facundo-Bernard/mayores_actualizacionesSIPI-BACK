@@ -9,10 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Data;
 
 @Entity
-@Data
 public class Usuario {
 
     public Usuario() {}
@@ -43,10 +41,8 @@ public class Usuario {
     @Column
     private int tipoUsuario;
 
-    // ✅ IMPORTANTE: wrapper Boolean para tolerar NULL y evitar el crash
-    // ✅ Mapea a tu columna real (según logs: is_black)
     @Column(name = "is_black")
-    @JsonProperty("black") // permite que el front mande/reciba "black"
+    @JsonProperty("black")
     private Boolean black = false;
 
     @Column
@@ -55,8 +51,70 @@ public class Usuario {
     @Column
     private LocalDate dateEnd;
 
-    public void setBlack(boolean value) {
-    this.black = value;
-}
+    // ===== GETTERS / SETTERS MANUALES =====
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public int getTipoUsuario() {
+        return tipoUsuario;
+    }
+
+    public void setTipoUsuario(int tipoUsuario) {
+        this.tipoUsuario = tipoUsuario;
+    }
+
+    // LOS QUE TE FALTAN
+    public Boolean getBlack() {
+        return black;
+    }
+
+    public void setBlack(Boolean black) {
+        this.black = black;
+    }
+
+    public LocalDate getDateStart() {
+        return dateStart;
+    }
+
+    public void setDateStart(LocalDate dateStart) {
+        this.dateStart = dateStart;
+    }
+
+    public LocalDate getDateEnd() {
+        return dateEnd;
+    }
+
+    public void setDateEnd(LocalDate dateEnd) {
+        this.dateEnd = dateEnd;
+    }
 }

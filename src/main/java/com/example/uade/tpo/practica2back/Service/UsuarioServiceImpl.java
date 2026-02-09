@@ -20,26 +20,35 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findAll();
     }
 
-    @SuppressWarnings("null")
     @Override
     public Usuario registerUsuario(Usuario usuario) {
+        // Normaliza null
+        if (usuario.getBlack() == null) {
+            usuario.setBlack(false);
+        }
         return usuarioRepository.save(usuario);
     }
 
     @Override
-    public boolean actualizarSuscripcion(Long usuarioId){
+    public boolean actualizarSuscripcion(Long usuarioId) {
         Optional<Usuario> usuarioBuscado = usuarioRepository.findById(usuarioId);
-        if(usuarioBuscado.isPresent()){
+
+        if (usuarioBuscado.isPresent()) {
             Usuario usuario = usuarioBuscado.get();
-            usuario.setBlack(true);
+
+            Boolean actual = usuario.getBlack();
+            boolean nuevoValor = !(actual != null && actual);
+
+            usuario.setBlack(nuevoValor);
             usuarioRepository.save(usuario);
             return true;
         }
+
         return false;
     }
 
     @Override
     public void deleteAllUsuarios() {
-        usuarioRepository.deleteAll(); // Eliminar todos los usuarios
+        usuarioRepository.deleteAll();
     }
 }
