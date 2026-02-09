@@ -17,7 +17,8 @@ import com.example.uade.tpo.practica2back.entity.ProgresoUsuario;
 
 @RestController
 @RequestMapping({ "/progreso" })
-@CrossOrigin(origins = { "http://localhost:5173" })
+@CrossOrigin(origins = "*")
+
 public class ProgresoUsuarioController {
 
    @Autowired

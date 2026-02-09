@@ -19,7 +19,8 @@ import com.example.uade.tpo.practica2back.entity.Reunion;
 
 @RestController
 @RequestMapping("/reuniones")
-@CrossOrigin(origins = "http://localhost:5173") // Ajusta según sea necesario
+@CrossOrigin(origins = "*")
+
 
 public class ReunionController {
 
