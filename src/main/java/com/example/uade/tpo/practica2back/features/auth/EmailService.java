@@ -17,6 +17,9 @@ public class EmailService {
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
+    @org.springframework.beans.factory.annotation.Value("${app.mail.from:no-reply@mayoresactualizaciones.com}")
+    private String mailFrom;
+
     public boolean enviarMagicLink(String toEmail, String userName, String accessUrl) {
         return enviarMagicLink(toEmail, userName, accessUrl, null);
     }
@@ -45,7 +48,7 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
-            helper.setFrom("Mayores Actualizaciones <no-reply@mayoresactualizaciones.com>");
+            helper.setFrom(mailFrom, "Mayores Actualizaciones");
 
             mailSender.send(message);
             log.info("Correo de acceso enviado con éxito a {}", toEmail);

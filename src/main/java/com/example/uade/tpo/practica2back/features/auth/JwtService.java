@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
@@ -36,7 +37,7 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expiry = now.plus(expirationDays, ChronoUnit.DAYS);
 
-        java.util.Map<String, Object> claims = new java.util.HashMap<>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("name", name != null ? name : "");
         claims.put("email", email != null ? email : "");
         claims.put("black", isBlack != null ? isBlack : false);

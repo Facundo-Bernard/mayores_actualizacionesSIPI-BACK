@@ -34,3 +34,7 @@ build/
 
 # Local backups
 legacy_backup/
+
+# Environment files
+.env
+.env.local
