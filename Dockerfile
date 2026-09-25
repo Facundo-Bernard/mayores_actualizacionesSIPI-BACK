@@ -21,8 +21,8 @@ WORKDIR /app
 # Copiamos el archivo .jar generado en la etapa anterior
 COPY --from=build /app/target/*.jar app.jar
 
-# Exponemos el puerto de la aplicación (8080)
-EXPOSE 8080
+# Exponemos el puerto de la aplicación (3000 para IIS Proxy)
+EXPOSE 3000
 
 # Arrancamos el JAR
 ENTRYPOINT ["java", "-jar", "app.jar"]
