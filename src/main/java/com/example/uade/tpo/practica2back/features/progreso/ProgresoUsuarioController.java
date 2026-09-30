@@ -18,7 +18,7 @@ import com.example.uade.tpo.practica2back.features.usuario.UsuarioService;
 
 @RestController
 @RequestMapping("/progreso")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class ProgresoUsuarioController {
 
     private final ProgresoUsuarioService progresoUsuarioService;

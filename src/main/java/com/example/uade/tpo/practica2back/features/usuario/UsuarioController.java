@@ -19,7 +19,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/usuario")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;

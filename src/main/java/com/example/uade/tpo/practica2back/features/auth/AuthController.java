@@ -21,7 +21,7 @@ import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class AuthController {
 
     private final JwtService jwtService;
