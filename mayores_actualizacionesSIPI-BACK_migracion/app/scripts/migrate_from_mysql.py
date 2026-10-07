@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import mysql.connector
-from datetime import datetime
+from datetime import datetime, date
 from app.core.config import settings
 from app.core.database import get_database, connect_to_mongo, close_mongo_connection, set_sequence_value
 
@@ -78,6 +78,16 @@ async def run_migration():
         if user_id > max_user_id:
             max_user_id = user_id
 
+        d_start = u["date_start"]
+        if isinstance(d_start, datetime):
+            pass
+        elif isinstance(d_start, date):
+            d_start = datetime.combine(d_start, datetime.min.time())
+        elif not d_start:
+            d_start = datetime.now()
+
+        d_end = u["date_end"].strftime("%Y-%m-%d") if isinstance(u["date_end"], (date, datetime)) else u["date_end"]
+
         doc = {
             "id": user_id,
             "name": u["name"] or "",
@@ -87,8 +97,8 @@ async def run_migration():
             "tipo_usuario": u["tipo_usuario"] if u["tipo_usuario"] is not None else 1,
             "black": bool(u["is_black"]),
             "activo": bool(u["activo"]) if u["activo"] is not None else True,
-            "date_start": u["date_start"] if u["date_start"] else datetime.now(),
-            "date_end": u["date_end"],
+            "date_start": d_start,
+            "date_end": d_end,
             "progresos": progresos_por_usuario.get(user_id, [])
         }
 

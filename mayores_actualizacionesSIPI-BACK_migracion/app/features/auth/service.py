@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timezone
+from datetime import datetime, date, timezone
 from fastapi import HTTPException, status
 from app.core.database import get_database, get_next_sequence_value
 from app.core.security import verify_password, get_password_hash, create_access_token, decode_access_token
@@ -15,11 +15,13 @@ def format_user_response(user: dict) -> dict:
     date_start = user.get("date_start")
     if isinstance(date_start, datetime):
         date_start_str = date_start.strftime("%Y-%m-%dT%H:%M:%S")
+    elif isinstance(date_start, date):
+        date_start_str = date_start.strftime("%Y-%m-%dT00:00:00")
     else:
         date_start_str = date_start
 
     date_end = user.get("date_end")
-    if isinstance(date_end, datetime):
+    if isinstance(date_end, (datetime, date)):
         date_end_str = date_end.strftime("%Y-%m-%d")
     else:
         date_end_str = date_end
@@ -66,13 +68,20 @@ async def login_sistemas(req: LoginSistemasRequest):
 
     token = create_access_token(user)
     return {
+        "success": True,
+        "message": "Inicio de sesión exitoso",
         "token": token,
         "user": format_user_response(user)
     }
 
 async def login_codigo(req: LoginCodigoRequest):
     db = get_database()
-    code = req.codigoAcceso.strip()
+    code = req.get_codigo()
+    if not code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El código es obligatorio"
+        )
     user = await db["usuarios"].find_one({"codigo_acceso": code})
 
     if not user:
@@ -89,6 +98,8 @@ async def login_codigo(req: LoginCodigoRequest):
 
     token = create_access_token(user)
     return {
+        "success": True,
+        "message": "Acceso concedido exitosamente.",
         "token": token,
         "user": format_user_response(user)
     }
@@ -125,7 +136,9 @@ async def verificar_token(req: VerificarTokenRequest):
         )
 
     return {
+        "success": True,
         "valid": True,
+        "message": "Token verificado con éxito",
         "user": format_user_response(user)
     }
 
@@ -208,4 +221,10 @@ async def register_usuario(req: RegisterRequest):
     }
 
     await db["usuarios"].insert_one(doc)
-    return format_user_response(doc)
+    token = create_access_token(doc)
+    return {
+        "success": True,
+        "message": "Usuario registrado con éxito.",
+        "token": token,
+        "user": format_user_response(doc)
+    }
