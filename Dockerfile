@@ -1,28 +1,21 @@
-# ==========================================
-# ETAPA 1: Compilación (Build)
-# ==========================================
-FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
+FROM python:3.12-slim
+
+# Directorio de trabajo en el contenedor
 WORKDIR /app
 
-# Copiamos el descriptor de dependencias e instalamos en caché
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# Prevenir archivos .pyc y habilitar salida sin buffer
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Copiamos el código fuente e invocamos el empaquetado omitiendo tests
-COPY src ./src
-RUN mvn clean package -DskipTests
+# Instalar dependencias del proyecto
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# ==========================================
-# ETAPA 2: Ejecución (Runtime ligero)
-# ==========================================
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
+# Copiar el código fuente completo
+COPY . .
 
-# Copiamos el archivo .jar generado en la etapa anterior
-COPY --from=build /app/target/*.jar app.jar
+# Exponer el puerto configurado para FastAPI
+EXPOSE 8080
 
-# Exponemos el puerto de la aplicación (3000 para IIS Proxy)
-EXPOSE 3000
-
-# Arrancamos el JAR
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Comando para iniciar la aplicación con Uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

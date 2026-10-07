@@ -1,45 +1,104 @@
-"# mayores_actualizacionesSIPI-BACK" 
+# Mayores Actualizaciones — Backend API
 
-.\mvnw.cmd spring-boot:run
+Backend del sistema **Mayores Actualizaciones** (plataforma educativa para adultos mayores), desarrollado en **Python (FastAPI)** y **MongoDB**.
 
-paso a paso 
+Diseñado para mantener **100% de compatibilidad** con el frontend en React (`mayores_actualizacionesSIPI-FRONT`).
 
-generar el .jar
-.\mvnw.cmd clean package -DskipTests
+---
 
-crear scrip que lea .env
-iniciar.ps1
+## 🚀 Características principales
 
-# ========================================================
-# Script para cargar variables de .env y levantar Spring Boot
-# ========================================================
-$envFile = Join-Path $PSScriptRoot ".env"
+- **FastAPI + Asincronismo**: Respuestas rápidas y no bloqueantes con Motor (driver async oficial de MongoDB).
+- **Cero Breaking Changes**: Todos los endpoints, payloads, nombres de campos en JSON (`dateStart`, `codigoAcceso`, `tipoUsuario`, etc.) y contratos de autenticación coinciden exactamente con la versión original de Spring Boot.
+- **IDs Secuenciales Numéricos (`id: int`)**: Compatible con el frontend existente mediante secuencias atómicas en la colección `counters`.
+- **Compatibilidad con contraseñas existentes (BCrypt)**: Los hashes generados previamente por Spring Security se verifican directamente mediante `bcrypt`.
+- **Ligero y Eficiente**: Bajo consumo de recursos y tiempo de arranque menor a 0.5 segundos.
+- **Documentación Swagger Automática**: Accesible en `http://localhost:8080/docs`.
 
-if (-not (Test-Path $envFile)) {
-    Write-Error "No se encontro el archivo .env en la carpeta."
-    exit 1
-}
+---
 
-Write-Host "Cargando variables de entorno desde .env..." -ForegroundColor Cyan
+## 📂 Estructura del Proyecto
 
-# Lee el archivo .env linea por linea ignorando comentarios y lineas vacias
-Get-Content $envFile | ForEach-Object {
-    $line = $_.Trim()
-    if ($line -and -not ($line.StartsWith("#"))) {
-        $parts = $line -split '=', 2
-        if ($parts.Count -eq 2) {
-            $name = $parts[0].Trim()
-            $value = $parts[1].Trim()
-            [System.Environment]::SetEnvironmentVariable($name, $value, "Process")
-        }
-    }
-}
+```text
+.
+├── app/
+│   ├── main.py                 # Punto de entrada FastAPI, CORS y ciclo de vida (Lifespan)
+│   ├── core/
+│   │   ├── config.py           # Variables de entorno con Pydantic Settings
+│   │   ├── database.py         # Conexión async a MongoDB y generador de secuencias atómicas
+│   │   └── security.py         # Criptografía BCrypt y tokens JWT (HMAC-SHA256)
+│   ├── features/
+│   │   ├── auth/               # Login sistemas, validación de PIN, Brevo SMTP
+│   │   ├── usuario/            # Torre de control (filtros, paginación, toggles)
+│   │   └── progreso/           # Avance de cursos con upsert embebido en usuarios
+│   └── scripts/
+│       ├── init_db.py          # Creación de superadmin inicial e índices
+│       └── migrate_from_mysql.py # ETL para migrar MySQL a MongoDB
+├── requirements.txt            # Dependencias de Python
+├── Dockerfile                  # Imagen optimizada Python 3.12-slim
+├── docker-compose.yml          # Orquestación de Backend + MongoDB
+├── .env.example                # Plantilla de variables de entorno
+└── README.md                   # Esta documentación
+```
 
-# Configuracion de perfil produccion
-$env:SPRING_PROFILES_ACTIVE = "production"
-$env:SERVER_FORWARD_HEADERS_STRATEGY = "framework"
+---
 
-Write-Host "Iniciando aplicacion Spring Boot..." -ForegroundColor Green
-java -jar (Join-Path $PSScriptRoot "app.jar")
+## 🛠️ Instalación y Ejecución Local
 
+### 1. Requisitos previos
+- **Python 3.12+**
+- **MongoDB** corriendo localmente en el puerto `27017` (o mediante Docker).
 
+### 2. Configurar entorno virtual
+En Windows PowerShell:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+### 3. Configurar variables de entorno
+Copiá el archivo de ejemplo:
+```powershell
+Copy-Item .env.example .env
+```
+Ajustá las credenciales de MongoDB, Brevo SMTP y JWT si es necesario.
+
+### 4. Inicializar datos / Migrar (Opcional)
+Para crear el superadmin inicial (`admin@sistemas.com` / `admin123`):
+```powershell
+python -m app.scripts.init_db
+```
+
+Para migrar datos desde MySQL `prueba2` a MongoDB `mayores_actualizaciones`:
+```powershell
+python -m app.scripts.migrate_from_mysql
+```
+
+### 5. Iniciar el servidor de desarrollo
+```powershell
+uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+```
+
+Accedé a la documentación interactiva en:
+👉 **http://localhost:8080/docs**
+
+---
+
+## 🐳 Ejecución con Docker Compose
+
+Para levantar tanto el backend como MongoDB en un entorno aislado:
+
+```powershell
+docker compose up --build -d
+```
+
+Para ver los logs:
+```powershell
+docker compose logs -f backend
+```
+
+Para detener los servicios:
+```powershell
+docker compose down
+```

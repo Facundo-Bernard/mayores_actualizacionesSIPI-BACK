@@ -1,31 +1,25 @@
-version: '3.8'
-
 services:
   backend:
     build: .
-    container_name: spring-boot-backend
+    container_name: mayores-actualizaciones-backend
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8080:8080"
     env_file:
       - .env
     environment:
-      # Variables de entorno adicionales o sobrescrituras
-      - SPRING_PROFILES_ACTIVE=production
-      # Confía en headers X-Forwarded-* de IIS
-      - SERVER_FORWARD_HEADERS_STRATEGY=framework
-    restart: unless-stopped
-    networks:
-      - app-network
-    # Permite acceso a servicios locales del host (MySQL en host.docker.internal)
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - MONGODB_URL=mongodb://mongodb:27017
+    depends_on:
+      - mongodb
 
-networks:
-  app-network:
-    driver: bridge
+  mongodb:
+    image: mongo:7.0
+    container_name: mayores-actualizaciones-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
