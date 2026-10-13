@@ -15,7 +15,8 @@ class UserAttemptCreateRequest(BaseModel):
     attempts: int = Field(1, description="Número de intentos utilizados")
     stars: int = Field(1, description="Estrellas obtenidas (1 a 3)")
     score: int = Field(100, description="Puntaje obtenido")
-    guesses: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Lista de intentos realizados")
+    guesses: Optional[List[Any]] = Field(default_factory=list, description="Lista de intentos realizados (palabras, objetos o números)")
+    game_data: Optional[Dict[str, Any]] = Field(None, description="Datos adicionales específicos del juego")
     remaining_attempts: Optional[int] = Field(0, description="Intentos restantes")
 
 class UserAttemptResponse(BaseModel):
@@ -29,7 +30,8 @@ class UserAttemptResponse(BaseModel):
     attempts: int
     stars: int
     score: int
-    guesses: List[Dict[str, Any]] = []
+    guesses: List[Any] = []
+    game_data: Optional[Dict[str, Any]] = None
     updated_at: Optional[str] = None
 
 class UserAttemptsListResponse(BaseModel):

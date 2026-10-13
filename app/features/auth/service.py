@@ -6,9 +6,10 @@ from app.core.security import verify_password, get_password_hash, create_access_
 from app.core.config import settings
 from app.features.auth.schemas import (
     LoginSistemasRequest, LoginCodigoRequest, VerificarTokenRequest,
-    EnviarAccesoCorreoRequest, RegisterRequest
+    EnviarAccesoCorreoRequest, RegisterRequest,
+    VerificarCodigoRegistroRequest, ReenviarCodigoRequest, ModificarEmailRegistroRequest
 )
-from app.features.auth.email_service import enviar_magic_link
+from app.features.auth.email_service import enviar_magic_link, enviar_codigo_activacion
 
 def format_user_response(user: dict) -> dict:
     """Formatea el documento de MongoDB al contrato JSON esperado por el frontend."""
@@ -26,6 +27,16 @@ def format_user_response(user: dict) -> dict:
     else:
         date_end_str = date_end
 
+    estado_id = user.get("estado_id", 2 if user.get("activo", True) else 3)
+    estado_codigo = user.get("estado_codigo")
+    if not estado_codigo:
+        if estado_id == 1:
+            estado_codigo = "PENDIENTE_VERIFICACION"
+        elif estado_id == 2:
+            estado_codigo = "ACTIVO"
+        else:
+            estado_codigo = "SUSPENDIDO"
+
     return {
         "id": user.get("id"),
         "name": user.get("name", ""),
@@ -34,6 +45,8 @@ def format_user_response(user: dict) -> dict:
         "tipoUsuario": user.get("tipo_usuario", 1),
         "black": bool(user.get("black", False)),
         "activo": bool(user.get("activo", True)),
+        "estadoId": estado_id,
+        "estadoCodigo": estado_codigo,
         "dateStart": date_start_str,
         "dateEnd": date_end_str
     }
@@ -90,7 +103,14 @@ async def login_codigo(req: LoginCodigoRequest):
             detail="Código de acceso incorrecto"
         )
 
-    if user.get("activo") is False:
+    estado_id = user.get("estado_id")
+    if estado_id == 1:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tu cuenta aún no está confirmada. Por favor, ingresá el código de 6 dígitos que enviamos a tu correo para activarla."
+        )
+
+    if user.get("activo") is False or estado_id == 3:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Tu cuenta se encuentra inactiva. Contacta al administrador."
@@ -184,13 +204,29 @@ async def enviar_acceso_correo(req: EnviarAccesoCorreoRequest):
 async def register_usuario(req: RegisterRequest):
     db = get_database()
     email_clean = req.email.lower().strip()
+    name_clean = req.name.strip()
 
     existing = await db["usuarios"].find_one({"email": email_clean})
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El email ya está registrado"
-        )
+        # Si ya existe pero está pendiente de verificación, reenviar código sin dar error
+        if existing.get("estado_id") == 1:
+            await db["usuarios"].update_one(
+                {"id": existing["id"]},
+                {"$set": {"name": name_clean}}
+            )
+            codigo = existing.get("codigo_acceso")
+            await enviar_codigo_activacion(email_clean, name_clean, codigo)
+            return {
+                "success": True,
+                "status": "PENDIENTE_VERIFICACION",
+                "message": "¡Ya tenías un registro iniciado! Te reenviamos tu código a tu correo.",
+                "email": email_clean
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El correo electrónico ya está registrado. Podés ingresar directamente con tu código en 'Tengo mi código'."
+            )
 
     # Generar ID secuencial numérico atómico
     user_id = await get_next_sequence_value("usuario_id")
@@ -206,25 +242,163 @@ async def register_usuario(req: RegisterRequest):
 
     pwd_hash = get_password_hash(req.password) if req.password else None
 
+    # Si se crea explícitamente como activo desde admin, queda ACTIVO (id 2). Si es registro público, PENDIENTE_VERIFICACION (id 1)
+    is_admin_preactive = req.activo is True
+    estado_id = 2 if is_admin_preactive else 1
+    estado_codigo = "ACTIVO" if is_admin_preactive else "PENDIENTE_VERIFICACION"
+    activo_flag = True if is_admin_preactive else False
+
     doc = {
         "id": user_id,
-        "name": req.name.strip(),
+        "name": name_clean,
         "email": email_clean,
         "password": pwd_hash,
         "codigo_acceso": codigo,
         "tipo_usuario": req.tipoUsuario if req.tipoUsuario is not None else 1,
         "black": bool(req.black) if req.black is not None else False,
-        "activo": bool(req.activo) if req.activo is not None else True,
+        "activo": activo_flag,
+        "estado_id": estado_id,
+        "estado_codigo": estado_codigo,
         "date_start": datetime.now(timezone.utc),
         "date_end": None,
         "progresos": []
     }
 
     await db["usuarios"].insert_one(doc)
+
+    # Si requiere verificación de email
+    if estado_id == 1:
+        await enviar_codigo_activacion(email_clean, name_clean, codigo)
+        return {
+            "success": True,
+            "status": "PENDIENTE_VERIFICACION",
+            "message": "Te enviamos un código de activación a tu correo electrónico.",
+            "email": email_clean
+        }
+
+    # Creación administrativa pre-activada
     token = create_access_token(doc)
     return {
         "success": True,
         "message": "Usuario registrado con éxito.",
         "token": token,
         "user": format_user_response(doc)
+    }
+
+async def verificar_codigo_registro(req: VerificarCodigoRegistroRequest):
+    db = get_database()
+    email_clean = req.email.lower().strip()
+    code_clean = req.codigo.strip()
+
+    user = await db["usuarios"].find_one({"email": email_clean})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No encontramos ninguna cuenta con ese correo electrónico."
+        )
+
+    if user.get("estado_id") == 3:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tu cuenta se encuentra inactiva. Contacta al administrador."
+        )
+
+    if user.get("codigo_acceso") != code_clean:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El código ingresado no coincide con el enviado a tu correo. Revisalo e intentalo nuevamente."
+        )
+
+    # Activar la cuenta
+    now = datetime.now(timezone.utc)
+    await db["usuarios"].update_one(
+        {"id": user["id"]},
+        {"$set": {
+            "estado_id": 2,
+            "estado_codigo": "ACTIVO",
+            "activo": True,
+            "fecha_activacion": now
+        }}
+    )
+
+    user["estado_id"] = 2
+    user["estado_codigo"] = "ACTIVO"
+    user["activo"] = True
+
+    token = create_access_token(user)
+    return {
+        "success": True,
+        "message": "¡Cuenta activada con éxito!",
+        "token": token,
+        "user": format_user_response(user)
+    }
+
+async def reenviar_codigo_registro(req: ReenviarCodigoRequest):
+    db = get_database()
+    email_clean = req.email.lower().strip()
+
+    user = await db["usuarios"].find_one({"email": email_clean})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No encontramos ninguna cuenta con ese correo electrónico."
+        )
+
+    if user.get("estado_id") == 2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tu cuenta ya está activada. Podés ingresar directamente con tu código en 'Tengo mi código'."
+        )
+
+    codigo = user.get("codigo_acceso")
+    await enviar_codigo_activacion(email_clean, user.get("name", "Estimado alumno"), codigo)
+
+    return {
+        "success": True,
+        "message": f"Código reenviado con éxito a {email_clean}."
+    }
+
+async def modificar_email_registro(req: ModificarEmailRegistroRequest):
+    db = get_database()
+    actual_clean = req.email_actual.lower().strip()
+    nuevo_clean = req.email_nuevo.lower().strip()
+
+    if actual_clean == nuevo_clean:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El nuevo correo electrónico debe ser diferente al anterior."
+        )
+
+    user = await db["usuarios"].find_one({"email": actual_clean})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No encontramos el registro anterior."
+        )
+
+    if user.get("estado_id") == 2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No es posible modificar el correo de una cuenta ya activada mediante este proceso."
+        )
+
+    conflict = await db["usuarios"].find_one({"email": nuevo_clean, "id": {"$ne": user["id"]}})
+    if conflict:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El nuevo correo electrónico ya pertenece a otra cuenta registrada."
+        )
+
+    await db["usuarios"].update_one(
+        {"id": user["id"]},
+        {"$set": {"email": nuevo_clean}}
+    )
+
+    codigo = user.get("codigo_acceso")
+    await enviar_codigo_activacion(nuevo_clean, user.get("name", "Estimado alumno"), codigo)
+
+    return {
+        "success": True,
+        "message": f"Correo actualizado con éxito. Te enviamos el código a {nuevo_clean}.",
+        "email": nuevo_clean
     }

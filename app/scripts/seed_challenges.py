@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timezone
 from app.core.database import get_database
+from app.scripts.seed_sopa_letras import seed_sopa_letras_challenges
 
 logger = logging.getLogger(__name__)
 

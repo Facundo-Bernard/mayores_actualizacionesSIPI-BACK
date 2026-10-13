@@ -33,6 +33,7 @@ def _serialize_attempt(doc: dict) -> UserAttemptResponse:
         stars=int(doc.get("stars", 1)),
         score=int(doc.get("score", 100)),
         guesses=doc.get("guesses", []),
+        game_data=doc.get("game_data"),
         updated_at=updated_at_str
     )
 
@@ -62,6 +63,7 @@ async def save_user_attempt(
         "stars": req.stars,
         "score": req.score,
         "guesses": req.guesses or [],
+        "game_data": req.game_data,
         "remaining_attempts": req.remaining_attempts or 0,
         "updated_at": now_utc
     }

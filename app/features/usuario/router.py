@@ -3,16 +3,39 @@ from typing import Optional
 from datetime import date
 from app.features.usuario.schemas import (
     UsuarioResponse, PaginatedUsuariosResponse,
-    EstadoActivoResponse, SuscripcionResponse
+    EstadoActivoResponse, SuscripcionResponse,
+    ListEstadosResponse, EstadoUsuarioSchema,
+    CambiarEstadoUsuarioRequest, CambiarEstadoUsuarioResponse,
+    CrearEstadoRequest
 )
 from app.features.usuario.service import (
     get_usuarios_paginados, get_usuario_by_id,
-    toggle_activo, toggle_black
+    toggle_activo, toggle_black, get_estados_usuario,
+    cambiar_estado_usuario, crear_estado_usuario,
+    toggle_habilitado_estado
 )
 from app.features.auth.schemas import RegisterRequest
 from app.features.auth.service import register_usuario
 
 router = APIRouter(prefix="/usuario", tags=["Usuarios y Torre de Control"])
+
+@router.get("/estados", response_model=ListEstadosResponse, summary="Listar catálogo de estados de usuario")
+async def endpoint_listar_estados(soloHabilitados: bool = Query(False, description="Filtrar solo los estados habilitados")):
+    return await get_estados_usuario(solo_habilitados=soloHabilitados)
+
+@router.post("/estados", summary="Crear un nuevo estado en el catálogo")
+async def endpoint_crear_estado(req: CrearEstadoRequest):
+    return await crear_estado_usuario(
+        nombre=req.nombre,
+        codigo=req.codigo,
+        descripcion=req.descripcion,
+        color=req.color,
+        permite_login=req.permite_login or False
+    )
+
+@router.put("/estados/{estado_id}/toggle-habilitado", summary="Habilitar o inhabilitar un estado del catálogo")
+async def endpoint_toggle_habilitado_estado(estado_id: int):
+    return await toggle_habilitado_estado(estado_id)
 
 @router.get("", response_model=PaginatedUsuariosResponse, summary="Listar usuarios paginados con filtros dinámicos")
 async def endpoint_listar_usuarios(
@@ -49,6 +72,10 @@ async def endpoint_toggle_activo(user_id: int):
 @router.put("/{user_id}/toggle-black", response_model=SuscripcionResponse, summary="Activar o desactivar suscripción Black")
 async def endpoint_toggle_black(user_id: int):
     return await toggle_black(user_id)
+
+@router.put("/{user_id}/cambiar-estado", response_model=CambiarEstadoUsuarioResponse, summary="Cambiar estado del usuario en el catálogo")
+async def endpoint_cambiar_estado_usuario(user_id: int, req: CambiarEstadoUsuarioRequest):
+    return await cambiar_estado_usuario(user_id, req.estado_id)
 
 @router.post("", response_model=UsuarioResponse, summary="Crear un nuevo usuario")
 async def endpoint_crear_usuario(req: RegisterRequest):

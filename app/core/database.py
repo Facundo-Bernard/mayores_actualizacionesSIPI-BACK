@@ -79,6 +79,12 @@ async def init_indexes():
             unique=True
         )
         await user_attempts.create_index([("user_id", ASCENDING), ("date", -1)])
+
+        # Índices de Estados de Usuario (estados_usuario)
+        estados_usuario = db["estados_usuario"]
+        await estados_usuario.create_index([("id", ASCENDING)], unique=True)
+        await estados_usuario.create_index([("codigo", ASCENDING)], unique=True)
+
         logger.info("Índices de MongoDB inicializados correctamente.")
     except Exception as e:
         logger.warning(f"Aviso al inicializar índices: {e}")
