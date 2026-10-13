@@ -6,9 +6,12 @@ import logging
 from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.scripts.init_db import seed_default_admin
+from app.scripts.seed_challenges import seed_wordle_challenges
 from app.features.auth.router import router as auth_router
 from app.features.usuario.router import router as usuario_router
 from app.features.progreso.router import router as progreso_router
+from app.features.daily_challenges.router import router as daily_challenges_router
+from app.features.user_attempts.router import router as user_attempts_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,10 +21,11 @@ logger = logging.getLogger("AppMain")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Conectar a MongoDB, inicializar índices y sembrar superadmin
+    # Startup: Conectar a MongoDB, inicializar índices y sembrar datos
     logger.info("Iniciando aplicación Mayores Actualizaciones (FastAPI)...")
     await connect_to_mongo()
     await seed_default_admin()
+    await seed_wordle_challenges()
     logger.info(f"Servidor listo en el puerto {settings.PORT}.")
     yield
     # Shutdown: Cerrar conexiones
@@ -57,6 +61,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(usuario_router)
 app.include_router(progreso_router)
+app.include_router(daily_challenges_router)
+app.include_router(user_attempts_router)
 
 @app.get("/", tags=["Estado"])
 async def root():
