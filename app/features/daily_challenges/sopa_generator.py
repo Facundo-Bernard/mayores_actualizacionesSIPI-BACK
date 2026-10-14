@@ -8,7 +8,7 @@ obtiene definiciones de la RAE con máscara de spoilers para el botón de pistas
 import random
 import logging
 from typing import Dict, Any, List, Tuple
-from app.features.daily_challenges.wordle_generator import fetch_rae_definition
+from app.core.rae_client import fetch_rae_definition
 
 logger = logging.getLogger(__name__)
 
