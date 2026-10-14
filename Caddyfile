@@ -1,0 +1,14 @@
+http://mayoresactualizaciones.asistodo.com.ar:8082, :8082 {
+    # 1. Enrutar endpoints de la API hacia el contenedor del backend
+    @backend path /api/* /usuario* /progreso* /cursos* /payment* /health* /actuator/* /docs* /openapi.json*
+    handle @backend {
+        reverse_proxy backend:3000
+    }
+
+    # 2. Servir los archivos estáticos de React y soporte de React Router (fallback a index.html)
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}

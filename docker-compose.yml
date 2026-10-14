@@ -1,25 +1,40 @@
 services:
+  # 1. Portero Web y Reverse Proxy (sirve el Frontend y redirige las APIs)
+  caddy:
+    image: caddy:2-alpine
+    container_name: mayores-actualizaciones-caddy
+    restart: unless-stopped
+    ports:
+      - "8082:8082"                       # Único puerto expuesto hacia el exterior (Router / Firewall)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile  # Reglas de proxy y ruteo
+      - ./dist:/srv                       # Archivos estáticos del Frontend compilado
+    depends_on:
+      - backend
+
+  # 2. Backend FastAPI (Python)
   backend:
     build: .
     container_name: mayores-actualizaciones-backend
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "3000:3000"                       # Expuesto localmente en el host (opcional para pruebas directas)
     env_file:
-      - .env
+      - .env                              # Carga automática de todas las variables de entorno
     environment:
       - MONGODB_URL=mongodb://mongodb:27017
+      - PORT=3000
+      - HOST=0.0.0.0
     depends_on:
       - mongodb
 
+  # 3. Base de Datos MongoDB
   mongodb:
     image: mongo:7.0
     container_name: mayores-actualizaciones-mongodb
     restart: unless-stopped
-    ports:
-      - "27017:27017"
     volumes:
-      - mongo_data:/data/db
+      - mongo_data:/data/db               # Persistencia de datos
 
 volumes:
   mongo_data:
