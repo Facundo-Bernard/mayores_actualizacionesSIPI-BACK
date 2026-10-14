@@ -3,7 +3,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Servidor
-    PORT: int = 8080
+    PORT: int = 8082
     HOST: str = "0.0.0.0"
     
     # MongoDB
