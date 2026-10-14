@@ -11,7 +11,11 @@ from app.features.daily_challenges.service import (
     get_month_challenges,
     get_challenge_by_date,
     upsert_challenge,
-    get_challenge_date_range
+    get_challenge_date_range,
+    generate_and_save_sudoku_month,
+    generate_and_save_wordle_month,
+    generate_and_save_sopa_month,
+    get_challenges_monthly_status
 )
 
 router = APIRouter(prefix="/api/challenges", tags=["Desafíos Diarios"])
@@ -76,3 +80,32 @@ async def endpoint_get_challenge_by_date(
 )
 async def endpoint_upsert_challenge(req: DailyChallengeCreateRequest):
     return await upsert_challenge(req)
+
+@router.get(
+    "/admin/status",
+    summary="Obtener el estado de cobertura de desafíos por mes para administración"
+)
+async def endpoint_admin_challenges_status(
+    year: int = Query(2026, description="Año a auditar"),
+    game_id: str = Query("sudoku", description="Juego a consultar (sudoku, wordle, sopa_letras)")
+):
+    return await get_challenges_monthly_status(year=year, game_id=game_id)
+
+@router.post(
+    "/admin/generate-month",
+    summary="Generar o regenerar los desafíos de un mes completo desde la Torre de Control"
+)
+async def endpoint_admin_generate_month(
+    year: int = Query(..., ge=2020, le=2050, description="Año a generar"),
+    month: int = Query(..., ge=1, le=12, description="Mes a generar (1-12)"),
+    game_id: str = Query("sudoku", description="Juego a generar (sudoku)"),
+    force: bool = Query(True, description="Forzar regeneración si ya existe")
+):
+    if game_id == "sudoku":
+        return await generate_and_save_sudoku_month(year=year, month=month, force=force)
+    elif game_id == "wordle":
+        return await generate_and_save_wordle_month(year=year, month=month, force=force)
+    elif game_id == "sopa_letras":
+        return await generate_and_save_sopa_month(year=year, month=month, force=force)
+    return {"success": False, "message": f"Generación automática no disponible para el juego '{game_id}'."}
+

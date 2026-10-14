@@ -10,6 +10,8 @@ from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.scripts.init_db import seed_default_admin, seed_estados_usuario
 from app.scripts.seed_challenges import seed_wordle_challenges, seed_sopa_letras_challenges
+from app.scripts.seed_sudoku import seed_sudoku_challenges
+from app.features.daily_challenges.service import ensure_current_and_next_month_generated
 from app.features.auth.router import router as auth_router
 from app.features.usuario.router import router as usuario_router
 from app.features.progreso.router import router as progreso_router
@@ -31,9 +33,26 @@ async def lifespan(app: FastAPI):
     await seed_default_admin()
     await seed_wordle_challenges()
     await seed_sopa_letras_challenges()
+    await seed_sudoku_challenges()
+    await ensure_current_and_next_month_generated()
+
+    import asyncio
+    async def _auto_check_loop():
+        while True:
+            try:
+                await asyncio.sleep(43200)  # Chequear cada 12 horas
+                await ensure_current_and_next_month_generated()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.warning(f"Error en auto_check_loop de desafíos: {e}")
+                await asyncio.sleep(3600)
+
+    checker_task = asyncio.create_task(_auto_check_loop())
     logger.info(f"Servidor listo en el puerto {settings.PORT}.")
     yield
-    # Shutdown: Cerrar conexiones
+    # Shutdown: Cancelar tareas y cerrar conexiones
+    checker_task.cancel()
     logger.info("Deteniendo aplicación y cerrando conexiones...")
     await close_mongo_connection()
 
