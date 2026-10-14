@@ -1,11 +1,41 @@
-http://mayoresactualizaciones.asistodo.com.ar:8082, :8082 {
-    # 1. Enrutar endpoints de la API hacia el contenedor del backend
-    @backend path /api/* /usuario* /progreso* /cursos* /payment* /health* /actuator/* /docs* /openapi.json*
-    handle @backend {
-        reverse_proxy backend:3000
+:8082 {
+    # 1. Compresión para máxima velocidad de respuesta
+    encode zstd gzip
+
+    # 2. Encabezados globales de seguridad
+    header {
+        # Ocultar la firma del servidor web
+        -Server
+
+        # Prevención de ataques MIME-sniffing
+        X-Content-Type-Options "nosniff"
+
+        # Protección anti-clickjacking
+        X-Frame-Options "DENY"
+
+        # Política de privacidad en referencias
+        Referrer-Policy "strict-origin-when-cross-origin"
+
+        # Restringir permisos de APIs del navegador que la app no necesita
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
     }
 
-    # 2. Servir los archivos estáticos de React y soporte de React Router (fallback a index.html)
+    # 3. Protección contra Payloads excesivos (Anti-DoS)
+    request_body {
+        max_size 10MB
+    }
+
+    # 4. Bloquear acceso a archivos ocultos (.env, .git, etc.)
+    @hidden path */.*
+    respond @hidden 404
+
+    # 5. Enrutar endpoints de la API hacia FastAPI
+    @backend path /api* /usuario* /progreso* /cursos* /payment* /health* /actuator*
+    handle @backend {
+        reverse_proxy backend:8082
+    }
+
+    # 6. Servir estáticos de React con fallback SPA
     handle {
         root * /srv
         try_files {path} /index.html
