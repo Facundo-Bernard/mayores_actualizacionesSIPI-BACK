@@ -32,6 +32,9 @@ app = FastAPI(
     title="Mayores Actualizaciones API",
     description="Backend en FastAPI + MongoDB para la plataforma educativa de adultos mayores",
     version="2.0.0",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
     lifespan=lifespan
 )
 
@@ -41,6 +44,8 @@ origins = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:8082",
+    "http://127.0.0.1:8082",
     settings.FRONTEND_URL.rstrip("/"),
 ]
 
@@ -63,8 +68,7 @@ async def root():
     return {
         "status": "online",
         "service": "Mayores Actualizaciones API (FastAPI + MongoDB)",
-        "version": "2.0.0",
-        "docs": "/docs"
+        "version": "2.0.0"
     }
 
 @app.get("/health", tags=["Estado"])
