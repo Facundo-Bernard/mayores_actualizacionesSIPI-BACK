@@ -15,6 +15,7 @@ from app.features.daily_challenges.service import (
     generate_and_save_sudoku_month,
     generate_and_save_wordle_month,
     generate_and_save_sopa_month,
+    generate_and_save_crucigrama_month,
     get_challenges_monthly_status
 )
 
@@ -87,7 +88,7 @@ async def endpoint_upsert_challenge(req: DailyChallengeCreateRequest):
 )
 async def endpoint_admin_challenges_status(
     year: int = Query(2026, description="Año a auditar"),
-    game_id: str = Query("sudoku", description="Juego a consultar (sudoku, wordle, sopa_letras)")
+    game_id: str = Query("sudoku", description="Juego a consultar (sudoku, wordle, sopa_letras, crucigrama)")
 ):
     return await get_challenges_monthly_status(year=year, game_id=game_id)
 
@@ -98,7 +99,7 @@ async def endpoint_admin_challenges_status(
 async def endpoint_admin_generate_month(
     year: int = Query(..., ge=2020, le=2050, description="Año a generar"),
     month: int = Query(..., ge=1, le=12, description="Mes a generar (1-12)"),
-    game_id: str = Query("sudoku", description="Juego a generar (sudoku)"),
+    game_id: str = Query("sudoku", description="Juego a generar (sudoku, wordle, sopa_letras, crucigrama)"),
     force: bool = Query(True, description="Forzar regeneración si ya existe")
 ):
     if game_id == "sudoku":
@@ -107,5 +108,7 @@ async def endpoint_admin_generate_month(
         return await generate_and_save_wordle_month(year=year, month=month, force=force)
     elif game_id == "sopa_letras":
         return await generate_and_save_sopa_month(year=year, month=month, force=force)
+    elif game_id == "crucigrama":
+        return await generate_and_save_crucigrama_month(year=year, month=month, force=force)
     return {"success": False, "message": f"Generación automática no disponible para el juego '{game_id}'."}
 
