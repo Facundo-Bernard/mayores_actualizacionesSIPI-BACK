@@ -4,35 +4,101 @@ services:
     image: caddy:2-alpine
     container_name: mayores-actualizaciones-caddy
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "8082:8082"                       # Único puerto expuesto hacia el exterior (Nginx / Firewall)
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile  # Reglas de proxy y ruteo
-      - ./dist:/srv                       # Archivos estáticos del Frontend compilado
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro  # Reglas de proxy y ruteo (Solo lectura)
+      - ./dist:/srv:ro                       # Archivos estáticos del Frontend compilado (Solo lectura)
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    networks:
+      - sipi_net
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
   # 2. Backend FastAPI (Python)
   backend:
     build: .
     container_name: mayores-actualizaciones-backend
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     env_file:
       - .env                              # Carga automática de variables de entorno
     environment:
       - MONGODB_URL=mongodb://mongodb:27017
       - PORT=8082
       - HOST=0.0.0.0
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8082/health')"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.50"
+          memory: 1024M
+    networks:
+      - sipi_net
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
 
   # 3. Base de Datos MongoDB
   mongodb:
     image: mongo:7.0
     container_name: mayores-actualizaciones-mongodb
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - mongo_data:/data/db               # Persistencia de datos
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval \"db.adminCommand('ping')\" || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1024M
+    networks:
+      - sipi_net
 
 volumes:
   mongo_data:
+
+networks:
+  sipi_net:
+    driver: bridge

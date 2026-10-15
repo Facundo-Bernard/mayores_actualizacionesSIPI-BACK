@@ -201,7 +201,7 @@ async def enviar_acceso_correo(req: EnviarAccesoCorreoRequest):
         "message": f"Correo de acceso enviado con éxito a {user['email']}"
     }
 
-async def register_usuario(req: RegisterRequest):
+async def register_usuario(req: RegisterRequest, is_admin_creation: bool = False):
     db = get_database()
     email_clean = req.email.lower().strip()
     name_clean = req.name.strip()
@@ -242,11 +242,10 @@ async def register_usuario(req: RegisterRequest):
 
     pwd_hash = get_password_hash(req.password) if req.password else None
 
-    # Si se crea explícitamente como activo desde admin, queda ACTIVO (id 2). Si es registro público, PENDIENTE_VERIFICACION (id 1)
-    is_admin_preactive = req.activo is True
-    estado_id = 2 if is_admin_preactive else 1
-    estado_codigo = "ACTIVO" if is_admin_preactive else "PENDIENTE_VERIFICACION"
-    activo_flag = True if is_admin_preactive else False
+    # Prevenir escalada de privilegios (Mass Assignment): solo administradores autenticados pueden definir roles elevados
+    tipo_usuario = req.tipoUsuario if (is_admin_creation and req.tipoUsuario is not None) else 1
+    black = bool(req.black) if (is_admin_creation and req.black is not None) else False
+    activo = bool(req.activo) if (is_admin_creation and req.activo is not None) else True
 
     doc = {
         "id": user_id,
@@ -254,11 +253,9 @@ async def register_usuario(req: RegisterRequest):
         "email": email_clean,
         "password": pwd_hash,
         "codigo_acceso": codigo,
-        "tipo_usuario": req.tipoUsuario if req.tipoUsuario is not None else 1,
-        "black": bool(req.black) if req.black is not None else False,
-        "activo": activo_flag,
-        "estado_id": estado_id,
-        "estado_codigo": estado_codigo,
+        "tipo_usuario": tipo_usuario,
+        "black": black,
+        "activo": activo,
         "date_start": datetime.now(timezone.utc),
         "date_end": None,
         "progresos": []

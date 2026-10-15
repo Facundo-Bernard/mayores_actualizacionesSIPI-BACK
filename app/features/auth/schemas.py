@@ -3,11 +3,11 @@ from typing import Optional, Any, Dict
 
 class LoginSistemasRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=1, max_length=128)
 
 class LoginCodigoRequest(BaseModel):
-    codigo: Optional[str] = None
-    codigoAcceso: Optional[str] = Field(None, alias="codigoAcceso")
+    codigo: Optional[str] = Field(None, min_length=4, max_length=10)
+    codigoAcceso: Optional[str] = Field(None, alias="codigoAcceso", min_length=4, max_length=10)
 
     class Config:
         populate_by_name = True
@@ -16,16 +16,16 @@ class LoginCodigoRequest(BaseModel):
         return (self.codigo or self.codigoAcceso or "").strip()
 
 class VerificarTokenRequest(BaseModel):
-    token: str
+    token: str = Field(..., min_length=10)
 
 class EnviarAccesoCorreoRequest(BaseModel):
     email: EmailStr
     redirectPath: Optional[str] = "/mis-cursos"
 
 class RegisterRequest(BaseModel):
-    name: str
+    name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
-    password: Optional[str] = None
+    password: Optional[str] = Field(None, max_length=128)
     codigoAcceso: Optional[str] = None
     tipoUsuario: Optional[int] = 1
     black: Optional[bool] = False

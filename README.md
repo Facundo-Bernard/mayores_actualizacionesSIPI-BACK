@@ -13,7 +13,8 @@ Diseñado para mantener **100% de compatibilidad** con el frontend en React (`ma
 - **IDs Secuenciales Numéricos (`id: int`)**: Compatible con el frontend existente mediante secuencias atómicas en la colección `counters`.
 - **Compatibilidad con contraseñas existentes (BCrypt)**: Los hashes generados previamente por Spring Security se verifican directamente mediante `bcrypt`.
 - **Ligero y Eficiente**: Bajo consumo de recursos y tiempo de arranque menor a 0.5 segundos.
-- **Documentación Swagger Automática**: Accesible en `http://localhost:8080/docs`.
+- **Seguridad Multicapa (Defensa en Profundidad)**: Hardening en Docker, proxy Caddy con cabeceras de seguridad, control de acceso por roles (RBAC), Row-Level Security (RLS) anti-IDOR y rate limiting anti-fuerza bruta.
+- **Documentación de Seguridad Completa**: Disponible en [`docs_interna/README_SEGURIDAD.md`](docs_interna/README_SEGURIDAD.md).
 
 ---
 
@@ -26,17 +27,24 @@ Diseñado para mantener **100% de compatibilidad** con el frontend en React (`ma
 │   ├── core/
 │   │   ├── config.py           # Variables de entorno con Pydantic Settings
 │   │   ├── database.py         # Conexión async a MongoDB y generador de secuencias atómicas
+│   │   ├── dependencies.py     # Dependencias de autenticación (get_current_user, get_current_admin)
+│   │   ├── rate_limit.py       # Limitador de tasa por IP anti-fuerza bruta en memoria
 │   │   └── security.py         # Criptografía BCrypt y tokens JWT (HMAC-SHA256)
 │   ├── features/
-│   │   ├── auth/               # Login sistemas, validación de PIN, Brevo SMTP
-│   │   ├── usuario/            # Torre de control (filtros, paginación, toggles)
-│   │   └── progreso/           # Avance de cursos con upsert embebido en usuarios
+│   │   ├── auth/               # Login sistemas, PIN de alumnos, Brevo SMTP y auto-registro
+│   │   ├── usuario/            # Torre de control (filtros, paginación, toggles) [Solo Admin]
+│   │   └── progreso/           # Avance de cursos con RLS (solo el propio alumno o admin)
 │   └── scripts/
 │       ├── init_db.py          # Creación de superadmin inicial e índices
 │       └── migrate_from_mysql.py # ETL para migrar MySQL a MongoDB
+├── docs_interna/
+│   ├── README_SEGURIDAD.md     # Guía detallada de la arquitectura de seguridad implementada
+│   ├── GUIA_INTEGRACION_FRONTEND_AUTH.md
+│   └── GUIA_PROGRESO_USUARIO.md
+├── Caddyfile                   # Servidor web, proxy inverso y cabeceras de seguridad
 ├── requirements.txt            # Dependencias de Python
 ├── Dockerfile                  # Imagen optimizada Python 3.12-slim
-├── docker-compose.yml          # Orquestación de Backend + MongoDB
+├── docker-compose.yml          # Orquestación hardened (Caddy + FastAPI + MongoDB)
 ├── .env.example                # Plantilla de variables de entorno
 └── README.md                   # Esta documentación
 ```
