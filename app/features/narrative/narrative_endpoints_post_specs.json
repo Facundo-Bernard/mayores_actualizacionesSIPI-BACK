@@ -1,0 +1,555 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "metadata": {
+    "titulo": "Especificación de Endpoints POST - Motor Narrativo Roguelite",
+    "version": "1.0.0",
+    "fecha_actualizacion": "2026-10-15",
+    "base_url_desarrollo": "http://localhost:8080",
+    "base_url_produccion": "/api/narrative",
+    "headers_requeridos": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <JWT_TOKEN>"
+    },
+    "notas_importantes": [
+      "El campo '_id' o 'id' representa la clave primaria única de cada entidad.",
+      "Todos los campos numéricos de afinidad manejan rango de 0 a 100 (50 por defecto).",
+      "El patrón ECA (Event - Condition - Action) es compartido por Personajes, Cartas, Desenlaces y Eventos.",
+      "Para los endpoints de administración, todas las referencias relacionales (universo_id, personajeId, resultado_id) deben existir previamente en la base de datos."
+    ]
+  },
+  "catalogo_enums": {
+    "disparador": {
+      "al_obtener": "Se dispara inmediatamente al añadir la carta al mazo o reclutar al personaje",
+      "cada_mes": "Se evalúa al inicio de cada mes (fase de balance)",
+      "en_evento_positivo": "Se activa tras obtener un resultado positivo en el evento mensual",
+      "en_evento_negativo": "Se activa tras obtener un resultado negativo en el evento mensual",
+      "al_final_partida": "Se evalúa al concluir el Mes 12 (cálculo de epílogo)"
+    },
+    "operador": {
+      ">=": "Mayor o igual",
+      "<=": "Menor o igual",
+      ">": "Mayor estricto",
+      "<": "Menor estricto",
+      "==": "Igual exacto",
+      "!=": "Distinto"
+    },
+    "tipo_condicion": {
+      "comparar_recurso": "Compara un recurso del reino (clave, operador, valor)",
+      "tiene_personaje": "Verifica si un personaje específico está en la corte activa (personaje_id)",
+      "afinidad_personaje": "Compara el nivel de afinidad con un personaje (personaje_id, operador, valor)",
+      "tiene_tag": "Verifica si el reino tiene un tag pasivo activo (tag)",
+      "tiene_carta": "Verifica si una carta está en el inventario del jugador (carta_id)"
+    },
+    "tipo_accion": {
+      "modificar_recurso": "Modifica un recurso numérico del reino (clave, valor, tipo_calculo)",
+      "modificar_afinidad": "Modifica la afinidad con un personaje (personaje_id, valor)",
+      "otorgar_tag": "Añade un tag permanente al estado del reino (tag)",
+      "amortiguar_danio": "Reduce el impacto negativo recibido sobre un recurso (clave, valor)"
+    },
+    "tipo_calculo": {
+      "fijo": "Modificación numérica directa (+10, -5, +20)",
+      "porcentual": "Modificación porcentual (+15%, -20%)"
+    },
+    "categoria_carta": {
+      "item": "Objeto o reliquia de apoyo",
+      "bonus": "Modificador global de reglas",
+      "personaje": "Recluta o aliado de soporte"
+    },
+    "tipo_resultado": {
+      "positivo": "Desenlace favorable (generalmente suma recursos/afinidad)",
+      "negativo": "Desenlace desfavorable (resta recursos/afinidad o añade crisis)",
+      "neutro": "Desenlace de balance o compensación mixta"
+    }
+  },
+  "bloque_eca_reutilizable": {
+    "descripcion": "Estructura estándar de un efecto o pasiva",
+    "schema": {
+      "disparador": "al_obtener | cada_mes | en_evento_positivo | en_evento_negativo | al_final_partida",
+      "condiciones": [
+        {
+          "tipo": "comparar_recurso | tiene_personaje | afinidad_personaje | tiene_tag | tiene_carta",
+          "clave": "nombre del recurso o null",
+          "operador": ">= | <= | > | < | == | != o null",
+          "valor": "número o texto o null",
+          "personaje_id": "ID del personaje o null",
+          "carta_id": "ID de la carta o null",
+          "tag": "nombre del tag o null"
+        }
+      ],
+      "accion": {
+        "tipo": "modificar_recurso | modificar_afinidad | otorgar_tag | amortiguar_danio",
+        "clave": "recurso afectado o null",
+        "tipo_calculo": "fijo | porcentual",
+        "valor": "número flotante o entero",
+        "personaje_id": "ID del personaje afectado o null",
+        "tag": "tag a otorgar o null"
+      }
+    }
+  },
+  "endpoints_admin": {
+    "1_universos": {
+      "entidad": "Universo / Temática",
+      "metodo": "POST",
+      "url": "/api/narrative/admin/universos",
+      "descripcion": "Crea o actualiza un universo temático definiendo sus recursos vitales.",
+      "campos": {
+        "_id": { "tipo": "string", "requerido": true, "descripcion": "Identificador alfanumérico único" },
+        "nombre": { "tipo": "string", "requerido": true, "descripcion": "Nombre público del universo" },
+        "descripcion": { "tipo": "string", "requerido": true, "descripcion": "Sinopsis de la ambientación" },
+        "icono": { "tipo": "string", "requerido": false, "default": "crown", "descripcion": "Identificador de ícono SVG" },
+        "recursos": {
+          "tipo": "array",
+          "requerido": true,
+          "descripcion": "Lista de recursos vitales que gestionará el jugador",
+          "items": {
+            "clave": { "tipo": "string", "requerido": true, "descripcion": "Clave única del recurso (ej: oro)" },
+            "nombre": { "tipo": "string", "requerido": true, "descripcion": "Nombre visible (ej: Tesoro Real)" },
+            "icono": { "tipo": "string", "requerido": false, "default": "coins", "descripcion": "Ícono del recurso" },
+            "min": { "tipo": "integer", "requerido": false, "default": 0, "descripcion": "Límite inferior" },
+            "max": { "tipo": "integer", "requerido": false, "default": 100, "descripcion": "Límite superior" },
+            "inicial": { "tipo": "integer", "requerido": false, "default": 50, "descripcion": "Valor con el que inicia la partida" }
+          }
+        }
+      },
+      "ejemplo_payload": {
+        "_id": "corte_medieval",
+        "nombre": "Crónicas de la Corte Real",
+        "descripcion": "Gobierna un reino feudal al borde de la rebelión y el invierno perpetuo.",
+        "icono": "crown",
+        "recursos": [
+          { "clave": "oro", "nombre": "Tesoro Real", "icono": "coins", "min": 0, "max": 100, "inicial": 50 },
+          { "clave": "comida", "nombre": "Graneros del Valle", "icono": "wheat", "min": 0, "max": 100, "inicial": 50 },
+          { "clave": "orden", "nombre": "Paz y Guardia Civil", "icono": "shield", "min": 0, "max": 100, "inicial": 50 },
+          { "clave": "moral", "nombre": "Aprobación del Pueblo", "icono": "heart", "min": 0, "max": 100, "inicial": 50 }
+        ]
+      }
+    },
+    "2_personajes": {
+      "entidad": "Personaje de Corte",
+      "metodo": "POST",
+      "url": "/api/narrative/admin/personajes",
+      "descripcion": "Crea o actualiza un miembro de corte reclutable por el jugador.",
+      "campos": {
+        "_id": { "tipo": "string", "requerido": true, "descripcion": "ID único del personaje (ej: pj_canciller_elena)" },
+        "universo_id": { "tipo": "string", "requerido": true, "descripcion": "ID del universo al que pertenece" },
+        "nombre": { "tipo": "string", "requerido": true, "descripcion": "Nombre de pila" },
+        "titulo": { "tipo": "string", "requerido": true, "descripcion": "Cargo o rol (ej: Canciller de la Moneda)" },
+        "imagen": { "tipo": "string", "requerido": true, "descripcion": "Ruta o URL de retrato" },
+        "descripcion": { "tipo": "string", "requerido": true, "descripcion": "Biografía y motivaciones" },
+        "pros": { "tipo": "array de strings", "requerido": false, "default": [], "descripcion": "Ventajas visibles" },
+        "cons": { "tipo": "array de strings", "requerido": false, "default": [], "descripcion": "Desventajas visibles" },
+        "tags": { "tipo": "array de strings", "requerido": false, "default": [], "descripcion": "Tags temáticos" },
+        "afinidad_inicial": { "tipo": "integer", "requerido": false, "default": 50, "descripcion": "Afinidad base (0-100)" },
+        "efectos": { "tipo": "array", "requerido": false, "default": [], "descripcion": "Reglas pasivas ECA" },
+        "conversaciones": { "tipo": "array", "requerido": false, "default": [], "descripcion": "Pesos para diálogos" }
+      },
+      "ejemplo_payload": {
+        "_id": "pj_canciller_elena",
+        "universo_id": "corte_medieval",
+        "nombre": "Elena",
+        "titulo": "Canciller de la Moneda",
+        "imagen": "/assets/narrative/characters/canciller.webp",
+        "descripcion": "Diplomática calculadora. Protege las arcas reales con mano firme.",
+        "pros": ["Genera +10 de oro en balance mensual", "Reduce costos de sobornos"],
+        "cons": ["Resta 5 de moral si el tesoro supera 80"],
+        "tags": ["finanzas", "diplomacia", "noble"],
+        "afinidad_inicial": 50,
+        "efectos": [
+          {
+            "disparador": "cada_mes",
+            "condiciones": [],
+            "accion": {
+              "tipo": "modificar_recurso",
+              "clave": "oro",
+              "tipo_calculo": "fijo",
+              "valor": 10.0
+            }
+          }
+        ],
+        "conversaciones": [
+          { "idConversacion": "conv_disputa_tesoro_militar", "probabilidad": 0.35 }
+        ]
+      }
+    },
+    "3_cartas": {
+      "entidad": "Carta de Apoyo",
+      "metodo": "POST",
+      "url": "/api/narrative/admin/cartas",
+      "descripcion": "Crea o actualiza una carta de apoyo (ítem, bonificación o recluta).",
+      "campos": {
+        "_id": { "tipo": "string", "requerido": true, "descripcion": "ID único (ej: carta_sello_real)" },
+        "universo_id": { "tipo": "string", "requerido": true, "descripcion": "ID del universo" },
+        "categoria": { "tipo": "string", "requerido": true, "enum": ["item", "bonus", "personaje"], "descripcion": "Tipo de carta" },
+        "nombre": { "tipo": "string", "requerido": true, "descripcion": "Nombre de la carta" },
+        "descripcion": { "tipo": "string", "requerido": true, "descripcion": "Efecto o leyenda" },
+        "imagen": { "tipo": "string", "requerido": true, "descripcion": "URL o ruta de imagen" },
+        "tags": { "tipo": "array de strings", "requerido": false, "default": [], "descripcion": "Tags que otorga" },
+        "efectos": { "tipo": "array", "requerido": false, "default": [], "descripcion": "Reglas pasivas ECA" }
+      },
+      "ejemplo_payload": {
+        "_id": "carta_sello_real",
+        "universo_id": "corte_medieval",
+        "categoria": "item",
+        "nombre": "Sello Real de Cera",
+        "descripcion": "Autoriza decretos indiscutibles y desbloquea opciones secretas en eventos.",
+        "imagen": "/assets/narrative/cards/sello_real.webp",
+        "tags": ["sello_real", "legitimidad"],
+        "efectos": [
+          {
+            "disparador": "al_obtener",
+            "condiciones": [],
+            "accion": {
+              "tipo": "otorgar_tag",
+              "tag": "sello_real"
+            }
+          }
+        ]
+      }
+    },
+    "4_resultados": {
+      "entidad": "Desenlace / Resultado Posible",
+      "metodo": "POST",
+      "url": "/api/narrative/admin/resultados",
+      "descripcion": "Crea o actualiza una consecuencia de evento con impacto en recursos y afinidad.",
+      "campos": {
+        "_id": { "tipo": "string", "requerido": true, "descripcion": "ID único (ej: res_suministros_asegurados)" },
+        "universo_id": { "tipo": "string", "requerido": true, "descripcion": "ID del universo" },
+        "titulo": { "tipo": "string", "requerido": true, "descripcion": "Título del desenlace" },
+        "texto": { "tipo": "string", "requerido": true, "descripcion": "Narración de lo sucedido" },
+        "imagen": { "tipo": "string", "requerido": true, "descripcion": "Ilustración del resultado" },
+        "tipo_resultado": { "tipo": "string", "requerido": false, "default": "neutro", "enum": ["positivo", "negativo", "neutro"] },
+        "efectos": { "tipo": "array", "requerido": false, "default": [], "descripcion": "Efectos sobre recursos (disparador 'al_obtener')" },
+        "impacto_afinidad": {
+          "tipo": "array",
+          "requerido": false,
+          "default": [],
+          "items": {
+            "personaje_id": { "tipo": "string", "requerido": true, "descripcion": "ID del personaje" },
+            "delta": { "tipo": "integer", "requerido": true, "descripcion": "Cambio numérico (+15, -10)" }
+          }
+        }
+      },
+      "ejemplo_payload": {
+        "_id": "res_suministros_asegurados",
+        "universo_id": "corte_medieval",
+        "titulo": "Suministros Asegurados",
+        "texto": "La oportuna compra de grano evitó la hambruna generalizada en el valle.",
+        "imagen": "/assets/narrative/results/suministros.webp",
+        "tipo_resultado": "positivo",
+        "efectos": [
+          {
+            "disparador": "al_obtener",
+            "condiciones": [],
+            "accion": {
+              "tipo": "modificar_recurso",
+              "clave": "comida",
+              "tipo_calculo": "fijo",
+              "valor": 25.0
+            }
+          },
+          {
+            "disparador": "al_obtener",
+            "condiciones": [],
+            "accion": {
+              "tipo": "modificar_recurso",
+              "clave": "oro",
+              "tipo_calculo": "fijo",
+              "valor": -15.0
+            }
+          }
+        ],
+        "impacto_afinidad": [
+          { "personaje_id": "pj_canciller_elena", "delta": 10 }
+        ]
+      }
+    },
+    "5_eventos": {
+      "entidad": "Evento Mensual",
+      "metodo": "POST",
+      "url": "/api/narrative/admin/eventos",
+      "descripcion": "Crea o actualiza un evento con árbol de decisiones, opciones secretas y desenlaces probabilísticos.",
+      "campos": {
+        "_id": { "tipo": "string", "requerido": true, "descripcion": "ID único (ej: evt_helada_cosechas)" },
+        "universo_id": { "tipo": "string", "requerido": true, "descripcion": "ID del universo" },
+        "titulo": { "tipo": "string", "requerido": true, "descripcion": "Nombre del dilema" },
+        "descripcion": { "tipo": "string", "requerido": true, "descripcion": "Contexto del evento" },
+        "imagen": { "tipo": "string", "requerido": true, "descripcion": "Imagen ilustrativa" },
+        "tags_tematicos": { "tipo": "array de strings", "requerido": false, "default": [], "descripcion": "Categorías" },
+        "peso_base": { "tipo": "number", "requerido": false, "default": 100.0, "descripcion": "Probabilidad relativa de sorteo mensual" },
+        "opciones": {
+          "tipo": "array",
+          "requerido": true,
+          "descripcion": "Lista de opciones que se le presentan al jugador",
+          "items": {
+            "id": { "tipo": "string", "requerido": true, "descripcion": "Identificador de la opción (op_a, op_b, op_c)" },
+            "texto": { "tipo": "string", "requerido": true, "descripcion": "Texto visible de la decisión" },
+            "es_secreta": { "tipo": "boolean", "requerido": false, "default": false, "descripcion": "Si es secreta, requiere condiciones cumplidas" },
+            "condiciones": { "tipo": "array", "requerido": false, "default": [], "descripcion": "Condiciones para desbloquear" },
+            "resultados_posibles": {
+              "tipo": "array",
+              "requerido": true,
+              "descripcion": "Desenlaces vinculados con pesos",
+              "items": {
+                "resultado_id": { "tipo": "string", "requerido": true, "descripcion": "ID de un resultado existente" },
+                "peso_base": { "tipo": "number", "requerido": false, "default": 50.0, "descripcion": "Peso base" },
+                "modificadores_probabilidad": {
+                  "tipo": "array",
+                  "requerido": false,
+                  "default": [],
+                  "items": {
+                    "condicion": { "tipo": "object", "requerido": true, "descripcion": "Condición para aplicar delta" },
+                    "delta_peso": { "tipo": "number", "requerido": true, "descripcion": "Variación de peso (+35, -20)" },
+                    "explicacion": { "tipo": "string", "requerido": false, "descripcion": "Texto para tooltip del alumno" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ejemplo_payload": {
+        "_id": "evt_helada_cosechas",
+        "universo_id": "corte_medieval",
+        "titulo": "La Gran Helada en el Valle",
+        "descripcion": "Una ola de frío polar congeló los campos de trigo. Los silos campesinos amenazan con quedar vacíos.",
+        "imagen": "/assets/narrative/events/helada.webp",
+        "tags_tematicos": ["clima", "comida", "crisis", "pueblo"],
+        "peso_base": 100.0,
+        "opciones": [
+          {
+            "id": "op_a",
+            "texto": "Enviar patrullas a custodiar y racionar graneros",
+            "es_secreta": false,
+            "condiciones": [],
+            "resultados_posibles": [
+              {
+                "resultado_id": "res_suministros_asegurados",
+                "peso_base": 50.0,
+                "modificadores_probabilidad": [
+                  {
+                    "condicion": {
+                      "tipo": "tiene_personaje",
+                      "clave": null,
+                      "operador": null,
+                      "valor": null,
+                      "personaje_id": "pj_comandante_marcus",
+                      "carta_id": null,
+                      "tag": null
+                    },
+                    "delta_peso": 35.0,
+                    "explicacion": "+35% por liderazgo del Comandante Marcus"
+                  }
+                ]
+              },
+              {
+                "resultado_id": "res_emboscada_y_perdida",
+                "peso_base": 50.0,
+                "modificadores_probabilidad": []
+              }
+            ]
+          },
+          {
+            "id": "op_b",
+            "texto": "Comprar grano de emergencia a mercaderes extranjeros",
+            "es_secreta": false,
+            "condiciones": [],
+            "resultados_posibles": [
+              {
+                "resultado_id": "res_suministros_asegurados",
+                "peso_base": 60.0,
+                "modificadores_probabilidad": []
+              }
+            ]
+          },
+          {
+            "id": "op_c",
+            "texto": "[Secreto] Decretar requisa general amparado en el Sello Real",
+            "es_secreta": true,
+            "condiciones": [
+              {
+                "tipo": "tiene_tag",
+                "clave": null,
+                "operador": null,
+                "valor": null,
+                "personaje_id": null,
+                "carta_id": null,
+                "tag": "sello_real"
+              }
+            ],
+            "resultados_posibles": [
+              {
+                "resultado_id": "res_suministros_asegurados",
+                "peso_base": 100.0,
+                "modificadores_probabilidad": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "6_conversaciones": {
+      "entidad": "Diálogo de Corte",
+      "metodo": "POST",
+      "url": "/api/narrative/admin/conversaciones",
+      "descripcion": "Crea o actualiza una disputa/conversación entre 2 personajes de corte con opciones de arbitraje del monarca.",
+      "campos": {
+        "_id": { "tipo": "string", "requerido": true, "descripcion": "ID único (ej: conv_disputa_tesoro_militar)" },
+        "universo_id": { "tipo": "string", "requerido": true, "descripcion": "ID del universo" },
+        "titulo": { "tipo": "string", "requerido": true, "descripcion": "Título del dilema de corte" },
+        "imagen": { "tipo": "string", "requerido": true, "descripcion": "URL o ruta de fondo de la conversación" },
+        "requisitos": {
+          "tipo": "array",
+          "requerido": true,
+          "descripcion": "Lista de personajes que deben estar en la corte activa (exactamente 2)",
+          "items": {
+            "personajeId": { "tipo": "string", "requerido": true, "descripcion": "ID del personaje requerido" }
+          }
+        },
+        "frases": {
+          "tipo": "array",
+          "requerido": true,
+          "descripcion": "Guion secuencial de diálogo",
+          "items": {
+            "personajeId": { "tipo": "string", "requerido": true, "descripcion": "Personaje que habla" },
+            "texto": { "tipo": "string", "requerido": true, "descripcion": "Línea de diálogo" }
+          }
+        },
+        "decisiones": {
+          "tipo": "array",
+          "requerido": true,
+          "descripcion": "Opciones de intervención del jugador",
+          "items": {
+            "opcion": { "tipo": "integer", "requerido": true, "descripcion": "Número ordinal (1, 2, 3)" },
+            "texto": { "tipo": "string", "requerido": true, "descripcion": "Decisión tomada por el jugador" },
+            "condiciones": { "tipo": "array", "requerido": false, "default": [], "descripcion": "Condiciones opcionales" },
+            "resultado_texto": { "tipo": "string", "requerido": true, "descripcion": "Respuesta narrativa de la corte" },
+            "impacto_afinidad": {
+              "tipo": "array",
+              "requerido": false,
+              "default": [],
+              "items": {
+                "personaje_id": { "tipo": "string", "requerido": true, "descripcion": "Personaje afectado" },
+                "delta": { "tipo": "integer", "requerido": true, "descripcion": "Cambio en afinidad (+15, -10)" }
+              }
+            }
+          }
+        }
+      },
+      "ejemplo_payload": {
+        "_id": "conv_disputa_tesoro_militar",
+        "universo_id": "corte_medieval",
+        "titulo": "Presupuesto de Campaña Militar",
+        "imagen": "/assets/narrative/conversations/sala_reuniones.webp",
+        "requisitos": [
+          { "personajeId": "pj_canciller_elena" },
+          { "personajeId": "pj_comandante_marcus" }
+        ],
+        "frases": [
+          {
+            "personajeId": "pj_comandante_marcus",
+            "texto": "Mis hombres necesitan mejores armaduras y raciones si queremos mantener segura la frontera norte."
+          },
+          {
+            "personajeId": "pj_canciller_elena",
+            "texto": "Si desviamos más oro a la guarnición, asfixiaremos el comercio y los gremios se rebelarán."
+          }
+        ],
+        "decisiones": [
+          {
+            "opcion": 1,
+            "texto": "Respaldar a Elena: la prudencia fiscal es prioridad ante el invierno",
+            "condiciones": [],
+            "resultado_texto": "Marcus aprieta la mandíbula y acata la orden con evidente desagrado.",
+            "impacto_afinidad": [
+              { "personaje_id": "pj_canciller_elena", "delta": 15 },
+              { "personaje_id": "pj_comandante_marcus", "delta": -15 }
+            ]
+          },
+          {
+            "opcion": 2,
+            "texto": "Respaldar a Marcus: las murallas y las armas deben garantizar la paz",
+            "condiciones": [],
+            "resultado_texto": "Elena toma notas en silencio, advirtiendo que los balances estarán al límite.",
+            "impacto_afinidad": [
+              { "personaje_id": "pj_canciller_elena", "delta": -15 },
+              { "personaje_id": "pj_comandante_marcus", "delta": 15 }
+            ]
+          }
+        ]
+      }
+    },
+    "7_generar_mes": {
+      "entidad": "Generador Mensual de Desafíos Diarios",
+      "metodo": "POST",
+      "url": "/api/narrative/admin/generar-mes?year=2026&month=1&universo_id=corte_medieval",
+      "descripcion": "Genera los 28 a 31 desafíos diarios del mes en la colección daily_challenges para el juego narrativo.",
+      "parametros_query": {
+        "year": { "tipo": "integer", "requerido": true, "rango": "2020-2050", "ejemplo": 2026 },
+        "month": { "tipo": "integer", "requerido": true, "rango": "1-12", "ejemplo": 1 },
+        "universo_id": { "tipo": "string", "requerido": true, "ejemplo": "corte_medieval" }
+      },
+      "cuerpo_body": null,
+      "ejemplo_respuesta": {
+        "year": 2026,
+        "month": 1,
+        "universo_id": "corte_medieval",
+        "desafios_creados": 31
+      }
+    }
+  },
+  "endpoints_runtime_alumno": {
+    "1_iniciar_partida": {
+      "metodo": "POST",
+      "url": "/api/narrative/partida/iniciar",
+      "descripcion": "Fase 0: Elige 2 de 5 personajes y 2 de 5 cartas iniciales ofrecidas en el setup diario.",
+      "ejemplo_payload": {
+        "date": "2026-10-15",
+        "corte_elegida_ids": ["pj_canciller_elena", "pj_comandante_marcus"],
+        "cartas_iniciales_ids": ["carta_sello_real", "carta_veteranos"]
+      }
+    },
+    "2_elegir_carta_mes": {
+      "metodo": "POST",
+      "url": "/api/narrative/partida/elegir-carta-mes",
+      "descripcion": "Fase 1: Elige 1 de las 3 cartas sorteadas del draft mensual. Avanza inmediatamente a Fase 2 (sortea el evento mensual).",
+      "ejemplo_payload": {
+        "date": "2026-10-15",
+        "carta_id": "carta_veteranos"
+      }
+    },
+    "3_decidir_evento": {
+      "metodo": "POST",
+      "url": "/api/narrative/partida/decidir-evento",
+      "descripcion": "Fase 2: Elige una opción (op_a, op_b, op_c). El motor calcula probabilidades, sortea el desenlace, aplica deltas y evalúa si dispara diálogo en Fase 3.",
+      "ejemplo_payload": {
+        "date": "2026-10-15",
+        "opcion_id": "op_a"
+      }
+    },
+    "4_responder_conversacion": {
+      "metodo": "POST",
+      "url": "/api/narrative/partida/responder-conversacion",
+      "descripcion": "Fase 3: Selecciona una de las decisiones del diálogo de corte. Modifica afinidades y pasa a Fase 4 (Balance del mes).",
+      "ejemplo_payload": {
+        "date": "2026-10-15",
+        "opcion_numero": 1
+      }
+    },
+    "5_avanzar_mes": {
+      "metodo": "POST",
+      "url": "/api/narrative/partida/avanzar-mes",
+      "descripcion": "Fase 4: Guarda historial del mes, ejecuta efectos pasivos 'cada_mes' y avanza al siguiente mes (o emite epílogo final en Mes 12).",
+      "ejemplo_payload": {
+        "date": "2026-10-15"
+      }
+    },
+    "6_reiniciar_partida": {
+      "metodo": "POST",
+      "url": "/api/narrative/partida/reiniciar",
+      "descripcion": "Reinicia el estado de la partida viva del alumno para el desafío del día indicado.",
+      "ejemplo_payload": {
+        "date": "2026-10-15"
+      }
+    }
+  }
+}
