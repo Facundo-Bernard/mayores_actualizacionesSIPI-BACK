@@ -53,3 +53,28 @@ async def endpoint_enviar_acceso_correo(
 async def endpoint_register(req: RegisterRequest):
     # Registro público siempre crea cuentas de alumno (is_admin_creation=False)
     return await register_usuario(req, is_admin_creation=False)
+
+@router.post(
+    "/api/auth/verificar-codigo-registro",
+    dependencies=[Depends(rate_limit(max_requests=10, window_seconds=60))],
+    summary="Confirmar código de email y activar cuenta"
+)
+async def endpoint_verificar_codigo_registro(req: VerificarCodigoRegistroRequest):
+    return await verificar_codigo_registro(req)
+
+@router.post(
+    "/api/auth/reenviar-codigo-registro",
+    dependencies=[Depends(rate_limit(max_requests=5, window_seconds=60))],
+    summary="Reenviar código de activación al correo"
+)
+async def endpoint_reenviar_codigo_registro(req: ReenviarCodigoRequest):
+    return await reenviar_codigo_registro(req)
+
+@router.post(
+    "/api/auth/modificar-email-registro",
+    dependencies=[Depends(rate_limit(max_requests=5, window_seconds=60))],
+    summary="Corregir correo electrónico del registro pendiente"
+)
+async def endpoint_modificar_email_registro(req: ModificarEmailRegistroRequest):
+    return await modificar_email_registro(req)
+

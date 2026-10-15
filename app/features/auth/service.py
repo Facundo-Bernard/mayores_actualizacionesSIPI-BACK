@@ -245,7 +245,12 @@ async def register_usuario(req: RegisterRequest, is_admin_creation: bool = False
     # Prevenir escalada de privilegios (Mass Assignment): solo administradores autenticados pueden definir roles elevados
     tipo_usuario = req.tipoUsuario if (is_admin_creation and req.tipoUsuario is not None) else 1
     black = bool(req.black) if (is_admin_creation and req.black is not None) else False
-    activo = bool(req.activo) if (is_admin_creation and req.activo is not None) else True
+
+    # Si se crea explícitamente como activo desde admin, queda ACTIVO (id 2). Si es registro público, PENDIENTE_VERIFICACION (id 1)
+    is_admin_preactive = (is_admin_creation and req.activo is True)
+    estado_id = 2 if is_admin_preactive else 1
+    estado_codigo = "ACTIVO" if is_admin_preactive else "PENDIENTE_VERIFICACION"
+    activo = True if is_admin_preactive else False
 
     doc = {
         "id": user_id,
@@ -256,6 +261,8 @@ async def register_usuario(req: RegisterRequest, is_admin_creation: bool = False
         "tipo_usuario": tipo_usuario,
         "black": black,
         "activo": activo,
+        "estado_id": estado_id,
+        "estado_codigo": estado_codigo,
         "date_start": datetime.now(timezone.utc),
         "date_end": None,
         "progresos": []

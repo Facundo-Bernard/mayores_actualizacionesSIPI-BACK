@@ -45,6 +45,38 @@ async def endpoint_listar_usuarios(
         orden=orden
     )
 
+@router.get("/estados", response_model=ListEstadosResponse, summary="Listar catálogo de estados de usuario")
+async def endpoint_listar_estados(soloHabilitados: bool = Query(False, description="Filtrar solo los estados habilitados")):
+    return await get_estados_usuario(solo_habilitados=soloHabilitados)
+
+@router.post("/estados", summary="Crear un nuevo estado en el catálogo (Solo Admin)")
+async def endpoint_crear_estado(
+    req: CrearEstadoRequest,
+    admin: Dict[str, Any] = Depends(get_current_admin)
+):
+    return await crear_estado_usuario(
+        nombre=req.nombre,
+        codigo=req.codigo,
+        descripcion=req.descripcion,
+        color=req.color,
+        permite_login=req.permite_login or False
+    )
+
+@router.put("/estados/{estado_id}/toggle-habilitado", summary="Habilitar o inhabilitar un estado del catálogo (Solo Admin)")
+async def endpoint_toggle_habilitado_estado(
+    estado_id: int,
+    admin: Dict[str, Any] = Depends(get_current_admin)
+):
+    return await toggle_habilitado_estado(estado_id)
+
+@router.put("/{user_id}/cambiar-estado", response_model=CambiarEstadoUsuarioResponse, summary="Cambiar estado del usuario en el catálogo (Solo Admin)")
+async def endpoint_cambiar_estado_usuario(
+    user_id: int,
+    req: CambiarEstadoUsuarioRequest,
+    admin: Dict[str, Any] = Depends(get_current_admin)
+):
+    return await cambiar_estado_usuario(user_id, req.estado_id)
+
 @router.get("/{user_id}", response_model=UsuarioResponse, summary="Obtener usuario por ID")
 async def endpoint_obtener_usuario(
     user_id: int,
