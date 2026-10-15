@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, date, time
 from typing import Optional, List, Dict, Any
 from fastapi import HTTPException, status
@@ -19,9 +20,9 @@ async def get_usuarios_paginados(
     db = get_database()
     query: Dict[str, Any] = {}
 
-    # Filtro de búsqueda por nombre o email
+    # Filtro de búsqueda por nombre o email con re.escape para mitigar ReDoS
     if nombre and nombre.strip():
-        term = nombre.strip()
+        term = re.escape(nombre.strip())
         query["$or"] = [
             {"name": {"$regex": term, "$options": "i"}},
             {"email": {"$regex": term, "$options": "i"}}
