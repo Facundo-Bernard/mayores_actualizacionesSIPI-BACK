@@ -4,11 +4,13 @@ from app.core.dependencies import get_current_admin
 from app.core.rate_limit import rate_limit
 from app.features.auth.schemas import (
     LoginSistemasRequest, LoginCodigoRequest, VerificarTokenRequest,
-    EnviarAccesoCorreoRequest, RegisterRequest
+    EnviarAccesoCorreoRequest, RegisterRequest,
+    VerificarCodigoRegistroRequest, ReenviarCodigoRequest, ModificarEmailRegistroRequest
 )
 from app.features.auth.service import (
     login_sistemas, login_codigo, verificar_token,
-    enviar_acceso_correo, register_usuario
+    enviar_acceso_correo, register_usuario,
+    verificar_codigo_registro, reenviar_codigo_registro, modificar_email_registro
 )
 
 router = APIRouter(tags=["Autenticación"])

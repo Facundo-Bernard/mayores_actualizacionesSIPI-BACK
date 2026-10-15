@@ -29,7 +29,18 @@ class RegisterRequest(BaseModel):
     codigoAcceso: Optional[str] = None
     tipoUsuario: Optional[int] = 1
     black: Optional[bool] = False
-    activo: Optional[bool] = True
+    activo: Optional[bool] = None
+
+class VerificarCodigoRegistroRequest(BaseModel):
+    email: EmailStr
+    codigo: str
+
+class ReenviarCodigoRequest(BaseModel):
+    email: EmailStr
+
+class ModificarEmailRegistroRequest(BaseModel):
+    email_actual: EmailStr
+    email_nuevo: EmailStr
 
 class LoginSistemasResponse(BaseModel):
     success: bool = True

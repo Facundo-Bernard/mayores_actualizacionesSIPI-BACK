@@ -4,11 +4,16 @@ from datetime import date
 from app.core.dependencies import get_current_admin, get_current_user
 from app.features.usuario.schemas import (
     UsuarioResponse, PaginatedUsuariosResponse,
-    EstadoActivoResponse, SuscripcionResponse
+    EstadoActivoResponse, SuscripcionResponse,
+    ListEstadosResponse, EstadoUsuarioSchema,
+    CambiarEstadoUsuarioRequest, CambiarEstadoUsuarioResponse,
+    CrearEstadoRequest
 )
 from app.features.usuario.service import (
     get_usuarios_paginados, get_usuario_by_id,
-    toggle_activo, toggle_black
+    toggle_activo, toggle_black, get_estados_usuario,
+    cambiar_estado_usuario, crear_estado_usuario,
+    toggle_habilitado_estado
 )
 from app.features.auth.schemas import RegisterRequest
 from app.features.auth.service import register_usuario

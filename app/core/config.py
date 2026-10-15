@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     ADMIN_DEFAULT_PASSWORD: str = "admin123"
     ADMIN_DEFAULT_NAME: str = "Operador Sistemas"
     
+    # RAE API
+    RAE_API_KEY: Optional[str] = ""
+
     # MySQL (solo para script ETL)
     MYSQL_HOST: str = "localhost"
     MYSQL_PORT: int = 3306

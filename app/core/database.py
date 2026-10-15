@@ -63,6 +63,28 @@ async def init_indexes():
         await usuarios.create_index([("id", ASCENDING)], unique=True)
         await usuarios.create_index([("name", ASCENDING)])
         await usuarios.create_index([("date_start", ASCENDING)])
+
+        # Índices de Desafíos Diarios (daily_challenges)
+        daily_challenges = db["daily_challenges"]
+        await daily_challenges.create_index(
+            [("game_id", ASCENDING), ("date", ASCENDING), ("difficulty", ASCENDING)],
+            unique=True
+        )
+        await daily_challenges.create_index([("date", ASCENDING)])
+
+        # Índices de Intentos / Partidas (user_attempts)
+        user_attempts = db["user_attempts"]
+        await user_attempts.create_index(
+            [("user_id", ASCENDING), ("game_id", ASCENDING), ("date", ASCENDING)],
+            unique=True
+        )
+        await user_attempts.create_index([("user_id", ASCENDING), ("date", -1)])
+
+        # Índices de Estados de Usuario (estados_usuario)
+        estados_usuario = db["estados_usuario"]
+        await estados_usuario.create_index([("id", ASCENDING)], unique=True)
+        await estados_usuario.create_index([("codigo", ASCENDING)], unique=True)
+
         logger.info("Índices de MongoDB inicializados correctamente.")
     except Exception as e:
         logger.warning(f"Aviso al inicializar índices: {e}")

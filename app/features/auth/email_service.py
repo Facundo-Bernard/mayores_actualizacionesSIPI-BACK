@@ -13,7 +13,7 @@ async def enviar_magic_link(to_email: str, user_name: str, access_url: str, codi
     subject = "Tu acceso directo a Mayores Actualizaciones"
     html_content = construir_plantilla_html(user_name, access_url, codigo_acceso)
 
-    if not settings.SMTP_PASSWORD:
+    if not settings.SMTP_PASSWORD or settings.SMTP_PASSWORD in ("tu_clave_smtp_aqui", ""):
         logger.warning("=================================================================")
         logger.warning(f"ENVÍO SIMULADO (Sin clave SMTP configurada):")
         logger.warning(f"Destinatario: {to_email} ({user_name})")
@@ -84,6 +84,88 @@ def construir_plantilla_html(user_name: str, access_url: str, codigo_acceso: str
         </div>
         <div class="footer">
           Si tenés alguna duda o necesitás asistencia, comunicate con nuestro equipo de atención telefónica o respondiendo a este correo.
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
+async def enviar_codigo_activacion(to_email: str, user_name: str, codigo_acceso: str) -> bool:
+    """
+    Envía por correo el código PIN de 6 dígitos para la activación de la cuenta.
+    Si la clave SMTP no está configurada, simula el envío e imprime el código en consola.
+    """
+    subject = f"Tu código de acceso: {codigo_acceso} - Mayores Actualizaciones"
+    html_content = construir_plantilla_codigo_activacion(user_name, codigo_acceso)
+
+    if not settings.SMTP_PASSWORD or settings.SMTP_PASSWORD in ("tu_clave_smtp_aqui", ""):
+        logger.warning("=================================================================")
+        logger.warning("ENVÍO SIMULADO DE CÓDIGO (Sin clave SMTP configurada):")
+        logger.warning(f"Destinatario: {to_email} ({user_name})")
+        logger.warning(f"CÓDIGO DE ACCESO / ACTIVACIÓN: {codigo_acceso}")
+        logger.warning("=================================================================")
+        return True
+
+    try:
+        message = EmailMessage()
+        message["From"] = f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>"
+        message["To"] = to_email
+        message["Subject"] = subject
+        message.set_content(html_content, subtype="html")
+
+        await aiosmtplib.send(
+            message,
+            hostname=settings.SMTP_HOST,
+            port=settings.SMTP_PORT,
+            username=settings.SMTP_USER,
+            password=settings.SMTP_PASSWORD,
+            start_tls=True
+        )
+        logger.info(f"Código de activación enviado con éxito a {to_email}")
+        return True
+    except Exception as e:
+        logger.error(f"No se pudo enviar el correo de activación a {to_email}: {e}. Código: {codigo_acceso}")
+        return False
+
+def construir_plantilla_codigo_activacion(user_name: str, codigo_acceso: str) -> str:
+    return f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }}
+        .card {{ max-width: 580px; margin: 0 auto; background-color: #ffffff; border-radius: 18px; padding: 36px; border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }}
+        h1 {{ color: #294c6b; font-size: 26px; margin-bottom: 16px; font-weight: 900; }}
+        p {{ color: #334155; font-size: 18px; line-height: 1.55; margin-bottom: 20px; }}
+        .codigo-box {{ background-color: #f1f5f9; border: 2px dashed #53bfc9; border-radius: 14px; padding: 24px; text-align: center; margin: 28px 0; }}
+        .codigo-label {{ font-size: 15px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }}
+        .codigo-numero {{ font-size: 42px; font-weight: 900; letter-spacing: 10px; color: #294c6b; font-family: Consolas, monospace; }}
+        .nota-importante {{ background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 14px 18px; border-radius: 8px; font-size: 16px; color: #1e40af; margin-top: 24px; line-height: 1.5; }}
+        .nota-spam {{ background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 8px; font-size: 15px; color: #92400e; margin-top: 16px; line-height: 1.5; }}
+        .footer {{ font-size: 14px; color: #64748b; text-align: center; margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 18px; }}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1>¡Hola, {user_name}! 👋</h1>
+        <p>Te damos la bienvenida a <strong>Mayores Actualizaciones</strong>. Para activar tu cuenta y comenzar a jugar, ingresá este código en tu pantalla:</p>
+        
+        <div class="codigo-box">
+          <div class="codigo-label">Tu código de confirmación y acceso</div>
+          <div class="codigo-numero">{codigo_acceso}</div>
+        </div>
+
+        <div class="nota-importante">
+          <strong>📝 Importante:</strong> Guardá este código en un lugar seguro (por ejemplo, en un cuaderno). Con este mismo número de 6 dígitos vas a poder ingresar siempre desde cualquier celular o computadora.
+        </div>
+
+        <div class="nota-spam">
+          <strong>💡 Consejo:</strong> Si en el futuro no encontrás nuestros correos en tu bandeja de entrada, revisá también tu carpeta de <strong>Correo no deseado o Spam</strong>.
+        </div>
+
+        <div class="footer">
+          Equipo de Mayores Actualizaciones · Estimulación cognitiva y aprendizaje continuo
         </div>
       </div>
     </body>
