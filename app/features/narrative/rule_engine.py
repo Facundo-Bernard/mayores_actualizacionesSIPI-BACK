@@ -34,7 +34,7 @@ def evaluar_condicion(condicion: Any, run_data: Dict[str, Any]) -> bool:
 
     # 2. Posesión de Personaje en la Corte Activa
     elif tipo == TipoCondicionEnum.TIENE_PERSONAJE:
-        corte = run_data.get("corte_activa", [])
+        corte = list(run_data.get("afinidad", {}).keys()) or run_data.get("corte_activa", [])
         return condicion.personaje_id in corte
 
     # 3. Nivel de Afinidad con Personaje

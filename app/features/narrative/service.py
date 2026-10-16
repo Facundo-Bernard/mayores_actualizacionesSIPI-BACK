@@ -40,6 +40,17 @@ from app.features.narrative.schemas import (
     SetupDesafioResponse,
     EstadoPartidaActivaResponse,
     EventoTurnoResponse,
+    HistorialPartidaResponse,
+    InventarioPartidaResponse,
+    PersonajeCorteDetalle,
+    CortePartidaResponse,
+    FinalizacionPartidaResponse,
+    EstadoTurnoResponse,
+    IniciarPartidaV2Response,
+    ElegirCartaMesV2Response,
+    DecidirEventoV2Response,
+    ResponderConversacionV2Response,
+    AvanzarMesV2Response,
     EfectoSchema,
     CondicionSchema
 )
@@ -328,6 +339,34 @@ async def eliminar_conversacion(conversacion_id: str) -> bool:
     res = await db[COLL_CONVERSATIONS].delete_one({"_id": conversacion_id})
     return res.deleted_count > 0
 
+async def obtener_conversaciones_posibles_por_personajes(
+    personajes_ids: List[str],
+    universo_id: Optional[str] = None
+) -> List[ConversacionResponse]:
+    """
+    Dada una lista de IDs de personajes (mano o corte activa),
+    retorna todas las conversaciones del catálogo cuyos requisitos
+    están completamente satisfechos por ese conjunto de personajes.
+    """
+    if not personajes_ids:
+        return []
+
+    db = get_database()
+    query: Dict[str, Any] = {}
+    if universo_id:
+        query["universo_id"] = universo_id
+
+    cursor = db[COLL_CONVERSATIONS].find(query)
+    corte_set = set(personajes_ids)
+    posibles = []
+
+    async for doc in cursor:
+        reqs = [r.get("personajeId") for r in doc.get("requisitos", [])]
+        if reqs and all(r in corte_set for r in reqs):
+            posibles.append(ConversacionResponse(**doc))
+
+    return posibles
+
 # --- Finalizaciones / Desenlaces de Reino ---
 async def crear_o_actualizar_finalizacion(req: FinalizacionCreateRequest) -> FinalizacionResponse:
     db = get_database()
@@ -551,14 +590,6 @@ async def verificar_colapso_recursos(run_doc: Dict[str, Any]) -> Optional[Dict[s
     run_doc["status"] = "game_over"
     run_doc["fase_actual"] = RunPhaseEnum.FINALIZADA.value
     run_doc["finalizacion"] = finalizacion_data
-    run_doc["epilogo_final"] = {
-        "rango": finalizacion_data["rango"],
-        "titulo": finalizacion_data["titulo"],
-        "descripcion": finalizacion_data["texto"],
-        "promedio_recursos": round(sum(recursos.values()) / max(1, len(recursos)), 1),
-        "recursos_finales": recursos,
-        "mes_derrota": mes_caida
-    }
 
     return finalizacion_data
 
@@ -793,7 +824,6 @@ async def iniciar_partida(user_id: int, req: IniciarPartidaRequest) -> EstadoPar
         "fase_actual": RunPhaseEnum.DRAFT_MENSUAL.value,
         "status": "in_progress",
         "recursos": recursos_actuales,
-        "corte_activa": req.corte_elegida_ids,
         "afinidad": afinidades,
         "cartas_en_mano": req.cartas_iniciales_ids,
         "tags_activos": list(tags_activos),
@@ -877,7 +907,8 @@ async def elegir_carta_mes(user_id: int, req: ElegirCartaMesRequest) -> EstadoPa
     pool_eventos_ids = challenge.get("config", {}).get("pool_eventos_disponibles_ids", [])
 
     eventos_candidatos = await db[COLL_EVENTS].find({"_id": {"$in": pool_eventos_ids}}).to_list(None)
-    personajes_activos = await db[COLL_CHARACTERS].find({"_id": {"$in": run["corte_activa"]}}).to_list(None)
+    corte_ids = list(run.get("afinidad", {}).keys()) or run.get("corte_activa", [])
+    personajes_activos = await db[COLL_CHARACTERS].find({"_id": {"$in": corte_ids}}).to_list(None)
     cartas_activas = await db[COLL_CARDS].find({"_id": {"$in": run["cartas_en_mano"]}}).to_list(None)
 
     evento_seleccionado = seleccionar_evento_mes(
@@ -965,7 +996,7 @@ async def decidir_evento(user_id: int, req: DecidirEventoRequest) -> EstadoParti
     if conv_pool_ids and random.random() < 0.40: # 40% de probabilidad base mensual
         candidatas = await db[COLL_CONVERSATIONS].find({"_id": {"$in": conv_pool_ids}}).to_list(None)
         # Filtrar solo las que cumplen los personajes de la corte actual Y no se jugaron ya
-        corte_set = set(run["corte_activa"])
+        corte_set = set(run.get("afinidad", {}).keys()) or set(run.get("corte_activa", []))
         validas = []
         for conv in candidatas:
             if conv["_id"] in conversaciones_jugadas:
@@ -1043,7 +1074,7 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> EstadoPartidaActi
     turno = run.get("turno_actual", {})
     mes_actual = run.get("mes_actual", 1)
 
-    # 1. Guardar resumen del mes en historial
+    # 1. Guardar resumen completo del mes en historial_mensual
     historial_item = {
         "mes": mes_actual,
         "carta_elegida_id": turno.get("carta_elegida_id"),
@@ -1064,7 +1095,7 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> EstadoPartidaActi
         run["fase_actual"] = RunPhaseEnum.FINALIZADA.value
         run["status"] = "completed"
         universo_doc = await db[COLL_SETTINGS].find_one({"_id": run.get("universo_id")})
-        run["epilogo_final"] = _calcular_epilogo_final(run, universo_doc)
+        run["finalizacion"] = _calcular_finalizacion_victoria(run, universo_doc)
     else:
         # Avanzar al siguiente mes
         run["mes_actual"] = mes_actual + 1
@@ -1072,7 +1103,8 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> EstadoPartidaActi
 
         # Aplicar efectos "cada_mes" de personajes y cartas
         recursos_mapa = await _obtener_mapa_recursos_universo(run["universo_id"])
-        personajes_docs = await db[COLL_CHARACTERS].find({"_id": {"$in": run["corte_activa"]}}).to_list(None)
+        corte_ids = list(run.get("afinidad", {}).keys()) or run.get("corte_activa", [])
+        personajes_docs = await db[COLL_CHARACTERS].find({"_id": {"$in": corte_ids}}).to_list(None)
         cartas_docs = await db[COLL_CARDS].find({"_id": {"$in": run["cartas_en_mano"]}}).to_list(None)
 
         for p in personajes_docs:
@@ -1111,34 +1143,38 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> EstadoPartidaActi
     await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
     return await _construir_estado_respuesta(run)
 
-def _calcular_epilogo_final(run_data: Dict[str, Any], universo_doc: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def _calcular_finalizacion_victoria(run_data: Dict[str, Any], universo_doc: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     recursos = run_data.get("recursos", {})
     promedio = sum(recursos.values()) / max(1, len(recursos))
-    nombre_u = universo_doc.get("nombre", "este universo") if universo_doc else "este universo"
+    nombre_u = universo_doc.get("nombre", "este reino") if universo_doc else "este reino"
+    universo_id = run_data.get("universo_id", "corte_medieval")
 
     if promedio >= 75:
         rango = "S"
-        titulo = f"Era Dorada y Prosperidad Suprema"
+        titulo = "Era Dorada y Prosperidad Suprema"
         texto = f"Tus sabias decisiones y admirable gestión permitieron que {nombre_u} alcanzara su máximo esplendor histórico."
     elif promedio >= 55:
         rango = "A"
-        titulo = f"Gran Estabilidad y Triunfo"
+        titulo = "Gran Estabilidad y Triunfo"
         texto = f"Superaste las crisis con solvencia y aseguraste un porvenir seguro y próspero en {nombre_u}."
     elif promedio >= 35:
         rango = "B"
-        titulo = f"Tiempos Difíciles pero Superados"
+        titulo = "Tiempos Difíciles pero Superados"
         texto = f"El ciclo anual fue duro y las pérdidas se hicieron sentir, pero lograste salir adelante en {nombre_u}."
     else:
         rango = "C"
-        titulo = f"Supervivencia Crítica"
+        titulo = "Supervivencia Crítica"
         texto = f"Apenas lograste sostener el control en {nombre_u}. Las tensiones acumuladas amenazan lo poco que pudiste preservar."
 
     return {
-        "rango": rango,
+        "_id": f"fin_{universo_id}_victoria",
+        "universo_id": universo_id,
+        "recurso_clave": None,
+        "tipo": TipoFinalizacionEnum.VICTORIA_TIEMPO.value,
         "titulo": titulo,
-        "descripcion": texto,
-        "promedio_recursos": round(promedio, 1),
-        "recursos_finales": recursos
+        "texto": texto,
+        "imagen": "/assets/narrative/finalizaciones/default.webp",
+        "rango": rango
     }
 
 # ============================================================================
@@ -1159,7 +1195,7 @@ async def _sincronizar_intento_usuario(run_doc: Dict[str, Any]):
 
         is_completed = run_doc.get("status") == "completed"
         status_str = "completed" if is_completed else "failed"
-        rango = run_doc.get("epilogo_final", {}).get("rango", "F")
+        rango = run_doc.get("finalizacion", {}).get("rango", "F")
 
         scores_map = {"S": 1000, "A": 850, "B": 700, "C": 500, "F": 250}
         stars_map = {"S": 3, "A": 3, "B": 2, "C": 1, "F": 1}
@@ -1197,7 +1233,7 @@ async def _construir_estado_respuesta(run_doc: Dict[str, Any]) -> EstadoPartidaA
     universo_id = run_doc.get("universo_id")
     turno = run_doc.get("turno_actual", {})
     draft_ids = turno.get("cartas_ofrecidas_ids", [])
-    corte_ids = run_doc.get("corte_activa", [])
+    corte_ids = list(run_doc.get("afinidad", {}).keys()) or run_doc.get("corte_activa", [])
     cartas_ids = run_doc.get("cartas_en_mano", [])
     evento_id = turno.get("evento_actual_id")
     resultado_id = turno.get("resultado_obtenido_id")
@@ -1279,6 +1315,278 @@ async def _construir_estado_respuesta(run_doc: Dict[str, Any]) -> EstadoPartidaA
         evento_actual=evento_resp,
         resultado_actual=resultado_resp,
         conversacion_actual=conversacion_resp,
-        epilogo_final=run_doc.get("epilogo_final"),
+        epilogo_final=None,
         finalizacion=finalizacion_resp
     )
+
+# ============================================================================
+# ENDPOINTS DE CONSULTA ESPECIALIZADOS (BAJO DEMANDA)
+# ============================================================================
+
+async def obtener_historial_partida(user_id: int, date: str) -> HistorialPartidaResponse:
+    db = get_database()
+    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+    return HistorialPartidaResponse(
+        date=run.get("date", date),
+        mes_actual=run.get("mes_actual", 1),
+        status=run.get("status", "in_progress"),
+        fase_actual=run.get("fase_actual", ""),
+        historial_mensual=run.get("historial_mensual", [])
+    )
+
+async def obtener_inventario_partida(user_id: int, date: str) -> InventarioPartidaResponse:
+    db = get_database()
+    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+    cartas_ids = run.get("cartas_en_mano", [])
+    cartas_docs = await db[COLL_CARDS].find({"_id": {"$in": cartas_ids}}).to_list(None) if cartas_ids else []
+    return InventarioPartidaResponse(
+        date=run.get("date", date),
+        cartas=[CartaResponse(**c) for c in cartas_docs],
+        tags_activos=run.get("tags_activos", [])
+    )
+
+async def obtener_corte_partida(user_id: int, date: str) -> CortePartidaResponse:
+    db = get_database()
+    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+    afinidades = run.get("afinidad", {})
+    corte_ids = list(afinidades.keys()) or run.get("corte_activa", [])
+    personajes_docs = await db[COLL_CHARACTERS].find({"_id": {"$in": corte_ids}}).to_list(None) if corte_ids else []
+    corte_detalles = [
+        PersonajeCorteDetalle(
+            personaje=PersonajeResponse(**p),
+            afinidad=afinidades.get(p["_id"], 50)
+        )
+        for p in personajes_docs
+    ]
+    return CortePartidaResponse(
+        date=run.get("date", date),
+        corte=corte_detalles,
+        afinidad=afinidades
+    )
+
+async def obtener_finalizacion_partida(user_id: int, date: str) -> FinalizacionPartidaResponse:
+    db = get_database()
+    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+    fin_raw = run.get("finalizacion")
+    fin_resp = FinalizacionResponse(**fin_raw) if fin_raw else None
+    return FinalizacionPartidaResponse(
+        date=run.get("date", date),
+        status=run.get("status", "in_progress"),
+        mes_actual=run.get("mes_actual", 1),
+        finalizacion=fin_resp,
+        epilogo_final=run.get("epilogo_final")
+    )
+
+async def obtener_turno_actual(user_id: int, date: str) -> EstadoTurnoResponse:
+    db = get_database()
+    run_doc = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run_doc:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+
+    turno = run_doc.get("turno_actual", {})
+    draft_ids = turno.get("cartas_ofrecidas_ids", [])
+    evento_id = turno.get("evento_actual_id")
+    resultado_id = turno.get("resultado_obtenido_id")
+    conversacion_id = turno.get("conversacion_actual_id")
+
+    async def _get_empty_list():
+        return []
+
+    async def _get_none():
+        return None
+
+    draft_task = db[COLL_CARDS].find({"_id": {"$in": draft_ids}}).to_list(None) if draft_ids else _get_empty_list()
+    evento_task = db[COLL_EVENTS].find_one({"_id": evento_id}) if evento_id else _get_none()
+    resultado_task = db[COLL_RESULTS].find_one({"_id": resultado_id}) if resultado_id else _get_none()
+    conversacion_task = db[COLL_CONVERSATIONS].find_one({"_id": conversacion_id}) if conversacion_id else _get_none()
+
+    cartas_draft_docs, evento_doc, res_doc, conv_doc = await asyncio.gather(
+        draft_task, evento_task, resultado_task, conversacion_task
+    )
+
+    evento_resp = None
+    if evento_doc:
+        res_ids = set()
+        for op in evento_doc.get("opciones", []):
+            for rp in op.get("resultados_posibles", []):
+                res_ids.add(rp.get("resultado_id"))
+        resultados_docs = await db[COLL_RESULTS].find({"_id": {"$in": list(res_ids)}}).to_list(None) if res_ids else []
+        res_dict = {r["_id"]: r for r in resultados_docs}
+
+        opciones_calc = calcular_opciones_evento(evento_doc, run_doc, res_dict)
+        evento_resp = EventoTurnoResponse(
+            id=evento_doc["_id"],
+            titulo=evento_doc.get("titulo", ""),
+            descripcion=evento_doc.get("descripcion", ""),
+            imagen=evento_doc.get("imagen", ""),
+            opciones=opciones_calc
+        )
+
+    resultado_resp = ResultadoResponse(**res_doc) if res_doc else None
+    conversacion_resp = ConversacionResponse(**conv_doc) if conv_doc else None
+    finalizacion_resp = FinalizacionResponse(**run_doc["finalizacion"]) if run_doc.get("finalizacion") else None
+
+    return EstadoTurnoResponse(
+        date=run_doc.get("date", date),
+        mes_actual=run_doc.get("mes_actual", 1),
+        fase_actual=run_doc.get("fase_actual", ""),
+        status=run_doc.get("status", "in_progress"),
+        recursos=run_doc.get("recursos", {}),
+        afinidad=run_doc.get("afinidad", {}),
+        cartas_draft_actual=[CartaResponse(**c) for c in cartas_draft_docs],
+        evento_actual=evento_resp,
+        resultado_actual=resultado_resp,
+        conversacion_actual=conversacion_resp,
+        finalizacion=finalizacion_resp
+    )
+
+async def obtener_evento_actual_partida(user_id: int, date: str) -> Optional[EventoTurnoResponse]:
+    db = get_database()
+    run_doc = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run_doc:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+
+    turno = run_doc.get("turno_actual", {})
+    evento_id = turno.get("evento_actual_id")
+    if not evento_id:
+        return None
+
+    evento_doc = await db[COLL_EVENTS].find_one({"_id": evento_id})
+    if not evento_doc:
+        return None
+
+    res_ids = set()
+    for op in evento_doc.get("opciones", []):
+        for rp in op.get("resultados_posibles", []):
+            res_ids.add(rp.get("resultado_id"))
+    resultados_docs = await db[COLL_RESULTS].find({"_id": {"$in": list(res_ids)}}).to_list(None) if res_ids else []
+    res_dict = {r["_id"]: r for r in resultados_docs}
+
+    opciones_calc = calcular_opciones_evento(evento_doc, run_doc, res_dict)
+    return EventoTurnoResponse(
+        id=evento_doc["_id"],
+        titulo=evento_doc.get("titulo", ""),
+        descripcion=evento_doc.get("descripcion", ""),
+        imagen=evento_doc.get("imagen", ""),
+        opciones=opciones_calc
+    )
+
+async def obtener_conversacion_actual_partida(user_id: int, date: str) -> Optional[ConversacionResponse]:
+    db = get_database()
+    run_doc = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run_doc:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+
+    turno = run_doc.get("turno_actual", {})
+    conversacion_id = turno.get("conversacion_actual_id")
+    if not conversacion_id:
+        return None
+
+    conv_doc = await db[COLL_CONVERSATIONS].find_one({"_id": conversacion_id})
+    return ConversacionResponse(**conv_doc) if conv_doc else None
+
+async def obtener_resultado_actual_partida(user_id: int, date: str) -> Optional[ResultadoResponse]:
+    db = get_database()
+    run_doc = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run_doc:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+
+    turno = run_doc.get("turno_actual", {})
+    resultado_id = turno.get("resultado_obtenido_id")
+    if not resultado_id:
+        return None
+
+    res_doc = await db[COLL_RESULTS].find_one({"_id": resultado_id})
+    return ResultadoResponse(**res_doc) if res_doc else None
+
+async def obtener_draft_actual_partida(user_id: int, date: str) -> List[CartaResponse]:
+    db = get_database()
+    run_doc = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date})
+    if not run_doc:
+        raise HTTPException(status_code=404, detail="No se encontró una partida activa para esa fecha.")
+
+    turno = run_doc.get("turno_actual", {})
+    draft_ids = turno.get("cartas_ofrecidas_ids", [])
+    if not draft_ids:
+        return []
+
+    cartas_draft_docs = await db[COLL_CARDS].find({"_id": {"$in": draft_ids}}).to_list(None)
+    return [CartaResponse(**c) for c in cartas_draft_docs]
+
+# ============================================================================
+# FUNCIONES DEL MOTOR V2 (RESPUESTAS LIGERAS POR FASE)
+# ============================================================================
+
+async def iniciar_partida_v2(user_id: int, req: IniciarPartidaRequest) -> IniciarPartidaV2Response:
+    full = await iniciar_partida(user_id, req)
+    fase_str = full.run.fase_actual.value if hasattr(full.run.fase_actual, "value") else str(full.run.fase_actual)
+    return IniciarPartidaV2Response(
+        mes_actual=full.run.mes_actual,
+        fase_actual=fase_str,
+        recursos=full.run.recursos,
+        afinidad=full.run.afinidad,
+        cartas_draft_actual=full.cartas_draft_actual
+    )
+
+async def elegir_carta_mes_v2(user_id: int, req: ElegirCartaMesRequest) -> ElegirCartaMesV2Response:
+    full = await elegir_carta_mes(user_id, req)
+    fase_str = full.run.fase_actual.value if hasattr(full.run.fase_actual, "value") else str(full.run.fase_actual)
+    if not full.evento_actual:
+        raise HTTPException(status_code=500, detail="No se pudo sortear el evento del mes.")
+    return ElegirCartaMesV2Response(
+        fase_actual=fase_str,
+        recursos=full.run.recursos,
+        evento_actual=full.evento_actual
+    )
+
+async def decidir_evento_v2(user_id: int, req: DecidirEventoRequest) -> DecidirEventoV2Response:
+    full = await decidir_evento(user_id, req)
+    fase_str = full.run.fase_actual.value if hasattr(full.run.fase_actual, "value") else str(full.run.fase_actual)
+    if not full.resultado_actual:
+        raise HTTPException(status_code=500, detail="No se pudo resolver el resultado del evento.")
+    return DecidirEventoV2Response(
+        fase_actual=fase_str,
+        recursos=full.run.recursos,
+        resultado_actual=full.resultado_actual,
+        conversacion_actual=full.conversacion_actual,
+        finalizacion=full.finalizacion
+    )
+
+async def responder_conversacion_v2(user_id: int, req: ResponderConversacionRequest) -> ResponderConversacionV2Response:
+    db = get_database()
+    run_before = await db[COLL_RUNS].find_one({"user_id": user_id, "date": req.date, "game_id": "narrativo"})
+    conv_id = run_before.get("turno_actual", {}).get("conversacion_actual_id") if run_before else None
+    conv_doc = await db[COLL_CONVERSATIONS].find_one({"_id": conv_id}) if conv_id else None
+    decision = next((d for d in conv_doc.get("decisiones", []) if d.get("opcion") == req.opcion_numero), None) if conv_doc else None
+
+    full = await responder_conversacion(user_id, req)
+    fase_str = full.run.fase_actual.value if hasattr(full.run.fase_actual, "value") else str(full.run.fase_actual)
+    return ResponderConversacionV2Response(
+        fase_actual=fase_str,
+        afinidad=full.run.afinidad,
+        resultado_texto=decision.get("resultado_texto", "") if decision else "",
+        impacto_afinidad=decision.get("impacto_afinidad", []) if decision else []
+    )
+
+async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Response:
+    full = await avanzar_mes(user_id, req)
+    fase_str = full.run.fase_actual.value if hasattr(full.run.fase_actual, "value") else str(full.run.fase_actual)
+    return AvanzarMesV2Response(
+        mes_actual=full.run.mes_actual,
+        fase_actual=fase_str,
+        status=full.run.status,
+        recursos=full.run.recursos,
+        cartas_draft_actual=full.cartas_draft_actual,
+        finalizacion=full.finalizacion
+    )
+
+
+

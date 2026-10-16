@@ -28,6 +28,7 @@ from app.features.narrative.schemas import (
     EventoResponse,
     ConversacionCreateRequest,
     ConversacionResponse,
+    ConversacionesPosiblesRequest,
     FinalizacionCreateRequest,
     FinalizacionResponse
 )
@@ -56,6 +57,7 @@ from app.features.narrative.service import (
     obtener_conversaciones,
     obtener_conversacion_por_id,
     eliminar_conversacion,
+    obtener_conversaciones_posibles_por_personajes,
     crear_o_actualizar_finalizacion,
     obtener_finalizaciones,
     obtener_finalizacion_por_id,

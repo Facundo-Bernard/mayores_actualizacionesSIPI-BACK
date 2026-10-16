@@ -77,15 +77,13 @@ El juego narrativo transporta al usuario a un arquetipo temático (inicialmente 
 | Atributo | Tipo | Descripción |
 | :--- | :--- | :--- |
 | **`recursos`** | `Dict[str, int]` | Balances numéricos (0 a 100). En `corte_medieval`: `oro`, `pueblo`, `ejercito`, `fe`. Si alguno llega a $\le 0 \rightarrow$ **Game Over**. |
-| **`corte_activa`** | `List[str]` | IDs de los 3 personajes elegidos en el setup inicial (ej: Canciller, General, Abadesa). |
-| **`afinidad`** | `Dict[str, int]` | Relación con cada personaje de la corte (0 a 100). Las conversaciones y eventos la modifican. |
+| **`afinidad`** | `Dict[str, int]` | Miembros de la corte activa y su afinidad (0 a 100), mapeado como `{id_personaje: afinidad}`. Las claves representan directamente los miembros de la corte activa (eliminando redundancia de `corte_activa`). |
 | **`cartas_en_mano`** | `List[str]` | Inventario de cartas obtenidas (iniciales y del draft mensual). |
 | **`tags_activos`** | `List[str]` | Etiquetas acumuladas (`comercio`, `militar`, `clero`, etc.) requeridas para desbloquear opciones secretas en eventos. |
 | **`mes_actual`** | `int` | Mes en curso (1 al 12). |
 | **`fase_actual`** | `RunPhaseEnum` | Estado de la máquina de turnos (`DRAFT_MENSUAL`, `TOMA_DECISION_EVENTO`, `RESOLVER_CONVERSACION`, `BALANCE_MES`, `FINALIZADA`). |
-| **`status`** | `str` | `"in_progress"` \| `"completed"` (victoria en mes 12) \| `"game_over"` (derrota por colapso). |
-| **`finalizacion`** | `Optional[Dict]` | Objeto con lore, título e ilustración WebP del desenlace de derrota si `status == "game_over"`. |
-| **`epilogo_final`** | `Optional[Dict]` | Calificación (`"S"`, `"A"`, `"B"`, `"C"` o `"F"`), promedios de recursos y texto final de la partida. |
+| **`status`** | `str` | `"in_progress"` \| `"completed"` (victoria o derrota). |
+| **`finalizacion`** | `Optional[Dict]` | Desenlace unificado con lore, título, rango e ilustración WebP (tanto para victoria en mes 12 como para derrota por colapso de recurso). |
 
 ---
 
@@ -171,17 +169,34 @@ const estaEnJuego = data.run.status === 'in_progress';
 
 ## 6. Endpoints Clave
 
-### 6.1 Jugador / Cliente (`router.py` prefix: `/api/narrative`)
-- `GET /api/narrative/desafio/{date}`: Obtiene el setup inicial del día (universo, corte ofrecida, cartas iniciales).
-- `POST /api/narrative/partida/iniciar`: Selecciona corte y cartas iniciales; inicia el Mes 1.
-- `GET /api/narrative/partida/estado?date={date}`: Obtiene el estado reactivo completo de la partida activa.
-- `POST /api/narrative/partida/elegir-carta`: Fase 1 (Draft mensual).
-- `POST /api/narrative/partida/decidir-evento`: Fase 2 (Opción A, B o C del evento).
-- `POST /api/narrative/partida/responder-conversacion`: Fase 3 (Elección en el diálogo de corte).
-- `POST /api/narrative/partida/avanzar-mes`: Fase 4 (Cierra balance y avanza al mes siguiente).
-- `POST /api/narrative/partida/reiniciar`: Resetea la partida diaria para reintentar.
+### 6.1 Jugador / Cliente (`router.py` prefix: `/api/narrative/partida`)
+- `GET /setup?date={date}`: Obtiene el setup inicial del día (universo, corte ofrecida, cartas iniciales).
+- `POST /reiniciar`: Resetea la partida diaria para reintentar.
+- `POST /conversaciones-posibles` / `GET /conversaciones-posibles`: Evalúa conversaciones habilitadas para una mano de personajes.
 
-### 6.2 Administración / Torre de Control (`admin_router.py` prefix: `/api/narrative/admin`)
+#### Endpoints de Consulta Especializados (Bajo Demanda en Swagger):
+- `GET /draft-actual?date={date}`: Devuelve únicamente las 3 cartas ofrecidas en el draft del mes activo.
+- `GET /evento-actual?date={date}`: Devuelve únicamente el evento del mes con sus opciones y probabilidades calculadas.
+- `GET /resultado-actual?date={date}`: Devuelve únicamente el resultado del evento recién resuelto.
+- `GET /conversacion-actual?date={date}`: Devuelve únicamente el diálogo de corte sorteado (o null si no hubo).
+- `GET /historial?date={date}`: Bitácora mensual completa acumulada de los 12 meses (solo al finalizar o en modal de replay).
+- `GET /inventario?date={date}`: Baraja de cartas obtenidas y tags activos del jugador.
+- `GET /corte?date={date}`: Integrantes de la corte actual con sus afinidades (0 a 100).
+- `GET /finalizacion?date={date}`: Objeto con título, texto, rango y motivo de finalización o derrota.
+
+#### Endpoints Legacy V1 (Ocultos de Swagger con `include_in_schema=False`, activos por retrocompatibilidad):
+- `POST /iniciar`, `GET /activa`, `POST /elegir-carta-mes`, `POST /decidir-evento`, `POST /responder-conversacion`, `POST /avanzar-mes`, `GET /turno` (reemplazados oficialmente en la documentación por el Motor V2).
+
+### 6.2 Motor de Turnos V2 Ligero (`router_v2.py` prefix: `/api/narrative/v2/partida`)
+Endpoints hermanos optimizados para transferencia ultra-ligera (< 1 KB por llamada):
+- `POST /iniciar`: Devuelve solo recursos iniciales y las 3 cartas de draft del Mes 1 (`IniciarPartidaV2Response`).
+- `POST /elegir-carta-mes`: Devuelve solo recursos y el evento sorteado con probabilidades (`ElegirCartaMesV2Response`).
+- `POST /decidir-evento`: Devuelve solo recursos, el resultado obtenido y la conversación si hubo (`DecidirEventoV2Response`).
+- `POST /responder-conversacion`: Devuelve afinidad actualizada y consecuencia del diálogo (`ResponderConversacionV2Response`).
+- `POST /avanzar-mes`: Devuelve recursos post-pasivos y las 3 nuevas cartas de draft (`AvanzarMesV2Response`).
+- `GET /estado`: Estado liviano reactivo para sincronización o recarga F5 (`EstadoTurnoResponse`).
+
+### 6.3 Administración / Torre de Control (`admin_router.py` prefix: `/api/narrative/admin`)
 - **CRUDs completos:** `/universos`, `/personajes`, `/cartas`, `/eventos`, `/resultados`, `/conversaciones`, `/finalizaciones`.
 - **Generación masiva mensual:** `POST /generar-mes?year=YYYY&month=M&universo_id=...` (arma los 30 desafíos diarios combinando pools).
 - **Sembrado de derrotas:** `POST /universos/{universo_id}/sembrar-finalizaciones` (autogenera borradores de derrota para cada recurso del universo).

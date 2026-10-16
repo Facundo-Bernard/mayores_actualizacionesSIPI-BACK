@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
 
@@ -257,17 +257,23 @@ class NarrativeRunSchema(BaseModel):
     fase_actual: RunPhaseEnum = RunPhaseEnum.DRAFT_MENSUAL
     status: str = "in_progress" # in_progress | completed
     recursos: Dict[str, int]
-    corte_activa: List[str]
     afinidad: Dict[str, int]
+    corte_activa: Optional[List[str]] = None
     cartas_en_mano: List[str]
     tags_activos: List[str]
     turno_actual: TurnoSnapshot
     eventos_jugados: List[str] = []
     conversaciones_jugadas: List[str] = []
-    historial_mensual: List[HistorialMes] = []
+    historial_mensual: List[Union[HistorialMes, str, Dict[str, Any]]] = []
     finalizacion: Optional[Dict[str, Any]] = None
     epilogo_final: Optional[Dict[str, Any]] = None
     updated_at: Optional[str] = None
+
+    @model_validator(mode="after")
+    def populate_corte_activa(self):
+        if not self.corte_activa and self.afinidad:
+            self.corte_activa = list(self.afinidad.keys())
+        return self
 
     model_config = {"populate_by_name": True}
 
@@ -297,6 +303,10 @@ class AvanzarMesRequest(BaseModel):
 
 class ReiniciarPartidaRequest(BaseModel):
     date: str
+
+class ConversacionesPosiblesRequest(BaseModel):
+    personajes_ids: List[str] = Field(..., description="Lista de IDs de personajes en mano o corte")
+    universo_id: Optional[str] = Field(None, description="Filtro opcional por universo")
 
 class SetupDesafioResponse(BaseModel):
     date: str
@@ -340,3 +350,88 @@ class EstadoPartidaActivaResponse(BaseModel):
     conversacion_actual: Optional[ConversacionResponse] = None
     epilogo_final: Optional[Dict[str, Any]] = None
     finalizacion: Optional[FinalizacionResponse] = None
+
+# ============================================================================
+# 7. DTOs PARA ENDPOINTS DE CONSULTA ESPECIALIZADOS (BAJO DEMANDA)
+# ============================================================================
+
+class HistorialPartidaResponse(BaseModel):
+    date: str
+    mes_actual: int
+    status: str
+    fase_actual: str
+    historial_mensual: List[Union[HistorialMes, Dict[str, Any], str]]
+
+class InventarioPartidaResponse(BaseModel):
+    date: str
+    cartas: List[CartaResponse]
+    tags_activos: List[str]
+
+class PersonajeCorteDetalle(BaseModel):
+    personaje: PersonajeResponse
+    afinidad: int
+
+class CortePartidaResponse(BaseModel):
+    date: str
+    corte: List[PersonajeCorteDetalle]
+    afinidad: Dict[str, int]
+
+class FinalizacionPartidaResponse(BaseModel):
+    date: str
+    status: str
+    mes_actual: int
+    finalizacion: Optional[FinalizacionResponse] = None
+    epilogo_final: Optional[Dict[str, Any]] = None
+
+class EstadoTurnoResponse(BaseModel):
+    date: str
+    mes_actual: int
+    fase_actual: str
+    status: str
+    recursos: Dict[str, int]
+    afinidad: Dict[str, int]
+    cartas_draft_actual: List[CartaResponse] = []
+    evento_actual: Optional[EventoTurnoResponse] = None
+    resultado_actual: Optional[ResultadoResponse] = None
+    conversacion_actual: Optional[ConversacionResponse] = None
+    finalizacion: Optional[FinalizacionResponse] = None
+
+# ============================================================================
+# 8. DTOs PARA ENDPOINTS HERMANOS V2 (LIGEROS / POR FASE)
+# ============================================================================
+
+class IniciarPartidaV2Response(BaseModel):
+    mes_actual: int = 1
+    fase_actual: str = "DRAFT_MENSUAL"
+    recursos: Dict[str, int]
+    afinidad: Dict[str, int]
+    cartas_draft_actual: List[CartaResponse]
+
+class ElegirCartaMesV2Response(BaseModel):
+    fase_actual: str = "TOMA_DECISION_EVENTO"
+    recursos: Dict[str, int]
+    evento_actual: EventoTurnoResponse
+
+class DecidirEventoV2Response(BaseModel):
+    fase_actual: str
+    recursos: Dict[str, int]
+    resultado_actual: ResultadoResponse
+    conversacion_actual: Optional[ConversacionResponse] = None
+    finalizacion: Optional[FinalizacionResponse] = None
+
+class ResponderConversacionV2Response(BaseModel):
+    fase_actual: str = "BALANCE_MES"
+    afinidad: Dict[str, int]
+    resultado_texto: str
+    impacto_afinidad: List[Dict[str, Any]]
+
+class AvanzarMesV2Response(BaseModel):
+    mes_actual: int
+    fase_actual: str
+    status: str
+    recursos: Dict[str, int]
+    cartas_draft_actual: List[CartaResponse] = []
+    finalizacion: Optional[FinalizacionResponse] = None
+
+
+
