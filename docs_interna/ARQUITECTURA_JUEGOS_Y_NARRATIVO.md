@@ -1,0 +1,223 @@
+# Guía Integral de Arquitectura: Ecosistema de Juegos y Motor Narrativo Roguelite
+
+> Documento de transferencia técnica y contexto de desarrollo para el equipo de ingeniería.  
+> **Proyecto:** Mayores Actualizaciones (SIPI-BACK + Frontend)  
+> **Rama activa:** `feature/juego-narrativo`
+
+---
+
+## 1. Visión General del Ecosistema
+
+La plataforma tiene como objetivo estimular capacidades cognitivas en adultos mayores a través de desafíos diarios lúdicos. Cuenta con dos grandes subsistemas de juegos:
+
+1. **Juegos Cognitivos Tradicionales Diarios:** Wordle, Sopa de Letras y Sudoku.
+2. **Juego Narrativo de Gestión y Decisiones Roguelite:** *"Crónicas de la Corte Real"* (`game_id = "narrativo"`), una experiencia episódica anual donde el usuario toma decisiones para equilibrar los recursos de un reino a lo largo de 12 meses.
+
+### Diagrama de Relación entre Módulos
+
+```mermaid
+flowchart TD
+    subgraph Plataforma
+        U["Usuarios (usuarios)"] --> P["Progreso y Rachas (progreso)"]
+        U --> A["Intentos y Puntajes (user_attempts)"]
+        DC["Desafíos Diarios (daily_challenges)"] --> A
+    end
+
+    subgraph JuegosTradicionales
+        DC --> W["Wordle (5 letras / RAE)"]
+        DC --> S["Sopa de Letras (Matriz / Dificultad)"]
+        DC --> K["Sudoku (9x9 / Backtracking)"]
+    end
+
+    subgraph MotorNarrativo
+        DC --> NConfig["Configuración Desafío (daily_challenges.config)"]
+        NConfig --> NRun["Partida Activa (narrative_runs)"]
+        NRun --> Settings["Universos (narrative_settings)"]
+        NRun --> Chars["Personajes (narrative_characters)"]
+        NRun --> Cards["Cartas (narrative_cards)"]
+        NRun --> Events["Eventos (narrative_events)"]
+        NRun --> Results["Desenlaces (narrative_results)"]
+        NRun --> Conv["Diálogos (narrative_conversations)"]
+        NRun --> Endings["Finalizaciones y Derrotas (narrative_endings)"]
+    end
+```
+
+---
+
+## 2. Juegos Tradicionales (Wordle, Sopa, Sudoku)
+
+### 2.1 Desafíos Diarios (`daily_challenges`)
+- Cada juego tradicional genera automáticamente instancias fechadas (`YYYY-MM-DD`).
+- **Servicio `ensure_current_and_next_month_generated()`:** Al arrancar FastAPI en `main.py` y en un loop en segundo plano cada 12 horas, garantiza que el mes en curso y el mes siguiente estén completamente sembrados.
+- **Colección `daily_challenges`:**
+  - `_id`: Auto-generado o `"{game_id}_{date}_{difficulty}"`.
+  - `game_id`: `"wordle"` | `"sopa_letras"` | `"sudoku"` | `"narrativo"`.
+  - `date`: Formato ISO `"YYYY-MM-DD"`.
+  - `config`: Objeto JSON con el tablero, palabras o configuración inicial del desafío.
+
+### 2.2 Intentos y Métricas (`user_attempts`)
+- Cada vez que un usuario interactúa o completa un juego, se actualiza su intento diario:
+  - `user_id` (int), `game_id` (str), `date` (str).
+  - `completed` (bool): Si resolvió el desafío con éxito.
+  - `score` (int): Puntaje normalizado.
+  - `duration_seconds` (int): Tiempo de resolución.
+  - `attempts_count` (int): Cantidad de intentos o jugadas realizadas.
+
+---
+
+## 3. El Motor Narrativo Roguelite (`Crónicas de la Corte Real`)
+
+### 3.1 Filosofía de Diseño
+El juego narrativo transporta al usuario a un arquetipo temático (inicialmente `corte_medieval`, pero completamente extensible a universos como granjas, ciencia ficción, etc.). 
+- **Duración:** La partida consta de **12 Meses** (un año de gobierno).
+- **Roguelite por gestión:** Las decisiones alteran recursos numéricos. Si algún recurso vital cae a $\le 0$, el reino colapsa y sobreviene la derrota inmediata.
+
+### 3.2 Atributos Clave de la Partida (`narrative_runs`)
+
+| Atributo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| **`recursos`** | `Dict[str, int]` | Balances numéricos (0 a 100). En `corte_medieval`: `oro`, `pueblo`, `ejercito`, `fe`. Si alguno llega a $\le 0 \rightarrow$ **Game Over**. |
+| **`corte_activa`** | `List[str]` | IDs de los 3 personajes elegidos en el setup inicial (ej: Canciller, General, Abadesa). |
+| **`afinidad`** | `Dict[str, int]` | Relación con cada personaje de la corte (0 a 100). Las conversaciones y eventos la modifican. |
+| **`cartas_en_mano`** | `List[str]` | Inventario de cartas obtenidas (iniciales y del draft mensual). |
+| **`tags_activos`** | `List[str]` | Etiquetas acumuladas (`comercio`, `militar`, `clero`, etc.) requeridas para desbloquear opciones secretas en eventos. |
+| **`mes_actual`** | `int` | Mes en curso (1 al 12). |
+| **`fase_actual`** | `RunPhaseEnum` | Estado de la máquina de turnos (`DRAFT_MENSUAL`, `TOMA_DECISION_EVENTO`, `RESOLVER_CONVERSACION`, `BALANCE_MES`, `FINALIZADA`). |
+| **`status`** | `str` | `"in_progress"` \| `"completed"` (victoria en mes 12) \| `"game_over"` (derrota por colapso). |
+| **`finalizacion`** | `Optional[Dict]` | Objeto con lore, título e ilustración WebP del desenlace de derrota si `status == "game_over"`. |
+| **`epilogo_final`** | `Optional[Dict]` | Calificación (`"S"`, `"A"`, `"B"`, `"C"` o `"F"`), promedios de recursos y texto final de la partida. |
+
+---
+
+### 3.3 Ciclo de Turno Mensual (Máquina de Estados)
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT_MENSUAL: Iniciar Partida (Mes 1)
+    
+    DRAFT_MENSUAL --> TOMA_DECISION_EVENTO: Elegir 1 de 3 cartas mensuales
+    note right of DRAFT_MENSUAL: Aplica efectos inmediatos de la carta
+    
+    TOMA_DECISION_EVENTO --> RESOLVER_CONVERSACION: Tirada de desenlace (40% prob diálogo)
+    TOMA_DECISION_EVENTO --> BALANCE_MES: Tirada de desenlace (60% sin diálogo)
+    note right of TOMA_DECISION_EVENTO: Pondera opciones según cartas, corte y afinidad
+    
+    RESOLVER_CONVERSACION --> BALANCE_MES: El jugador interviene en el diálogo
+    note right of RESOLVER_CONVERSACION: Impacta afinidad con los personajes
+    
+    BALANCE_MES --> DRAFT_MENSUAL: Mes < 12 (Avanzar mes)
+    note left of BALANCE_MES: Aplica costos pasivos CADA_MES de corte y cartas
+    
+    BALANCE_MES --> FINALIZADA: Mes == 12 (Victoria anual)
+    
+    DRAFT_MENSUAL --> FINALIZADA: Cualquier recurso <= 0 (Derrota)
+    TOMA_DECISION_EVENTO --> FINALIZADA: Cualquier recurso <= 0 (Derrota)
+    BALANCE_MES --> FINALIZADA: Costos pasivos dejan recurso <= 0 (Derrota)
+```
+
+---
+
+## 4. Sistema de Derrotas y Finalizaciones (`narrative_endings`)
+
+### 4.1 Principio de Aislamiento Estricto por Universo
+Un problema habitual en sistemas con atributos compartidos (ej: dos universos tienen un recurso llamado `"oro"`) es que no deben compartir el mismo texto de derrota:
+- En **`corte_medieval`**, oro en 0 significa *"Bancarrota de la Corona y desertores del castillo"*.
+- En **`granjero_medieval`**, oro en 0 significa *"Embargo de la Granja y confiscación del arado"*.
+
+Por ello, la colección `narrative_endings` vincula obligatoriamente:
+$$\text{Ending} = (\text{universo\_id}, \text{recurso\_clave})$$
+
+### 4.2 Verificación de Colapso en `service.py`
+En `verificar_colapso_recursos(run_doc)`:
+1. Detecta si algún recurso de `run_doc["recursos"]` es $\le 0$.
+2. Busca estrictamente:
+   ```python
+   fin_doc = await db["narrative_endings"].find_one({
+       "universo_id": run_doc["universo_id"],
+       "recurso_clave": recurso_agotado
+   })
+   ```
+3. Si no existe una redacción manual para ese universo, consulta `COLL_SETTINGS` y genera un fallback dinámico contextualizado con el nombre del universo y del recurso, **sin asumir jamás temáticas medievales o coronas**.
+4. Modifica `run_doc["status"] = "game_over"` y `run_doc["fase_actual"] = "FINALIZADA"`.
+
+### 4.3 Diferenciación en el Frontend
+El cliente web o móvil reconoce el estado de la partida mediante la respuesta `EstadoPartidaActivaResponse`:
+
+```typescript
+// Regla unívoca en el Frontend:
+const esDerrota = data.run.status === 'game_over' || !!data.finalizacion;
+const esVictoria = data.run.status === 'completed';
+const estaEnJuego = data.run.status === 'in_progress';
+```
+
+---
+
+## 5. Colecciones de MongoDB e Índices
+
+| Colección | Propósito | Índices Clave |
+| :--- | :--- | :--- |
+| `daily_challenges` | Desafíos diarios fechados por juego. | `[("game_id", 1), ("date", 1), ("difficulty", 1)]` (Unique) |
+| `user_attempts` | Intentos y resultados de alumnos. | `[("user_id", 1), ("game_id", 1), ("date", 1)]` (Unique), `[("user_id", 1), ("date", -1)]` |
+| `narrative_runs` | Estado vivo de la partida narrativa del día. | `[("user_id", 1), ("date", 1), ("game_id", 1)]` (Unique), `[("user_id", 1), ("date", -1)]` |
+| `narrative_settings` | Catálogo de universos y recursos válidos. | `[("_id", 1)]` |
+| `narrative_characters` | Arquetipos de corte. | `[("universo_id", 1)]` |
+| `narrative_cards` | Cartas de inventario y draft. | `[("universo_id", 1)]` |
+| `narrative_events` | Eventos mensuales con opciones. | `[("universo_id", 1)]` |
+| `narrative_results` | Desenlaces ponderados de las opciones. | `[("universo_id", 1)]` |
+| `narrative_conversations`| Diálogos de corte entre personajes. | `[("universo_id", 1)]` |
+| `narrative_endings` | Finalizaciones y derrotas por colapso. | `[("universo_id", 1), ("recurso_clave", 1)]` |
+
+---
+
+## 6. Endpoints Clave
+
+### 6.1 Jugador / Cliente (`router.py` prefix: `/api/narrative`)
+- `GET /api/narrative/desafio/{date}`: Obtiene el setup inicial del día (universo, corte ofrecida, cartas iniciales).
+- `POST /api/narrative/partida/iniciar`: Selecciona corte y cartas iniciales; inicia el Mes 1.
+- `GET /api/narrative/partida/estado?date={date}`: Obtiene el estado reactivo completo de la partida activa.
+- `POST /api/narrative/partida/elegir-carta`: Fase 1 (Draft mensual).
+- `POST /api/narrative/partida/decidir-evento`: Fase 2 (Opción A, B o C del evento).
+- `POST /api/narrative/partida/responder-conversacion`: Fase 3 (Elección en el diálogo de corte).
+- `POST /api/narrative/partida/avanzar-mes`: Fase 4 (Cierra balance y avanza al mes siguiente).
+- `POST /api/narrative/partida/reiniciar`: Resetea la partida diaria para reintentar.
+
+### 6.2 Administración / Torre de Control (`admin_router.py` prefix: `/api/narrative/admin`)
+- **CRUDs completos:** `/universos`, `/personajes`, `/cartas`, `/eventos`, `/resultados`, `/conversaciones`, `/finalizaciones`.
+- **Generación masiva mensual:** `POST /generar-mes?year=YYYY&month=M&universo_id=...` (arma los 30 desafíos diarios combinando pools).
+- **Sembrado de derrotas:** `POST /universos/{universo_id}/sembrar-finalizaciones` (autogenera borradores de derrota para cada recurso del universo).
+- **Procesador de Imágenes:** `POST /upload-imagen?categoria={cat}` (JPG/PNG a WebP con redimensionado proporcional).
+
+---
+
+## 7. Sistema de Imágenes y Torre de Control (`admin_src`)
+
+### 7.1 Pipeline WebP con Pillow
+Para evitar saturación de ancho de banda y garantizar carga instantánea:
+1. Endpoint `POST /api/narrative/admin/upload-imagen`.
+2. Redimensiona proporcionalmente con filtro Lanczos según categoría:
+   - `universos`: 1200x600 px
+   - `personajes`: 600x750 px
+   - `cartas`: 450x630 px
+   - `eventos` / `resultados` / `conversaciones` / `finalizaciones`: 900x500 px
+3. Comprime en formato **WebP calidad 82**.
+4. Guarda en `backend/app/static/narrative/{categoria}/` y devuelve URL `/assets/narrative/{categoria}/{archivo}.webp`.
+
+### 7.2 Componente Frontend `ImageUploadField.jsx`
+- Ubicado en `frontend/admin_src/narrative/ImageUploadField.jsx`.
+- Permite subir archivos mediante drag-and-drop o selector, o ingresar URLs manuales, mostrando preview en miniatura y tamaño en KB resultante.
+
+---
+
+## 8. Convenciones y Reglas del Proyecto
+
+1. **Control de Versiones (`practicas-coopya-github`):**
+   - **Nunca** commitear ni pushear sin instrucción expresa del usuario.
+   - Trabajar siempre sobre ramas `feature/*` correspondientes.
+2. **Archivos de Despliegue Intocables:**
+   - No modificar `Dockerfile`, `docker-compose.yml` ni `Caddyfile`.
+3. **Iconografía en Admin:**
+   - Solo componentes SVG exportados desde `Icons.jsx`. No utilizar emojis en la interfaz administrativa.
+4. **Proxy de Desarrollo en Vite:**
+   - Las rutas `/usuario`, `/progreso`, `/api` y `/assets/narrative` se encuentran configuradas en `vite.config.ts` para redirigir a `http://localhost:8080`.
+5. **Compilación del Admin:**
+   - Para compilar el frontend administrativo en producción: `npm run build:admin` (genera los bundles en `backend/app/static/admin`).

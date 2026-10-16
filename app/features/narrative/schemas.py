@@ -10,7 +10,8 @@ from app.features.narrative.enums import (
     TipoCalculoEnum,
     RunPhaseEnum,
     TipoResultadoEnum,
-    CategoriaCartaEnum
+    CategoriaCartaEnum,
+    TipoFinalizacionEnum
 )
 
 # ============================================================================
@@ -56,6 +57,7 @@ class UniversoCreateRequest(BaseModel):
     nombre: str
     descripcion: str
     icono: str = "crown"
+    imagen: str = "/assets/narrative/universos/default.webp"
     recursos: List[RecursoDefinicionSchema]
 
     model_config = {"populate_by_name": True}
@@ -65,6 +67,7 @@ class UniversoResponse(BaseModel):
     nombre: str
     descripcion: str
     icono: str
+    imagen: str = "/assets/narrative/universos/default.webp"
     recursos: List[RecursoDefinicionSchema]
 
     model_config = {"populate_by_name": True}
@@ -82,7 +85,7 @@ class PersonajeCreateRequest(BaseModel):
     universo_id: str
     nombre: str
     titulo: str
-    imagen: str
+    imagen: str = "/assets/narrative/personajes/default.webp"
     descripcion: str
     pros: List[str] = []
     cons: List[str] = []
@@ -102,7 +105,7 @@ class CartaCreateRequest(BaseModel):
     categoria: CategoriaCartaEnum
     nombre: str
     descripcion: str
-    imagen: str
+    imagen: str = "/assets/narrative/cartas/default.webp"
     tags: List[str] = []
     efectos: List[EfectoSchema] = []
 
@@ -120,7 +123,7 @@ class ResultadoCreateRequest(BaseModel):
     universo_id: str
     titulo: str
     texto: str
-    imagen: str
+    imagen: str = "/assets/narrative/resultados/default.webp"
     tipo_resultado: TipoResultadoEnum = TipoResultadoEnum.NEUTRO
     efectos: List[EfectoSchema] = []
     impacto_afinidad: List[ImpactoAfinidadSchema] = []
@@ -152,7 +155,7 @@ class EventoCreateRequest(BaseModel):
     universo_id: str
     titulo: str
     descripcion: str
-    imagen: str
+    imagen: str = "/assets/narrative/eventos/default.webp"
     tags_tematicos: List[str] = []
     peso_base: float = 100.0
     opciones: List[OpcionEventoSchema]
@@ -181,7 +184,7 @@ class ConversacionCreateRequest(BaseModel):
     universo_id: str
     titulo: str
     requisitos: List[ConversacionRequisitoSchema]
-    imagen: str
+    imagen: str = "/assets/narrative/conversaciones/default.webp"
     frases: List[ConversacionFraseSchema]
     decisiones: List[ConversacionDecisionSchema]
 
@@ -189,6 +192,22 @@ class ConversacionCreateRequest(BaseModel):
 
 class ConversacionResponse(ConversacionCreateRequest):
     pass
+
+class FinalizacionCreateRequest(BaseModel):
+    id: str = Field(..., alias="_id", description="Identificador único (ej: fin_corte_oro_cero)")
+    universo_id: str
+    recurso_clave: Optional[str] = None
+    tipo: TipoFinalizacionEnum = TipoFinalizacionEnum.DERROTA_RECURSO
+    titulo: str
+    texto: str
+    imagen: str = "/assets/narrative/finalizaciones/default.webp"
+    rango: Optional[str] = "F"
+
+    model_config = {"populate_by_name": True}
+
+class FinalizacionResponse(FinalizacionCreateRequest):
+    pass
+
 
 # ============================================================================
 # 4. CONFIGURACIÓN DEL DESAFÍO DIARIO (Extensión a daily_challenges)
@@ -246,6 +265,8 @@ class NarrativeRunSchema(BaseModel):
     eventos_jugados: List[str] = []
     conversaciones_jugadas: List[str] = []
     historial_mensual: List[HistorialMes] = []
+    finalizacion: Optional[Dict[str, Any]] = None
+    epilogo_final: Optional[Dict[str, Any]] = None
     updated_at: Optional[str] = None
 
     model_config = {"populate_by_name": True}
@@ -318,3 +339,4 @@ class EstadoPartidaActivaResponse(BaseModel):
     resultado_actual: Optional[ResultadoResponse] = None
     conversacion_actual: Optional[ConversacionResponse] = None
     epilogo_final: Optional[Dict[str, Any]] = None
+    finalizacion: Optional[FinalizacionResponse] = None

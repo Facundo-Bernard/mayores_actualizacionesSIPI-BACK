@@ -1,14 +1,17 @@
 import random
 import logging
+import asyncio
+import re
 from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple, Union
 from fastapi import HTTPException
 
 from app.core.database import get_database
 from app.features.narrative.enums import (
     RunPhaseEnum,
     DisparadorEnum,
-    TipoResultadoEnum
+    TipoResultadoEnum,
+    TipoFinalizacionEnum
 )
 from app.features.narrative.schemas import (
     UniversoCreateRequest,
@@ -23,6 +26,8 @@ from app.features.narrative.schemas import (
     EventoResponse,
     ConversacionCreateRequest,
     ConversacionResponse,
+    FinalizacionCreateRequest,
+    FinalizacionResponse,
     NarrativeRunSchema,
     TurnoSnapshot,
     HistorialMes,
@@ -56,6 +61,7 @@ COLL_CARDS = "narrative_cards"
 COLL_RESULTS = "narrative_results"
 COLL_EVENTS = "narrative_events"
 COLL_CONVERSATIONS = "narrative_conversations"
+COLL_ENDINGS = "narrative_endings"
 COLL_RUNS = "narrative_runs"
 COLL_CHALLENGES = "daily_challenges"
 
@@ -96,14 +102,39 @@ async def crear_o_actualizar_personaje(req: PersonajeCreateRequest) -> Personaje
     await db[COLL_CHARACTERS].replace_one({"_id": req.id}, doc, upsert=True)
     return PersonajeResponse(**doc)
 
-async def obtener_personajes(universo_id: Optional[str] = None) -> List[PersonajeResponse]:
+async def obtener_personajes(
+    universo_id: Optional[str] = None,
+    skip: int = 0,
+    limit: Optional[int] = None,
+    busqueda: Optional[str] = None,
+    with_total: bool = False
+) -> Union[List[PersonajeResponse], Tuple[List[PersonajeResponse], int]]:
     db = get_database()
-    query = {"universo_id": universo_id} if universo_id else {}
-    cursor = db[COLL_CHARACTERS].find(query)
+    query: Dict[str, Any] = {}
+    if universo_id:
+        query["universo_id"] = universo_id
+    if busqueda:
+        query["$or"] = [
+            {"nombre": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"arquetipo": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"descripcion": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"_id": {"$regex": re.escape(busqueda), "$options": "i"}}
+        ]
+    total = await db[COLL_CHARACTERS].count_documents(query)
+    cursor = db[COLL_CHARACTERS].find(query).skip(skip)
+    if limit is not None and limit > 0:
+        cursor = cursor.limit(limit)
     items = []
     async for doc in cursor:
         items.append(PersonajeResponse(**doc))
+    if with_total:
+        return items, total
     return items
+
+async def obtener_personaje_por_id(personaje_id: str) -> Optional[PersonajeResponse]:
+    db = get_database()
+    doc = await db[COLL_CHARACTERS].find_one({"_id": personaje_id})
+    return PersonajeResponse(**doc) if doc else None
 
 async def eliminar_personaje(personaje_id: str) -> bool:
     db = get_database()
@@ -117,14 +148,42 @@ async def crear_o_actualizar_carta(req: CartaCreateRequest) -> CartaResponse:
     await db[COLL_CARDS].replace_one({"_id": req.id}, doc, upsert=True)
     return CartaResponse(**doc)
 
-async def obtener_cartas(universo_id: Optional[str] = None) -> List[CartaResponse]:
+async def obtener_cartas(
+    universo_id: Optional[str] = None,
+    categoria: Optional[str] = None,
+    skip: int = 0,
+    limit: Optional[int] = None,
+    busqueda: Optional[str] = None,
+    with_total: bool = False
+) -> Union[List[CartaResponse], Tuple[List[CartaResponse], int]]:
     db = get_database()
-    query = {"universo_id": universo_id} if universo_id else {}
-    cursor = db[COLL_CARDS].find(query)
+    query: Dict[str, Any] = {}
+    if universo_id:
+        query["universo_id"] = universo_id
+    if categoria:
+        query["categoria"] = categoria
+    if busqueda:
+        query["$or"] = [
+            {"nombre": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"descripcion": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"tags": {"$in": [busqueda.lower()]}},
+            {"_id": {"$regex": re.escape(busqueda), "$options": "i"}}
+        ]
+    total = await db[COLL_CARDS].count_documents(query)
+    cursor = db[COLL_CARDS].find(query).skip(skip)
+    if limit is not None and limit > 0:
+        cursor = cursor.limit(limit)
     items = []
     async for doc in cursor:
         items.append(CartaResponse(**doc))
+    if with_total:
+        return items, total
     return items
+
+async def obtener_carta_por_id(carta_id: str) -> Optional[CartaResponse]:
+    db = get_database()
+    doc = await db[COLL_CARDS].find_one({"_id": carta_id})
+    return CartaResponse(**doc) if doc else None
 
 async def eliminar_carta(carta_id: str) -> bool:
     db = get_database()
@@ -138,14 +197,41 @@ async def crear_o_actualizar_resultado(req: ResultadoCreateRequest) -> Resultado
     await db[COLL_RESULTS].replace_one({"_id": req.id}, doc, upsert=True)
     return ResultadoResponse(**doc)
 
-async def obtener_resultados(universo_id: Optional[str] = None) -> List[ResultadoResponse]:
+async def obtener_resultados(
+    universo_id: Optional[str] = None,
+    tipo: Optional[str] = None,
+    skip: int = 0,
+    limit: Optional[int] = None,
+    busqueda: Optional[str] = None,
+    with_total: bool = False
+) -> Union[List[ResultadoResponse], Tuple[List[ResultadoResponse], int]]:
     db = get_database()
-    query = {"universo_id": universo_id} if universo_id else {}
-    cursor = db[COLL_RESULTS].find(query)
+    query: Dict[str, Any] = {}
+    if universo_id:
+        query["universo_id"] = universo_id
+    if tipo:
+        query["tipo_resultado"] = tipo
+    if busqueda:
+        query["$or"] = [
+            {"titulo": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"texto": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"_id": {"$regex": re.escape(busqueda), "$options": "i"}}
+        ]
+    total = await db[COLL_RESULTS].count_documents(query)
+    cursor = db[COLL_RESULTS].find(query).skip(skip)
+    if limit is not None and limit > 0:
+        cursor = cursor.limit(limit)
     items = []
     async for doc in cursor:
         items.append(ResultadoResponse(**doc))
+    if with_total:
+        return items, total
     return items
+
+async def obtener_resultado_por_id(resultado_id: str) -> Optional[ResultadoResponse]:
+    db = get_database()
+    doc = await db[COLL_RESULTS].find_one({"_id": resultado_id})
+    return ResultadoResponse(**doc) if doc else None
 
 async def eliminar_resultado(resultado_id: str) -> bool:
     db = get_database()
@@ -159,14 +245,38 @@ async def crear_o_actualizar_evento(req: EventoCreateRequest) -> EventoResponse:
     await db[COLL_EVENTS].replace_one({"_id": req.id}, doc, upsert=True)
     return EventoResponse(**doc)
 
-async def obtener_eventos(universo_id: Optional[str] = None) -> List[EventoResponse]:
+async def obtener_eventos(
+    universo_id: Optional[str] = None,
+    skip: int = 0,
+    limit: Optional[int] = None,
+    busqueda: Optional[str] = None,
+    with_total: bool = False
+) -> Union[List[EventoResponse], Tuple[List[EventoResponse], int]]:
     db = get_database()
-    query = {"universo_id": universo_id} if universo_id else {}
-    cursor = db[COLL_EVENTS].find(query)
+    query: Dict[str, Any] = {}
+    if universo_id:
+        query["universo_id"] = universo_id
+    if busqueda:
+        query["$or"] = [
+            {"titulo": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"descripcion": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"_id": {"$regex": re.escape(busqueda), "$options": "i"}}
+        ]
+    total = await db[COLL_EVENTS].count_documents(query)
+    cursor = db[COLL_EVENTS].find(query).skip(skip)
+    if limit is not None and limit > 0:
+        cursor = cursor.limit(limit)
     items = []
     async for doc in cursor:
         items.append(EventoResponse(**doc))
+    if with_total:
+        return items, total
     return items
+
+async def obtener_evento_por_id(evento_id: str) -> Optional[EventoResponse]:
+    db = get_database()
+    doc = await db[COLL_EVENTS].find_one({"_id": evento_id})
+    return EventoResponse(**doc) if doc else None
 
 async def eliminar_evento(evento_id: str) -> bool:
     db = get_database()
@@ -180,19 +290,278 @@ async def crear_o_actualizar_conversacion(req: ConversacionCreateRequest) -> Con
     await db[COLL_CONVERSATIONS].replace_one({"_id": req.id}, doc, upsert=True)
     return ConversacionResponse(**doc)
 
-async def obtener_conversaciones(universo_id: Optional[str] = None) -> List[ConversacionResponse]:
+async def obtener_conversaciones(
+    universo_id: Optional[str] = None,
+    skip: int = 0,
+    limit: Optional[int] = None,
+    busqueda: Optional[str] = None,
+    with_total: bool = False
+) -> Union[List[ConversacionResponse], Tuple[List[ConversacionResponse], int]]:
     db = get_database()
-    query = {"universo_id": universo_id} if universo_id else {}
-    cursor = db[COLL_CONVERSATIONS].find(query)
+    query: Dict[str, Any] = {}
+    if universo_id:
+        query["universo_id"] = universo_id
+    if busqueda:
+        query["$or"] = [
+            {"titulo": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"contexto": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"_id": {"$regex": re.escape(busqueda), "$options": "i"}}
+        ]
+    total = await db[COLL_CONVERSATIONS].count_documents(query)
+    cursor = db[COLL_CONVERSATIONS].find(query).skip(skip)
+    if limit is not None and limit > 0:
+        cursor = cursor.limit(limit)
     items = []
     async for doc in cursor:
         items.append(ConversacionResponse(**doc))
+    if with_total:
+        return items, total
     return items
+
+async def obtener_conversacion_por_id(conversacion_id: str) -> Optional[ConversacionResponse]:
+    db = get_database()
+    doc = await db[COLL_CONVERSATIONS].find_one({"_id": conversacion_id})
+    return ConversacionResponse(**doc) if doc else None
 
 async def eliminar_conversacion(conversacion_id: str) -> bool:
     db = get_database()
     res = await db[COLL_CONVERSATIONS].delete_one({"_id": conversacion_id})
     return res.deleted_count > 0
+
+# --- Finalizaciones / Desenlaces de Reino ---
+async def crear_o_actualizar_finalizacion(req: FinalizacionCreateRequest) -> FinalizacionResponse:
+    db = get_database()
+    # 1. Validar que el universo exista
+    universo = await db[COLL_SETTINGS].find_one({"_id": req.universo_id})
+    if not universo:
+        raise HTTPException(
+            status_code=400,
+            detail=f"El universo '{req.universo_id}' no existe en el catálogo."
+        )
+
+    # 2. Si especifica un recurso_clave, validar que pertenezca a los recursos de ese universo
+    if req.recurso_clave:
+        claves_validas = [r["clave"] for r in universo.get("recursos", [])]
+        if req.recurso_clave not in claves_validas:
+            raise HTTPException(
+                status_code=400,
+                detail=f"El recurso '{req.recurso_clave}' no pertenece al universo '{universo.get('nombre', req.universo_id)}'. Recursos válidos: {claves_validas}"
+            )
+
+    doc = req.model_dump(by_alias=True)
+    await db[COLL_ENDINGS].replace_one({"_id": req.id}, doc, upsert=True)
+    return FinalizacionResponse(**doc)
+
+async def obtener_finalizaciones(
+    universo_id: Optional[str] = None,
+    recurso_clave: Optional[str] = None,
+    skip: int = 0,
+    limit: Optional[int] = None,
+    busqueda: Optional[str] = None,
+    with_total: bool = False
+) -> Union[List[FinalizacionResponse], Tuple[List[FinalizacionResponse], int]]:
+    db = get_database()
+    query: Dict[str, Any] = {}
+    if universo_id:
+        query["universo_id"] = universo_id
+    if recurso_clave:
+        query["recurso_clave"] = recurso_clave
+    if busqueda:
+        query["$or"] = [
+            {"titulo": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"texto": {"$regex": re.escape(busqueda), "$options": "i"}},
+            {"_id": {"$regex": re.escape(busqueda), "$options": "i"}}
+        ]
+    total = await db[COLL_ENDINGS].count_documents(query)
+    cursor = db[COLL_ENDINGS].find(query).skip(skip)
+    if limit is not None and limit > 0:
+        cursor = cursor.limit(limit)
+    items = []
+    async for doc in cursor:
+        items.append(FinalizacionResponse(**doc))
+    if with_total:
+        return items, total
+    return items
+
+async def obtener_finalizacion_por_id(finalizacion_id: str) -> Optional[FinalizacionResponse]:
+    db = get_database()
+    doc = await db[COLL_ENDINGS].find_one({"_id": finalizacion_id})
+    if doc:
+        return FinalizacionResponse(**doc)
+    return None
+
+async def eliminar_finalizacion(finalizacion_id: str) -> bool:
+    db = get_database()
+    res = await db[COLL_ENDINGS].delete_one({"_id": finalizacion_id})
+    return res.deleted_count > 0
+
+async def sembrar_finalizaciones_para_universo(universo_id: str) -> List[FinalizacionResponse]:
+    """
+    Genera automáticamente las finalizaciones de derrota base (<= 0)
+    para cada recurso definido en el universo indicado, si todavía no existen.
+    Garantiza que cada universo tenga sus propios textos e imágenes sin compartir finales.
+    """
+    db = get_database()
+    universo = await db[COLL_SETTINGS].find_one({"_id": universo_id})
+    if not universo:
+        raise HTTPException(status_code=404, detail=f"Universo '{universo_id}' no encontrado.")
+
+    # Si es corte_medieval, aplicar las canónicas ya redactadas
+    if universo_id == "corte_medieval":
+        default_endings = [
+            {
+                "_id": "fin_corte_oro_cero",
+                "universo_id": "corte_medieval",
+                "recurso_clave": "oro",
+                "tipo": TipoFinalizacionEnum.DERROTA_RECURSO.value,
+                "titulo": "Bancarrota de la Corona",
+                "texto": "Las arcas del reino quedaron completamente vacías. La guardia real desertó por falta de paga y los acreedores extranjeros confiscaron los castillos.",
+                "imagen": "/assets/narrative/finalizaciones/default.webp",
+                "rango": "F"
+            },
+            {
+                "_id": "fin_corte_pueblo_cero",
+                "universo_id": "corte_medieval",
+                "recurso_clave": "pueblo",
+                "tipo": TipoFinalizacionEnum.DERROTA_RECURSO.value,
+                "titulo": "Revolución Popular",
+                "texto": "El pueblo hambriento y descontento derribó los portones del palacio. La muchedumbre desconoció las leyes de la corona y la corte debió huir al exilio.",
+                "imagen": "/assets/narrative/finalizaciones/default.webp",
+                "rango": "F"
+            },
+            {
+                "_id": "fin_corte_ejercito_cero",
+                "universo_id": "corte_medieval",
+                "recurso_clave": "ejercito",
+                "tipo": TipoFinalizacionEnum.DERROTA_RECURSO.value,
+                "titulo": "Invasión y Conquista",
+                "texto": "Sin tropas para vigilar los pasos fronterizos ni defender las guarniciones, los reinos rivales avanzaron sin resistencia y subyugaron la corona.",
+                "imagen": "/assets/narrative/finalizaciones/default.webp",
+                "rango": "F"
+            },
+            {
+                "_id": "fin_corte_fe_cero",
+                "universo_id": "corte_medieval",
+                "recurso_clave": "fe",
+                "tipo": TipoFinalizacionEnum.DERROTA_RECURSO.value,
+                "titulo": "Herejía y Anarquía",
+                "texto": "Los monasterios cerraron sus puertas y el clero declaró maldito el linaje real. La desesperanza y el caos se apoderaron de cada aldea.",
+                "imagen": "/assets/narrative/finalizaciones/default.webp",
+                "rango": "F"
+            }
+        ]
+        for e in default_endings:
+            await db[COLL_ENDINGS].replace_one(
+                {"universo_id": universo_id, "recurso_clave": e["recurso_clave"]},
+                e,
+                upsert=True
+            )
+        items = await obtener_finalizaciones(universo_id=universo_id)
+        return items
+
+    # Para cualquier otro universo (ej. granjero, ciencia ficción, etc.)
+    recursos = universo.get("recursos", [])
+    creadas = []
+    universo_nombre = universo.get("nombre", universo_id)
+    for r in recursos:
+        clave = r.get("clave")
+        nombre_rec = r.get("nombre", clave.capitalize())
+        existente = await db[COLL_ENDINGS].find_one({
+            "universo_id": universo_id,
+            "recurso_clave": clave
+        })
+        if not existente:
+            doc = {
+                "_id": f"fin_{universo_id}_{clave}_cero",
+                "universo_id": universo_id,
+                "recurso_clave": clave,
+                "tipo": TipoFinalizacionEnum.DERROTA_RECURSO.value,
+                "titulo": f"Colapso por {nombre_rec} ({universo_nombre})",
+                "texto": f"El recurso '{nombre_rec}' se ha agotado por completo en {universo_nombre}, provocando el fracaso irrevocable de tu historia.",
+                "imagen": "/assets/narrative/finalizaciones/default.webp",
+                "rango": "F"
+            }
+            await db[COLL_ENDINGS].insert_one(doc)
+            creadas.append(FinalizacionResponse(**doc))
+
+    return creadas
+
+async def sembrar_finalizaciones_default():
+    """
+    Siembra las finalizaciones para 'corte_medieval' si no existen.
+    """
+    await sembrar_finalizaciones_para_universo("corte_medieval")
+
+async def verificar_colapso_recursos(run_doc: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """
+    Verifica si algún recurso del reino llegó a <= 0.
+    En tal caso, busca en narrative_endings la finalización asociada al recurso agotado,
+    marca la partida como game_over y FINALIZADA, y guarda el epílogo de la derrota.
+    """
+    recursos = run_doc.get("recursos", {})
+    recurso_agotado = None
+    for k, val in recursos.items():
+        if val is not None and float(val) <= 0:
+            recurso_agotado = k
+            break
+
+    if not recurso_agotado:
+        return None
+
+    universo_id = run_doc.get("universo_id")
+    db = get_database()
+
+    # Búsqueda ESTRICTA por universo_id y recurso_clave (cada universo tiene sus propios finales)
+    fin_doc = await db[COLL_ENDINGS].find_one({
+        "universo_id": universo_id,
+        "recurso_clave": recurso_agotado
+    })
+
+    # Cargar metadatos del universo para contextualizar título y relato sin asumir temáticas ajenas
+    universo_doc = await db[COLL_SETTINGS].find_one({"_id": universo_id})
+    universo_nombre = universo_doc.get("nombre", universo_id) if universo_doc else universo_id
+    recurso_meta = next((r for r in universo_doc.get("recursos", []) if r.get("clave") == recurso_agotado), None) if universo_doc else None
+    recurso_nombre = recurso_meta.get("nombre", recurso_agotado.capitalize()) if recurso_meta else recurso_agotado.capitalize()
+
+    if not fin_doc:
+        fin_doc = {
+            "_id": f"fin_{universo_id}_{recurso_agotado}_cero",
+            "universo_id": universo_id,
+            "recurso_clave": recurso_agotado,
+            "tipo": TipoFinalizacionEnum.DERROTA_RECURSO.value,
+            "titulo": f"Colapso por {recurso_nombre} ({universo_nombre})",
+            "texto": f"El recurso '{recurso_nombre}' ha llegado a cero en {universo_nombre}, provocando el fin irreversible de tu partida.",
+            "imagen": "/assets/narrative/finalizaciones/default.webp",
+            "rango": "F"
+        }
+
+    mes_caida = run_doc.get("mes_actual", 1)
+    finalizacion_data = {
+        "_id": fin_doc.get("_id"),
+        "universo_id": universo_id,
+        "recurso_clave": recurso_agotado,
+        "tipo": fin_doc.get("tipo", TipoFinalizacionEnum.DERROTA_RECURSO.value),
+        "titulo": fin_doc.get("titulo", f"Derrota en {universo_nombre}"),
+        "texto": fin_doc.get("texto", ""),
+        "imagen": fin_doc.get("imagen", "/assets/narrative/finalizaciones/default.webp"),
+        "rango": fin_doc.get("rango", "F"),
+        "mes_derrota": mes_caida
+    }
+
+    run_doc["status"] = "game_over"
+    run_doc["fase_actual"] = RunPhaseEnum.FINALIZADA.value
+    run_doc["finalizacion"] = finalizacion_data
+    run_doc["epilogo_final"] = {
+        "rango": finalizacion_data["rango"],
+        "titulo": finalizacion_data["titulo"],
+        "descripcion": finalizacion_data["texto"],
+        "promedio_recursos": round(sum(recursos.values()) / max(1, len(recursos)), 1),
+        "recursos_finales": recursos,
+        "mes_derrota": mes_caida
+    }
+
+    return finalizacion_data
+
 
 # ============================================================================
 # 2. GENERADOR MENSUAL DE DESAFÍOS (Torre de Control)
@@ -451,6 +820,12 @@ async def iniciar_partida(user_id: int, req: IniciarPartidaRequest) -> EstadoPar
         efectos_c = [EfectoSchema(**e) for e in c.get("efectos", [])]
         despachar_efectos(DisparadorEnum.AL_OBTENER, run_doc, efectos_c, recursos_mapa)
 
+    # Verificar si algún recurso colapsó tras efectos iniciales
+    derrota = await verificar_colapso_recursos(run_doc)
+    if derrota:
+        await db[COLL_RUNS].replace_one({"_id": run_doc["_id"]}, run_doc, upsert=True)
+        return await _construir_estado_respuesta(run_doc)
+
     # Sortear las 3 cartas para el Draft del Mes 1
     pool_mensuales = cfg.get("pool_cartas_mensuales_ids", [])
     cartas_ofrecidas_mes = random.sample(pool_mensuales, min(3, len(pool_mensuales)))
@@ -489,6 +864,13 @@ async def elegir_carta_mes(user_id: int, req: ElegirCartaMesRequest) -> EstadoPa
         despachar_efectos(DisparadorEnum.AL_OBTENER, run, efectos_carta, recursos_mapa)
 
     turno["carta_elegida_id"] = req.carta_id
+
+    # Si la carta elegida causa el colapso inmediato de un recurso:
+    derrota = await verificar_colapso_recursos(run)
+    if derrota:
+        run["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+        return await _construir_estado_respuesta(run)
 
     # 2. Sortear el Evento del Mes con el Director Narrativo
     challenge = await db[COLL_CHALLENGES].find_one({"game_id": "narrativo", "date": req.date})
@@ -566,6 +948,13 @@ async def decidir_evento(user_id: int, req: DecidirEventoRequest) -> EstadoParti
             delta = int(imp.get("delta", 0))
             if pid in run["afinidad"]:
                 run["afinidad"][pid] = max(0, min(100, run["afinidad"][pid] + delta))
+
+    # Si algún recurso colapsó tras el resultado del evento:
+    derrota = await verificar_colapso_recursos(run)
+    if derrota:
+        run["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+        return await _construir_estado_respuesta(run)
 
     # 3. Evaluar si ocurre conversación de corte (evitando repetidas en la misma partida)
     challenge = await db[COLL_CHALLENGES].find_one({"game_id": "narrativo", "date": req.date})
@@ -674,7 +1063,8 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> EstadoPartidaActi
     if mes_actual >= 12:
         run["fase_actual"] = RunPhaseEnum.FINALIZADA.value
         run["status"] = "completed"
-        run["epilogo_final"] = _calcular_epilogo_final(run)
+        universo_doc = await db[COLL_SETTINGS].find_one({"_id": run.get("universo_id")})
+        run["epilogo_final"] = _calcular_epilogo_final(run, universo_doc)
     else:
         # Avanzar al siguiente mes
         run["mes_actual"] = mes_actual + 1
@@ -692,6 +1082,13 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> EstadoPartidaActi
         for c in cartas_docs:
             efectos_c = [EfectoSchema(**e) for e in c.get("efectos", [])]
             despachar_efectos(DisparadorEnum.CADA_MES, run, efectos_c, recursos_mapa)
+
+        # Si algún recurso colapsó por costos mensuales pasivos:
+        derrota = await verificar_colapso_recursos(run)
+        if derrota:
+            run["updated_at"] = datetime.now(timezone.utc).isoformat()
+            await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+            return await _construir_estado_respuesta(run)
 
         # Sortear 3 cartas para el nuevo mes
         challenge = await db[COLL_CHALLENGES].find_one({"game_id": "narrativo", "date": req.date})
@@ -714,26 +1111,27 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> EstadoPartidaActi
     await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
     return await _construir_estado_respuesta(run)
 
-def _calcular_epilogo_final(run_data: Dict[str, Any]) -> Dict[str, Any]:
+def _calcular_epilogo_final(run_data: Dict[str, Any], universo_doc: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     recursos = run_data.get("recursos", {})
     promedio = sum(recursos.values()) / max(1, len(recursos))
+    nombre_u = universo_doc.get("nombre", "este universo") if universo_doc else "este universo"
 
     if promedio >= 75:
         rango = "S"
-        titulo = "Era de Oro y Prosperidad Eterna"
-        texto = "Tus sabias decisiones y el balance de tu corte llevaron al reino a su máximo esplendor histórico."
+        titulo = f"Era Dorada y Prosperidad Suprema"
+        texto = f"Tus sabias decisiones y admirable gestión permitieron que {nombre_u} alcanzara su máximo esplendor histórico."
     elif promedio >= 55:
         rango = "A"
-        titulo = "Paz Sólida y Buen Gobierno"
-        texto = "Superaste las crisis y aseguraste la estabilidad de las tierras por muchas generaciones."
+        titulo = f"Gran Estabilidad y Triunfo"
+        texto = f"Superaste las crisis con solvencia y aseguraste un porvenir seguro y próspero en {nombre_u}."
     elif promedio >= 35:
         rango = "B"
-        titulo = "Tiempos Difíciles pero Superados"
-        texto = "El año fue duro y las pérdidas se sintieron, pero la corona sigue firme en tu cabeza."
+        titulo = f"Tiempos Difíciles pero Superados"
+        texto = f"El ciclo anual fue duro y las pérdidas se hicieron sentir, pero lograste salir adelante en {nombre_u}."
     else:
         rango = "C"
-        titulo = "Reino en Ruinas"
-        texto = "Apenas lograste sostener el poder. Las tensiones internas amenazan con derrumbar lo poco que queda."
+        titulo = f"Supervivencia Crítica"
+        texto = f"Apenas lograste sostener el control en {nombre_u}. Las tensiones acumuladas amenazan lo poco que pudiste preservar."
 
     return {
         "rango": rango,
@@ -744,68 +1142,133 @@ def _calcular_epilogo_final(run_data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 # ============================================================================
-# 4. CONSTRUCTOR DE ESTADO COMPLETO PARA EL CLIENTE
+# 4. CONSTRUCTOR DE ESTADO COMPLETO PARA EL CLIENTE (Optimizado con asyncio.gather)
 # ============================================================================
+
+async def _sincronizar_intento_usuario(run_doc: Dict[str, Any]):
+    """
+    Sincroniza el resultado final del día con la colección 'user_attempts'
+    para que impacte en el progreso, racha y calendario mensual del alumno.
+    """
+    try:
+        db = get_database()
+        user_id = run_doc.get("user_id")
+        date_str = run_doc.get("date")
+        if not user_id or not date_str:
+            return
+
+        is_completed = run_doc.get("status") == "completed"
+        status_str = "completed" if is_completed else "failed"
+        rango = run_doc.get("epilogo_final", {}).get("rango", "F")
+
+        scores_map = {"S": 1000, "A": 850, "B": 700, "C": 500, "F": 250}
+        stars_map = {"S": 3, "A": 3, "B": 2, "C": 1, "F": 1}
+        score = scores_map.get(rango, 250)
+        stars = stars_map.get(rango, 1)
+
+        await db["user_attempts"].find_one_and_update(
+            {"user_id": user_id, "game_id": "narrativo", "date": date_str},
+            {
+                "$set": {
+                    "user_id": user_id,
+                    "game_id": "narrativo",
+                    "date": date_str,
+                    "mode": "daily",
+                    "status": status_str,
+                    "attempts": run_doc.get("mes_actual", 1),
+                    "stars": stars,
+                    "score": score,
+                    "game_data": {
+                        "rango": rango,
+                        "mes_final": run_doc.get("mes_actual", 1),
+                        "recursos_finales": run_doc.get("recursos", {}),
+                        "finalizacion": run_doc.get("finalizacion")
+                    },
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            },
+            upsert=True
+        )
+    except Exception as e:
+        logger.warning(f"Aviso al sincronizar partida narrativa con user_attempts: {e}")
 
 async def _construir_estado_respuesta(run_doc: Dict[str, Any]) -> EstadoPartidaActivaResponse:
     db = get_database()
     universo_id = run_doc.get("universo_id")
+    turno = run_doc.get("turno_actual", {})
+    draft_ids = turno.get("cartas_ofrecidas_ids", [])
+    corte_ids = run_doc.get("corte_activa", [])
+    cartas_ids = run_doc.get("cartas_en_mano", [])
+    evento_id = turno.get("evento_actual_id")
+    resultado_id = turno.get("resultado_obtenido_id")
+    conversacion_id = turno.get("conversacion_actual_id")
 
-    universo_doc = await db[COLL_SETTINGS].find_one({"_id": universo_id})
+    # Ejecución paralela concurrente de todas las consultas independientes
+    async def _get_empty_list():
+        return []
+
+    async def _get_none():
+        return None
+
+    universo_task = db[COLL_SETTINGS].find_one({"_id": universo_id})
+    personajes_task = db[COLL_CHARACTERS].find({"_id": {"$in": corte_ids}}).to_list(None) if corte_ids else _get_empty_list()
+    cartas_task = db[COLL_CARDS].find({"_id": {"$in": cartas_ids}}).to_list(None) if cartas_ids else _get_empty_list()
+    draft_task = db[COLL_CARDS].find({"_id": {"$in": draft_ids}}).to_list(None) if draft_ids else _get_empty_list()
+    evento_task = db[COLL_EVENTS].find_one({"_id": evento_id}) if evento_id else _get_none()
+    resultado_task = db[COLL_RESULTS].find_one({"_id": resultado_id}) if resultado_id else _get_none()
+    conversacion_task = db[COLL_CONVERSATIONS].find_one({"_id": conversacion_id}) if conversacion_id else _get_none()
+
+    (
+        universo_doc,
+        personajes_docs,
+        cartas_docs,
+        cartas_draft_docs,
+        evento_doc,
+        res_doc,
+        conv_doc
+    ) = await asyncio.gather(
+        universo_task,
+        personajes_task,
+        cartas_task,
+        draft_task,
+        evento_task,
+        resultado_task,
+        conversacion_task
+    )
+
     universo_resp = UniversoResponse(**universo_doc) if universo_doc else UniversoResponse(
         _id=universo_id, nombre="Universo", descripcion="", icono="crown", recursos=[]
     )
-
-    # Personajes de la corte
-    personajes_docs = await db[COLL_CHARACTERS].find({"_id": {"$in": run_doc.get("corte_activa", [])}}).to_list(None)
     personajes_resp = [PersonajeResponse(**p) for p in personajes_docs]
-
-    # Cartas en mano
-    cartas_docs = await db[COLL_CARDS].find({"_id": {"$in": run_doc.get("cartas_en_mano", [])}}).to_list(None)
     cartas_resp = [CartaResponse(**c) for c in cartas_docs]
-
-    turno = run_doc.get("turno_actual", {})
-
-    # Cartas ofrecidas en draft
-    draft_ids = turno.get("cartas_ofrecidas_ids", [])
-    cartas_draft_docs = await db[COLL_CARDS].find({"_id": {"$in": draft_ids}}).to_list(None) if draft_ids else []
     cartas_draft_resp = [CartaResponse(**c) for c in cartas_draft_docs]
 
     # Evento actual con opciones calculadas
     evento_resp = None
-    if turno.get("evento_actual_id"):
-        evento_doc = await db[COLL_EVENTS].find_one({"_id": turno.get("evento_actual_id")})
-        if evento_doc:
-            # Precargar todos los resultados posibles del evento
-            res_ids = set()
-            for op in evento_doc.get("opciones", []):
-                for rp in op.get("resultados_posibles", []):
-                    res_ids.add(rp.get("resultado_id"))
-            resultados_docs = await db[COLL_RESULTS].find({"_id": {"$in": list(res_ids)}}).to_list(None)
-            res_dict = {r["_id"]: r for r in resultados_docs}
+    if evento_doc:
+        res_ids = set()
+        for op in evento_doc.get("opciones", []):
+            for rp in op.get("resultados_posibles", []):
+                res_ids.add(rp.get("resultado_id"))
+        resultados_docs = await db[COLL_RESULTS].find({"_id": {"$in": list(res_ids)}}).to_list(None) if res_ids else []
+        res_dict = {r["_id"]: r for r in resultados_docs}
 
-            opciones_calc = calcular_opciones_evento(evento_doc, run_doc, res_dict)
-            evento_resp = EventoTurnoResponse(
-                id=evento_doc["_id"],
-                titulo=evento_doc.get("titulo", ""),
-                descripcion=evento_doc.get("descripcion", ""),
-                imagen=evento_doc.get("imagen", ""),
-                opciones=opciones_calc
-            )
+        opciones_calc = calcular_opciones_evento(evento_doc, run_doc, res_dict)
+        evento_resp = EventoTurnoResponse(
+            id=evento_doc["_id"],
+            titulo=evento_doc.get("titulo", ""),
+            descripcion=evento_doc.get("descripcion", ""),
+            imagen=evento_doc.get("imagen", ""),
+            opciones=opciones_calc
+        )
 
-    # Resultado actual obtenido
-    resultado_resp = None
-    if turno.get("resultado_obtenido_id"):
-        res_doc = await db[COLL_RESULTS].find_one({"_id": turno.get("resultado_obtenido_id")})
-        if res_doc:
-            resultado_resp = ResultadoResponse(**res_doc)
+    resultado_resp = ResultadoResponse(**res_doc) if res_doc else None
+    conversacion_resp = ConversacionResponse(**conv_doc) if conv_doc else None
+    finalizacion_resp = FinalizacionResponse(**run_doc["finalizacion"]) if run_doc.get("finalizacion") else None
 
-    # Conversación actual
-    conversacion_resp = None
-    if turno.get("conversacion_actual_id"):
-        conv_doc = await db[COLL_CONVERSATIONS].find_one({"_id": turno.get("conversacion_actual_id")})
-        if conv_doc:
-            conversacion_resp = ConversacionResponse(**conv_doc)
+    # Si la partida llegó a su término (derrota o victoria), sincronizar con user_attempts
+    if run_doc.get("status") in ("game_over", "completed"):
+        await _sincronizar_intento_usuario(run_doc)
 
     return EstadoPartidaActivaResponse(
         run=NarrativeRunSchema(**run_doc),
@@ -816,5 +1279,6 @@ async def _construir_estado_respuesta(run_doc: Dict[str, Any]) -> EstadoPartidaA
         evento_actual=evento_resp,
         resultado_actual=resultado_resp,
         conversacion_actual=conversacion_resp,
-        epilogo_final=run_doc.get("epilogo_final")
+        epilogo_final=run_doc.get("epilogo_final"),
+        finalizacion=finalizacion_resp
     )

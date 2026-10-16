@@ -85,6 +85,20 @@ async def init_indexes():
         await estados_usuario.create_index([("id", ASCENDING)], unique=True)
         await estados_usuario.create_index([("codigo", ASCENDING)], unique=True)
 
+        # Índices de Juego Narrativo
+        narrative_runs = db["narrative_runs"]
+        await narrative_runs.create_index(
+            [("user_id", ASCENDING), ("date", ASCENDING), ("game_id", ASCENDING)],
+            unique=True
+        )
+        await narrative_runs.create_index([("user_id", ASCENDING), ("date", -1)])
+
+        narrative_endings = db["narrative_endings"]
+        await narrative_endings.create_index([("universo_id", ASCENDING), ("recurso_clave", ASCENDING)])
+
+        for col_name in ["narrative_characters", "narrative_cards", "narrative_events", "narrative_results", "narrative_conversations"]:
+            await db[col_name].create_index([("universo_id", ASCENDING)])
+
         logger.info("Índices de MongoDB inicializados correctamente.")
     except Exception as e:
         logger.warning(f"Aviso al inicializar índices: {e}")

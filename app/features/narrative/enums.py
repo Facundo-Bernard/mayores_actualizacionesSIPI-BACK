@@ -50,3 +50,9 @@ class CategoriaCartaEnum(str, Enum):
     ITEM = "item"
     BONUS = "bonus"
     PERSONAJE = "personaje"
+
+class TipoFinalizacionEnum(str, Enum):
+    DERROTA_RECURSO = "derrota_recurso"
+    VICTORIA_TIEMPO = "victoria_tiempo"
+    DERROTA_GENERAL = "derrota_general"
+
