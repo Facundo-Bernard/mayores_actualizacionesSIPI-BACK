@@ -1,10 +1,9 @@
 import random
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 
-from app.features.narrative.rule_engine import evaluar_condicion
-from app.features.narrative.schemas import (
-    OpcionEventoSchema,
+from app.features.narrative.engine.rule_engine import evaluar_condicion, evaluar_condiciones
+from app.features.narrative.schemas.game_schemas import (
     ProbabilidadDesenlaceCalculada,
     OpcionEventoCalculadaResponse
 )
@@ -84,7 +83,6 @@ def calcular_opciones_evento(
         condiciones = op.get("condiciones", [])
 
         # Verificar si cumple los requisitos (para opción secreta o condicional)
-        from app.features.narrative.rule_engine import evaluar_condiciones
         cumple_condiciones = evaluar_condiciones(condiciones, run_data)
         bloqueada = es_secreta and not cumple_condiciones
 

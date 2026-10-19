@@ -8,7 +8,7 @@ from app.features.narrative.enums import (
     TipoAccionEnum,
     TipoCalculoEnum
 )
-from app.features.narrative.schemas import CondicionSchema, AccionSchema, EfectoSchema
+from app.features.narrative.schemas.rules_schemas import CondicionSchema, AccionSchema, EfectoSchema
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,9 @@ def evaluar_condiciones(condiciones: List[Any], run_data: Dict[str, Any]) -> boo
     return all(evaluar_condicion(c, run_data) for c in condiciones)
 
 def _comparar_valores(actual: float, operador: Optional[OperadorEnum], objetivo: float) -> bool:
+    """
+    Compara dos valores flotantes utilizando el operador relacional provisto.
+    """
     if operador == OperadorEnum.MAYOR_IGUAL:
         return actual >= objetivo
     elif operador == OperadorEnum.MENOR_IGUAL:

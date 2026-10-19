@@ -10,15 +10,15 @@ import logging
 from datetime import datetime
 
 from app.core.database import get_database, connect_to_mongo
-from app.features.narrative.service import (
+from app.features.narrative.admin.crud_service import (
     crear_o_actualizar_universo,
     crear_o_actualizar_personaje,
     crear_o_actualizar_carta,
     crear_o_actualizar_resultado,
     crear_o_actualizar_evento,
     crear_o_actualizar_conversacion,
-    generar_mes_narrativo
 )
+from app.features.narrative.admin.challenge_service import generar_mes_narrativo
 from app.features.narrative.schemas import (
     UniversoCreateRequest,
     RecursoDefinicionSchema,
