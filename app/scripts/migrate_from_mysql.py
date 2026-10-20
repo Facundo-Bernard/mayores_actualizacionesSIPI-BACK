@@ -2,7 +2,7 @@ import asyncio
 import logging
 import mysql.connector
 from datetime import datetime, date
-from app.core.config import settings
+import os
 from app.core.database import get_database, connect_to_mongo, close_mongo_connection, set_sequence_value
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -12,14 +12,14 @@ async def run_migration():
     logger.info("=== INICIANDO MIGRACIÓN DE MYSQL A MONGODB ===")
     
     # 1. Conexión a MySQL
-    logger.info(f"Conectando a MySQL en {settings.MYSQL_HOST}:{settings.MYSQL_PORT}/{settings.MYSQL_DATABASE}...")
+    logger.info(f"Conectando a MySQL en {os.getenv("MYSQL_HOST", "localhost")}:{int(os.getenv("MYSQL_PORT", 3306))}/{os.getenv("MYSQL_DATABASE", "prueba2")}...")
     try:
         mysql_conn = mysql.connector.connect(
-            host=settings.MYSQL_HOST,
-            port=settings.MYSQL_PORT,
-            user=settings.MYSQL_USER,
-            password=settings.MYSQL_PASSWORD,
-            database=settings.MYSQL_DATABASE
+            host=os.getenv("MYSQL_HOST", "localhost"),
+            port=int(os.getenv("MYSQL_PORT", 3306)),
+            user=os.getenv("MYSQL_USER", "root"),
+            password=os.getenv("MYSQL_PASSWORD", "root"),
+            database=os.getenv("MYSQL_DATABASE", "prueba2")
         )
         cursor = mysql_conn.cursor(dictionary=True)
         logger.info("Conexión a MySQL exitosa.")

@@ -59,7 +59,7 @@ async def init_indexes():
         # Índices de Usuarios
         usuarios = db["usuarios"]
         await usuarios.create_index([("email", ASCENDING)], unique=True)
-        await usuarios.create_index([("codigo_acceso", ASCENDING)], unique=True, sparse=True)
+        await usuarios.create_index([("codigo_acceso", ASCENDING)])
         await usuarios.create_index([("id", ASCENDING)], unique=True)
         await usuarios.create_index([("name", ASCENDING)])
         await usuarios.create_index([("date_start", ASCENDING)])

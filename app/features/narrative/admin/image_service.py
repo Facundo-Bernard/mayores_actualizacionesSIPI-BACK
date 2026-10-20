@@ -56,7 +56,10 @@ async def procesar_y_guardar_imagen_narrativa(
 
     try:
         img = Image.open(io.BytesIO(contenido))
-        img = img.convert("RGB")
+        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+            img = img.convert("RGBA")
+        else:
+            img = img.convert("RGB")
     except Exception as ex:
         raise HTTPException(status_code=400, detail=f"No se pudo decodificar la imagen: {ex}")
 

@@ -17,6 +17,12 @@ from app.features.usuario.router import router as usuario_router
 from app.features.progreso.router import router as progreso_router
 from app.features.daily_challenges.router import router as daily_challenges_router
 from app.features.user_attempts.router import router as user_attempts_router
+from app.features.narrative.game.router import (
+    router as narrative_router,
+    router_v2 as narrative_v2_router
+)
+from app.features.narrative.admin.router import router as narrative_admin_router
+from app.features.sso import router as sso_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,6 +41,12 @@ async def lifespan(app: FastAPI):
     await seed_sopa_letras_challenges()
     await seed_sudoku_challenges()
     await ensure_current_and_next_month_generated()
+
+    try:
+        from app.features.narrative.admin.challenge_service import sembrar_finalizaciones_default
+        await sembrar_finalizaciones_default()
+    except Exception as e:
+        logger.warning(f"Aviso al sembrar finalizaciones por defecto: {e}")
 
     import asyncio
     async def _auto_check_loop():
@@ -60,9 +72,9 @@ app = FastAPI(
     title="Mayores Actualizaciones API",
     description="Backend en FastAPI + MongoDB para la plataforma educativa de adultos mayores",
     version="2.0.0",
-    docs_url=None,
-    redoc_url=None,
-    openapi_url=None,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
     lifespan=lifespan
 )
 
@@ -108,6 +120,10 @@ app.include_router(usuario_router)
 app.include_router(progreso_router)
 app.include_router(daily_challenges_router)
 app.include_router(user_attempts_router)
+app.include_router(narrative_router)
+app.include_router(narrative_v2_router)
+app.include_router(narrative_admin_router)
+app.include_router(sso_router)
 
 @app.get("/", tags=["Estado"])
 async def root():
@@ -149,6 +165,16 @@ async def admin_redirect():
     return RedirectResponse(url="/admin/")
 
 app.mount("/admin", SPAStaticFiles(directory=static_admin_dir, html=True), name="admin")
+
+static_narrative_dir = os.path.join(os.path.dirname(__file__), "static", "narrative")
+os.makedirs(static_narrative_dir, exist_ok=True)
+# Alias de retrocompatibilidad para URLs legacy que apuntaban a 'characters'
+static_personajes_dir = os.path.join(static_narrative_dir, "personajes")
+os.makedirs(static_personajes_dir, exist_ok=True)
+app.mount("/assets/narrative/characters", StaticFiles(directory=static_personajes_dir), name="narrative_characters_alias")
+
+app.mount("/assets/narrative", StaticFiles(directory=static_narrative_dir), name="narrative_assets")
+
 
 if __name__ == "__main__":
     import uvicorn

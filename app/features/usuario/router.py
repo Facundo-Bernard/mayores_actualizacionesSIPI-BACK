@@ -110,7 +110,10 @@ async def endpoint_crear_usuario(
     req: RegisterRequest,
     admin: Dict[str, Any] = Depends(get_current_admin)
 ):
-    return await register_usuario(req, is_admin_creation=True)
+    res = await register_usuario(req, is_admin_creation=True)
+    if isinstance(res, dict) and "user" in res:
+        return res["user"]
+    return res
 
 from app.core.database import get_database
 from app.core.security import create_access_token
