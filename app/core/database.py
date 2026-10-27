@@ -13,16 +13,34 @@ db_instance = Database()
 
 def get_database() -> AsyncIOMotorDatabase:
     if db_instance.db is None:
-        db_instance.client = AsyncIOMotorClient(settings.MONGODB_URL)
-        db_instance.db = db_instance.client[settings.MONGODB_DB_NAME]
+        url = settings.mongodb_connection_url
+        db_name = settings.effective_db_name
+        db_instance.client = AsyncIOMotorClient(url)
+        db_instance.db = db_instance.client[db_name]
     return db_instance.db
 
 async def connect_to_mongo():
-    logger.info(f"Conectando a MongoDB en: {settings.MONGODB_URL} (Base: {settings.MONGODB_DB_NAME})")
-    db_instance.client = AsyncIOMotorClient(settings.MONGODB_URL)
-    db_instance.db = db_instance.client[settings.MONGODB_DB_NAME]
+    url = settings.mongodb_connection_url
+    db_name = settings.effective_db_name
+    # Log seguro: ocultar contraseñas para evitar fugas en logs
+    safe_log_url = url
+    if "@" in url:
+        pre, post = url.split("@", 1)
+        protocol = pre.split("://")[0]
+        safe_log_url = f"{protocol}://****:****@{post}"
+    logger.info(f"Conectando a MongoDB en: {safe_log_url} (Base: {db_name})")
+    db_instance.client = AsyncIOMotorClient(url, serverSelectionTimeoutMS=5000)
+    db_instance.db = db_instance.client[db_name]
+
+    # Verificación activa e inmediata de credenciales y conectividad
+    try:
+        await db_instance.client.admin.command('ping')
+        logger.info("Conexión y autenticación con MongoDB verificadas exitosamente.")
+    except Exception as e:
+        logger.error(f"Fallo crítico al conectar o autenticar con MongoDB: {e}")
+        raise e
+
     await init_indexes()
-    logger.info("Conexión a MongoDB establecida exitosamente.")
 
 async def close_mongo_connection():
     if db_instance.client:

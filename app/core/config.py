@@ -1,4 +1,5 @@
 from typing import Optional
+from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,9 +8,36 @@ class Settings(BaseSettings):
     PORT: int = 8082
     HOST: str = "0.0.0.0"
 
-    # Base de datos MongoDB
-    MONGODB_URL: str = "mongodb://localhost:27017"
+    # Base de datos MongoDB (Directa o Desglosada)
+    MONGODB_URL: Optional[str] = None
     MONGODB_DB_NAME: str = "mayores_actualizaciones"
+
+    MONGO_HOST: Optional[str] = None
+    MONGO_PORT: Optional[int] = 27017
+    MONGO_ROOT_USER: Optional[str] = None
+    MONGO_ROOT_PASSWORD: Optional[str] = None
+    MONGO_AUTH_SOURCE: str = "admin"
+    MONGO_DB_NAME: Optional[str] = None
+
+    @property
+    def mongodb_connection_url(self) -> str:
+        """
+        Construye la URL autenticada si se definen las variables desglosadas
+        (MONGO_HOST, MONGO_ROOT_USER, etc.), o utiliza MONGODB_URL si está presente.
+        """
+        if self.MONGO_HOST:
+            port = self.MONGO_PORT or 27017
+            auth_source = self.MONGO_AUTH_SOURCE or "admin"
+            if self.MONGO_ROOT_USER and self.MONGO_ROOT_PASSWORD:
+                user_esc = quote_plus(self.MONGO_ROOT_USER)
+                pass_esc = quote_plus(self.MONGO_ROOT_PASSWORD)
+                return f"mongodb://{user_esc}:{pass_esc}@{self.MONGO_HOST}:{port}/?authSource={auth_source}"
+            return f"mongodb://{self.MONGO_HOST}:{port}"
+        return self.MONGODB_URL or "mongodb://localhost:27017"
+
+    @property
+    def effective_db_name(self) -> str:
+        return self.MONGO_DB_NAME or self.MONGODB_DB_NAME
 
     # JWT & Seguridad (Obligatorio desde .env, debe coincidir con Autenticador)
     JWT_SECRET: str

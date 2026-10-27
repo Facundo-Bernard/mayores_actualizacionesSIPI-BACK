@@ -17,7 +17,10 @@
         Referrer-Policy "strict-origin-when-cross-origin"
 
         # Restringir permisos de APIs del navegador que la app no necesita
-        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+
+        # Aislamiento de ventanas en navegador
+        Cross-Origin-Opener-Policy "same-origin"
     }
 
     # 3. Protección contra Payloads excesivos (Anti-DoS)
@@ -25,11 +28,16 @@
         max_size 10MB
     }
 
-    # 4. Bloquear acceso a archivos ocultos (.env, .git, etc.)
-    @hidden path */.*
-    respond @hidden 404
+    # 4. DIRECTIVA FAIL-CLOSED: Bloqueo de sondeo, archivos ocultos y path traversal
+    @probes {
+        path /.* */.*
+        path_regexp probe_regex (?i)(\/\..*|\.env|\.git|\.aws|\.ssh|wp-admin|phpmyadmin|\.bak|\.sql|\.\.)
+    }
+    respond @probes "Solicitud no permitida." 404 {
+        close
+    }
 
-    # 5. Enrutar endpoints de la API hacia FastAPI
+    # 5. Enrutar endpoints activos de la API hacia FastAPI
     @backend path /api* /usuario* /progreso* /cursos* /payment* /health* /actuator*
     handle @backend {
         reverse_proxy backend:8082

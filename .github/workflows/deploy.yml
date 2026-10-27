@@ -1,0 +1,55 @@
+name: Deploy Backend & Caddy (Self-Hosted Runner)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Permite ejecución manual a demanda desde la pestaña Actions en GitHub
+
+jobs:
+  deploy:
+    name: Deploy Backend & Caddy
+    runs-on: self-hosted # Ejecuta directamente en el servidor Linux (sin SSH)
+
+    steps:
+      - name: 1. Descargar el código nuevo en el servidor
+        uses: actions/checkout@v4
+
+      - name: 2. Sincronizar repositorio con origin/main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: 3. Inyectar variables de entorno seguras (.env efímero)
+        env:
+          ENV_PROD: ${{ secrets.ENV_PROD }}
+        run: |
+          echo "$ENV_PROD" > .env
+          chmod 600 .env
+          echo "==> Archivo .env inyectado con permisos restringidos (chmod 600)."
+
+      - name: 4. Asegurar red compartida de MongoDB y levantar contenedores
+        run: |
+          docker network inspect red-mongo-compartida >/dev/null 2>&1 || docker network create red-mongo-compartida
+
+          # Levantar base de datos si existe un docker-compose.db.yml dedicado
+          if [ -f docker-compose.db.yml ]; then
+            echo "==> Levantando base de datos con docker-compose.db.yml..."
+            docker compose -f docker-compose.db.yml up -d
+          fi
+
+          # Reconstruir y levantar backend y caddy eliminando contenedores huérfanos
+          echo "==> Levantando backend y caddy con docker compose..."
+          docker compose up -d --build --remove-orphans
+
+      - name: 5. Eliminar archivo .env del disco (Zero-Disk Secrets)
+        if: always() # Se ejecuta SIEMPRE para garantizar que nunca queden credenciales en disco
+        run: |
+          rm -f .env
+          echo "==> Archivo .env eliminado físicamente del disco. Credenciales protegidas en memoria."
+
+      - name: 6. Limpieza de imágenes obsoletas y estado de servicios
+        run: |
+          docker image prune -f
+          echo "==> Estado actual de los contenedores:"
+          docker compose ps

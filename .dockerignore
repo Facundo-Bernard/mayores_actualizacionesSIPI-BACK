@@ -9,5 +9,11 @@ __pycache__/
 .dockerignore
 target/
 dist/
-.env.example
+.env
+.env.*
+auditorias/
+docs/
+docs_interna/
+tests/
+legacy_backup/
 contexto_y_estructura_despliegue.md
