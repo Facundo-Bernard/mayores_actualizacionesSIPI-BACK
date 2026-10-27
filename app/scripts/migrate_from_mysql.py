@@ -18,7 +18,7 @@ async def run_migration():
             host=os.getenv("MYSQL_HOST", "localhost"),
             port=int(os.getenv("MYSQL_PORT", 3306)),
             user=os.getenv("MYSQL_USER", "root"),
-            password=os.getenv("MYSQL_PASSWORD", "root"),
+            password=os.getenv("MYSQL_PASSWORD", ""),
             database=os.getenv("MYSQL_DATABASE", "prueba2")
         )
         cursor = mysql_conn.cursor(dictionary=True)
