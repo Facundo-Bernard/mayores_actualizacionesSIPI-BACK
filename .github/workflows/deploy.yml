@@ -25,16 +25,8 @@ jobs:
           ENV_PROD: ${{ secrets.ENV_PROD }}
         run: |
           echo "$ENV_PROD" > .env
-          # Garantizar que AUTH_SERVICE_URL apunte al microservicio de producción
-          sed -i 's|AUTH_SERVICE_URL=http://localhost:8000|AUTH_SERVICE_URL=https://autenticacion.asistodo.com.ar|g' .env || true
-          sed -i 's|AUTH_SERVICE_URL=http://127.0.0.1:8000|AUTH_SERVICE_URL=https://autenticacion.asistodo.com.ar|g' .env || true
-          if ! grep -q "AUTH_SERVICE_URL" .env; then
-            echo "AUTH_SERVICE_URL=https://autenticacion.asistodo.com.ar" >> .env
-          fi
-          # Garantizar que JWT_SECRET coincida con la firma del Autenticador Central
-          sed -i 's|JWT_SECRET=super_secret_autenticador_key_2026|JWT_SECRET=K8v_3mNp92WzX5qL7rT4yB1cV6jH0gF2sA9dE4uI|g' .env || true
           chmod 600 .env
-          echo "==> Archivo .env inyectado con permisos restringidos (chmod 600) y credenciales sincronizadas."
+          echo "==> Archivo .env inyectado con permisos restringidos (chmod 600)."
 
       - name: 4. Asegurar red compartida de MongoDB y levantar contenedores
         run: |

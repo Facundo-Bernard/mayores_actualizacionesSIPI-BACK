@@ -1,6 +1,5 @@
 from typing import Optional
 from urllib.parse import quote_plus
-from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -40,43 +39,24 @@ class Settings(BaseSettings):
     def effective_db_name(self) -> str:
         return self.MONGO_DB_NAME or self.MONGODB_DB_NAME
 
-    # JWT & Seguridad (Obligatorio desde .env, debe coincidir con Autenticador)
-    JWT_SECRET: str = "K8v_3mNp92WzX5qL7rT4yB1cV6jH0gF2sA9dE4uI"
+    # JWT & Seguridad (Obligatorio estrictamente desde .env, debe coincidir con Autenticador)
+    JWT_SECRET: str
     JWT_EXPIRATION_DAYS: int = 180
     FRONTEND_URL: str = "http://localhost:5173"
 
-    # Microservicio Autenticador Central (SSOT)
-    AUTH_SERVICE_URL: str = "https://autenticacion.asistodo.com.ar"
+    # Microservicio Autenticador Central (SSOT - configurable vía .env)
+    AUTH_SERVICE_URL: str = "http://localhost:8000"
 
-    # RAE API (Wordle / Desafíos)
+    # RAE API (Wordle / Desafíos - Opcional desde .env)
     RAE_API_KEY: Optional[str] = None
 
-    # Correo SMTP / Brevo (Opcional)
+    # Correo SMTP / Brevo (Opcional desde .env)
     SMTP_HOST: Optional[str] = None
     SMTP_PORT: int = 587
     SMTP_USER: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
     MAIL_FROM: Optional[str] = None
     MAIL_FROM_NAME: str = "Mayores Actualizaciones"
-
-    # Administrador por defecto para seed inicial
-    ADMIN_DEFAULT_EMAIL: str = "admin@sistemas.com"
-    ADMIN_DEFAULT_PASSWORD: str = "admin123"
-    ADMIN_DEFAULT_NAME: str = "Operador Sistemas"
-
-    @model_validator(mode="after")
-    def validate_auth_url(self) -> "Settings":
-        # Si FRONTEND_URL apunta a asistodo.com.ar (producción) y AUTH_SERVICE_URL apunta a localhost:8000
-        # (por ejemplo debido a un .env o secreto desactualizado), corregir automáticamente al dominio del Autenticador
-        if "asistodo.com.ar" in self.FRONTEND_URL and (
-            "localhost:8000" in self.AUTH_SERVICE_URL or "127.0.0.1:8000" in self.AUTH_SERVICE_URL
-        ):
-            self.AUTH_SERVICE_URL = "https://autenticacion.asistodo.com.ar"
-
-        # Garantizar que JWT_SECRET use la firma real del Autenticador Central
-        if not self.JWT_SECRET or self.JWT_SECRET == "super_secret_autenticador_key_2026":
-            self.JWT_SECRET = "K8v_3mNp92WzX5qL7rT4yB1cV6jH0gF2sA9dE4uI"
-        return self
 
     model_config = SettingsConfigDict(
         env_file=".env",

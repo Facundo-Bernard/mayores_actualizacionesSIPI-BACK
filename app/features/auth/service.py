@@ -102,33 +102,19 @@ async def sync_local_user_from_auth_service(remote_user: dict) -> dict:
 
 async def _call_autenticador(endpoint: str, payload: dict) -> httpx.Response:
     """
-    Envía una petición al Autenticador Central con reintento ante problemas de red local.
-    Prioriza settings.AUTH_SERVICE_URL y recurre a fallback si existe un problema de loopback en Docker.
+    Envía una petición al Autenticador Central configurado en settings.AUTH_SERVICE_URL.
     """
     clean_endpoint = endpoint.lstrip('/')
-    primary_url = f"{settings.AUTH_SERVICE_URL.rstrip('/')}/{clean_endpoint}"
-    urls_to_try = [primary_url]
+    url = f"{settings.AUTH_SERVICE_URL.rstrip('/')}/{clean_endpoint}"
 
-    # Fallback si Docker tiene problemas de hairpin NAT resolviendo el dominio público hacia sí mismo
-    if "asistodo.com.ar" in settings.AUTH_SERVICE_URL or "localhost" in settings.AUTH_SERVICE_URL:
-        fallback = f"http://host.docker.internal:8086/{clean_endpoint}"
-        if fallback not in urls_to_try:
-            urls_to_try.append(fallback)
-
-    last_exc = None
-    for url in urls_to_try:
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                resp = await client.post(url, json=payload)
-                return resp
-        except httpx.RequestError as exc:
-            last_exc = exc
-            continue
-
-    raise HTTPException(
-        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-        detail=f"Servicio de autenticación central no disponible ({settings.AUTH_SERVICE_URL}): {str(last_exc)}"
-    )
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            return await client.post(url, json=payload)
+    except httpx.RequestError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Servicio de autenticación central no disponible ({settings.AUTH_SERVICE_URL}): {str(exc)}"
+        )
 
 async def login_codigo(req: LoginCodigoRequest):
     """
