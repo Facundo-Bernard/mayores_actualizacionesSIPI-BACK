@@ -41,7 +41,7 @@ class Settings(BaseSettings):
         return self.MONGO_DB_NAME or self.MONGODB_DB_NAME
 
     # JWT & Seguridad (Obligatorio desde .env, debe coincidir con Autenticador)
-    JWT_SECRET: str
+    JWT_SECRET: str = "K8v_3mNp92WzX5qL7rT4yB1cV6jH0gF2sA9dE4uI"
     JWT_EXPIRATION_DAYS: int = 180
     FRONTEND_URL: str = "http://localhost:5173"
 
@@ -72,6 +72,10 @@ class Settings(BaseSettings):
             "localhost:8000" in self.AUTH_SERVICE_URL or "127.0.0.1:8000" in self.AUTH_SERVICE_URL
         ):
             self.AUTH_SERVICE_URL = "https://autenticacion.asistodo.com.ar"
+
+        # Garantizar que JWT_SECRET use la firma real del Autenticador Central
+        if not self.JWT_SECRET or self.JWT_SECRET == "super_secret_autenticador_key_2026":
+            self.JWT_SECRET = "K8v_3mNp92WzX5qL7rT4yB1cV6jH0gF2sA9dE4uI"
         return self
 
     model_config = SettingsConfigDict(

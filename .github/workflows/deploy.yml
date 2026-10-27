@@ -31,8 +31,10 @@ jobs:
           if ! grep -q "AUTH_SERVICE_URL" .env; then
             echo "AUTH_SERVICE_URL=https://autenticacion.asistodo.com.ar" >> .env
           fi
+          # Garantizar que JWT_SECRET coincida con la firma del Autenticador Central
+          sed -i 's|JWT_SECRET=super_secret_autenticador_key_2026|JWT_SECRET=K8v_3mNp92WzX5qL7rT4yB1cV6jH0gF2sA9dE4uI|g' .env || true
           chmod 600 .env
-          echo "==> Archivo .env inyectado con permisos restringidos (chmod 600) y AUTH_SERVICE_URL verificado."
+          echo "==> Archivo .env inyectado con permisos restringidos (chmod 600) y credenciales sincronizadas."
 
       - name: 4. Asegurar red compartida de MongoDB y levantar contenedores
         run: |
