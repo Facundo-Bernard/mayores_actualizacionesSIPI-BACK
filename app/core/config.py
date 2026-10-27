@@ -1,5 +1,6 @@
 from typing import Optional
 from urllib.parse import quote_plus
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -45,7 +46,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5173"
 
     # Microservicio Autenticador Central (SSOT)
-    AUTH_SERVICE_URL: str = "http://localhost:8000"
+    AUTH_SERVICE_URL: str = "https://autenticacion.asistodo.com.ar"
 
     # RAE API (Wordle / Desafíos)
     RAE_API_KEY: Optional[str] = None
@@ -62,6 +63,16 @@ class Settings(BaseSettings):
     ADMIN_DEFAULT_EMAIL: str = "admin@sistemas.com"
     ADMIN_DEFAULT_PASSWORD: str = "admin123"
     ADMIN_DEFAULT_NAME: str = "Operador Sistemas"
+
+    @model_validator(mode="after")
+    def validate_auth_url(self) -> "Settings":
+        # Si FRONTEND_URL apunta a asistodo.com.ar (producción) y AUTH_SERVICE_URL apunta a localhost:8000
+        # (por ejemplo debido a un .env o secreto desactualizado), corregir automáticamente al dominio del Autenticador
+        if "asistodo.com.ar" in self.FRONTEND_URL and (
+            "localhost:8000" in self.AUTH_SERVICE_URL or "127.0.0.1:8000" in self.AUTH_SERVICE_URL
+        ):
+            self.AUTH_SERVICE_URL = "https://autenticacion.asistodo.com.ar"
+        return self
 
     model_config = SettingsConfigDict(
         env_file=".env",

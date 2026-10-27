@@ -40,6 +40,8 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - .env                              # Carga automática de variables de entorno (.env)
     environment:
