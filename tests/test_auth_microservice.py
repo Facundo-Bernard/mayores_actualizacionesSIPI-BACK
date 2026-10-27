@@ -39,34 +39,3 @@ async def test_auth_microservice_flow():
         assert res_elena.status_code == 403
         assert "inactiva" in res_elena.json()["detail"].lower()
 
-        # 6. Login de Operador de Sistemas (Admin Central)
-        res_admin = await client.post(
-            "/api/auth/login-sistemas",
-            json={"email": "admin@autenticador.com", "password": "admin"}
-        )
-        if res_admin.status_code != 200:
-            res_admin = await client.post(
-                "/api/auth/login-sistemas",
-                json={"email": "admin@autenticador.com", "password": "999999"}
-            )
-        assert res_admin.status_code == 200
-        assert res_admin.json()["success"] is True
-        token_admin = res_admin.json()["token"]
-
-        # 7. Acceso a endpoints administrativos con token de admin
-        res_users = await client.get("/usuario", headers={"Authorization": f"Bearer {token_admin}"})
-        assert res_users.status_code == 200
-        assert "total" in res_users.json()
-
-        # 8. Registro de nuevo usuario alumno delegando al Autenticador Central
-        test_email = f"test_gateway_{int(time.time())}@ejemplo.com"
-        res_reg = await client.post(
-            "/api/auth/register",
-            json={"name": "Usuario Gateway Test", "email": test_email}
-        )
-        assert res_reg.status_code == 200
-        reg_data = res_reg.json()
-        assert reg_data["success"] is True
-        assert reg_data["user"]["email"] == test_email
-        assert reg_data["user"]["codigoAcceso"] is not None
-        assert reg_data["token"] is not None

@@ -5,8 +5,7 @@ from app.core.database import get_database
 from app.core.security import create_access_token
 from app.core.config import settings
 from app.features.auth.schemas import (
-    LoginSistemasRequest, LoginCodigoRequest, VerificarTokenRequest,
-    RegisterRequest
+    LoginCodigoRequest, VerificarTokenRequest
 )
 
 def format_user_response(user: dict) -> dict:
@@ -100,60 +99,6 @@ async def sync_local_user_from_auth_service(remote_user: dict) -> dict:
 
     local_user = await db["usuarios"].find_one({"id": user_id})
     return local_user or {}
-
-async def login_sistemas(req: LoginSistemasRequest):
-    """
-    Autentica al operador de sistemas delegando la verificación de credenciales
-    al microservicio central de Autenticación.
-    """
-    auth_url = f"{settings.AUTH_SERVICE_URL.rstrip('/')}/auth/login"
-    payload = {
-        "email": req.email.lower().strip(),
-        "password": req.password,
-        "servicio": "mayoresactualizaciones"
-    }
-
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(auth_url, json=payload)
-    except httpx.RequestError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Servicio de autenticación central no disponible ({settings.AUTH_SERVICE_URL}): {str(exc)}"
-        )
-
-    if resp.status_code != 200:
-        error_detail = "Credenciales incorrectas"
-        try:
-            err_data = resp.json()
-            if "detail" in err_data:
-                error_detail = err_data["detail"]
-        except Exception:
-            pass
-        raise HTTPException(
-            status_code=resp.status_code,
-            detail=error_detail
-        )
-
-    data = resp.json()
-    remote_user = data.get("user") or {}
-    token = data.get("token")
-
-    tipo_usuario = int(remote_user.get("tipoUsuario") or remote_user.get("tipo_usuario") or 1)
-    if tipo_usuario != 2:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acceso denegado: Se requieren permisos de Operador de Sistemas"
-        )
-
-    local_user = await sync_local_user_from_auth_service(remote_user)
-
-    return {
-        "success": True,
-        "message": "Inicio de sesión exitoso",
-        "token": token,
-        "user": format_user_response(local_user)
-    }
 
 async def login_codigo(req: LoginCodigoRequest):
     """
@@ -257,59 +202,3 @@ async def verificar_token(req: VerificarTokenRequest):
         "user": format_user_response(local_user)
     }
 
-async def register_usuario(req: RegisterRequest, is_admin_creation: bool = False):
-    """
-    Registra un nuevo usuario delegando la creación y generación de PIN
-    al microservicio central de Autenticación.
-    """
-    auth_url = f"{settings.AUTH_SERVICE_URL.rstrip('/')}/auth/register"
-    tipo_usuario = req.tipoUsuario if (is_admin_creation and req.tipoUsuario is not None) else 1
-    black = bool(req.black) if (is_admin_creation and req.black is not None) else False
-    activo = bool(req.activo) if (is_admin_creation and req.activo is not None) else True
-
-    payload = {
-        "name": req.name.strip(),
-        "email": req.email.lower().strip(),
-        "password": req.password,
-        "codigoAcceso": req.codigoAcceso,
-        "servicioOrigen": "mayoresactualizaciones",
-        "tipoUsuario": tipo_usuario,
-        "black": black,
-        "activo": activo,
-        "servicios": {"mayoresactualizaciones": True}
-    }
-
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(auth_url, json=payload)
-    except httpx.RequestError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Servicio de autenticación central no disponible ({settings.AUTH_SERVICE_URL}): {str(exc)}"
-        )
-
-    if resp.status_code != 200:
-        error_detail = "Error al registrar el usuario en el Autenticador Central"
-        try:
-            err_data = resp.json()
-            if "detail" in err_data:
-                error_detail = err_data["detail"]
-        except Exception:
-            pass
-        raise HTTPException(
-            status_code=resp.status_code,
-            detail=error_detail
-        )
-
-    data = resp.json()
-    remote_user = data.get("user") or {}
-    token = data.get("token")
-
-    local_user = await sync_local_user_from_auth_service(remote_user)
-
-    return {
-        "success": True,
-        "message": data.get("message") or "Usuario registrado con éxito.",
-        "token": token,
-        "user": format_user_response(local_user)
-    }

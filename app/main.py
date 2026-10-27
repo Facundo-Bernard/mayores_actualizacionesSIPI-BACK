@@ -2,18 +2,15 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
 
 from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
-from app.scripts.init_db import seed_default_admin, seed_estados_usuario
+from app.scripts.init_db import seed_estados_usuario
 from app.features.auth.router import router as auth_router
-from app.features.usuario.router import router as usuario_router
 from app.features.progreso.router import router as progreso_router
-from app.features.sso.router import router as sso_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,11 +20,10 @@ logger = logging.getLogger("AppMain")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Conectar a MongoDB, inicializar índices y sembrar datos esenciales de autenticación/usuarios
+    # Startup: Conectar a MongoDB, inicializar índices y colecciones base
     logger.info("Iniciando aplicación Mayores Actualizaciones (FastAPI)...")
     await connect_to_mongo()
     await seed_estados_usuario()
-    await seed_default_admin()
     logger.info(f"Servidor listo en el puerto {settings.PORT}.")
     yield
     # Shutdown: Cerrar conexiones limpiamente
@@ -91,11 +87,9 @@ async def global_fail_closed_exception_handler(request: Request, exc: Exception)
         }
     )
 
-# Inclusión de routers esenciales (Auth, Usuarios, Progreso de Cursos, SSO)
+# Inclusión de routers de la plataforma (Auth de Alumnos y Progreso de Cursos)
 app.include_router(auth_router)
-app.include_router(usuario_router)
 app.include_router(progreso_router)
-app.include_router(sso_router)
 
 @app.get("/", tags=["Estado"])
 async def root():
@@ -109,32 +103,6 @@ async def root():
 @app.get("/actuator/health", tags=["Estado"])
 async def health_check():
     return {"status": "UP"}
-
-# Montar Torre de Control (Panel de Administración SPA)
-static_admin_dir = os.path.join(os.path.dirname(__file__), "static", "admin")
-os.makedirs(static_admin_dir, exist_ok=True)
-
-class SPAStaticFiles(StaticFiles):
-    async def get_response(self, path: str, scope):
-        try:
-            response = await super().get_response(path, scope)
-            if response.status_code == 404:
-                index_path = os.path.join(self.directory, "index.html")
-                if os.path.exists(index_path):
-                    return FileResponse(index_path)
-            return response
-        except StarletteHTTPException as ex:
-            if ex.status_code == 404:
-                index_path = os.path.join(self.directory, "index.html")
-                if os.path.exists(index_path):
-                    return FileResponse(index_path)
-            raise ex
-
-@app.get("/admin", include_in_schema=False)
-async def admin_redirect():
-    return RedirectResponse(url="/admin/")
-
-app.mount("/admin", SPAStaticFiles(directory=static_admin_dir, html=True), name="admin")
 
 if __name__ == "__main__":
     import uvicorn

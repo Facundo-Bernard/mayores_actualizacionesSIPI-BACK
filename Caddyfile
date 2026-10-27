@@ -38,7 +38,7 @@
     }
 
     # 5. Enrutar endpoints activos de la API hacia FastAPI
-    @backend path /api* /usuario* /progreso* /cursos* /payment* /health* /actuator*
+    @backend path /api* /progreso* /cursos* /payment* /health* /actuator*
     handle @backend {
         reverse_proxy backend:8082
     }
