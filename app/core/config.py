@@ -46,7 +46,8 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5173"
 
     # Microservicio Autenticador Central (SSOT - configurable vía .env)
-    AUTH_SERVICE_URL: str = "http://localhost:8000"
+    AUTH_SERVICE_URL: str = "https://autenticacion.asistodo.com.ar"
+
 
     # RAE API (Wordle / Desafíos - Opcional desde .env)
     RAE_API_KEY: Optional[str] = None
