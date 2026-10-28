@@ -27,11 +27,37 @@ async def get_current_user(
     token = credentials.credentials
     payload = decode_access_token(token)
     if not payload:
+        # Fallback de alta disponibilidad: consultar al Autenticador Central (SSOT)
+        # en caso de claves JWT en proceso de rotación o desfasaje en variables de entorno
+        try:
+            from app.features.auth.service import _call_autenticador, sync_local_user_from_auth_service
+            resp = await _call_autenticador("auth/validar-acceso", {
+                "token": token,
+                "servicio": "mayoresactualizaciones"
+            })
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get("allowed"):
+                    remote_user = data.get("user") or {}
+                    local_user = await sync_local_user_from_auth_service(remote_user)
+                    if local_user:
+                        if local_user.get("activo") is False:
+                            raise HTTPException(
+                                status_code=status.HTTP_403_FORBIDDEN,
+                                detail="Tu cuenta de usuario se encuentra inactiva. Contacta al administrador."
+                            )
+                        return local_user
+        except HTTPException:
+            raise
+        except Exception:
+            pass
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token de autenticación inválido o expirado.",
             headers={"WWW-Authenticate": "Bearer"}
         )
+
 
     # Validar permisos específicos para el servicio mayoresactualizaciones
     tipo_usuario = int(payload.get("tipo_usuario") or payload.get("tipoUsuario") or 1)

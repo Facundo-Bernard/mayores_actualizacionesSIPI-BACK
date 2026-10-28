@@ -41,6 +41,7 @@ class Settings(BaseSettings):
 
     # JWT & Seguridad (Obligatorio estrictamente desde .env, debe coincidir con Autenticador)
     JWT_SECRET: str
+    JWT_SECRET_FALLBACK: Optional[str] = None
     JWT_EXPIRATION_DAYS: int = 180
     FRONTEND_URL: str = "http://localhost:5173"
 

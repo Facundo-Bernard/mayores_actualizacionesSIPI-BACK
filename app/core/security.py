@@ -56,17 +56,29 @@ def create_access_token(user: Dict[str, Any], expires_delta: Optional[timedelta]
 def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
     """
     Decodifica y valida la firma de un token JWT contra settings.JWT_SECRET.
+    Si está definido settings.JWT_SECRET_FALLBACK en .env, también lo prueba como alternativa.
     Utiliza verify_exp=False para admitir tokens permanentes de los alumnos.
     """
-    if not settings.JWT_SECRET:
+    secrets_to_try = []
+    if getattr(settings, "JWT_SECRET", None):
+        secrets_to_try.append(settings.JWT_SECRET)
+    fallback = getattr(settings, "JWT_SECRET_FALLBACK", None)
+    if fallback and fallback not in secrets_to_try:
+        secrets_to_try.append(fallback)
+
+    if not secrets_to_try:
         return None
-    try:
-        payload = jwt.decode(
-            token,
-            settings.JWT_SECRET,
-            algorithms=["HS256"],
-            options={"verify_exp": False}
-        )
-        return payload
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        return None
+
+    for secret in secrets_to_try:
+        try:
+            payload = jwt.decode(
+                token,
+                secret,
+                algorithms=["HS256"],
+                options={"verify_exp": False}
+            )
+            return payload
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            continue
+    return None
+
