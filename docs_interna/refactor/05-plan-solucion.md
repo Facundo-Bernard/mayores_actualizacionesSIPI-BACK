@@ -248,6 +248,8 @@ app/
 3. Test o regla de lint que detecte imports `feature → feature`.
 4. Tabla de módulos actuales → destino, actualizada a medida que se extrae.
 
+**Estado al 2/11/2026:** ADR en [adr/0001-arquitectura-objetivo.md](adr/0001-arquitectura-objetivo.md); `app/shared/clock.py`, `app/shared/errors.py` y `app/shared/ledger.py` creados (ledger sin implementación); ratchet de imports en `tests/unit/test_architecture_imports.py` con las 6 violaciones actuales en baseline. `tzdata` agregado a `requirements.txt` para que `zoneinfo` funcione en Windows.
+
 **Criterio de aceptación:** el diseño permite implementar ledger, idempotencia y validadores sin duplicar lógica ni tocar routers; ninguna extracción se hace sin tests de contrato verdes; no se mueve un módulo que la fase no necesita.
 
 ### Fase 1 — Integridad de economía e intentos (2-3 semanas)

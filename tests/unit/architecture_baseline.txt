@@ -1,0 +1,8 @@
+# Violaciones feature -> feature existentes al 2/11/2026.
+# Formato: archivo -> feature importada. El test falla si aparece una nueva
+# o si una de estas desaparece sin actualizar el archivo.
+app/features/daily_challenges/service.py -> narrative
+app/features/sso/service.py -> auth
+app/features/user_attempts/service.py -> economy
+app/features/usuario/router.py -> auth
+app/features/usuario/service.py -> auth
