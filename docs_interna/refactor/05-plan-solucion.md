@@ -689,6 +689,19 @@ cd ../mayores_actualizacionesSIPI-BACK
 
 El worktree estable comparte el intérprete del repo principal para no duplicar dependencias. Si `requirements.txt` cambia en refactor y el estable necesita quedarse con las versiones viejas, crear un `.venv` propio en `../sipi-estable`.
 
+**Lanzadores (fuera de ambos repos).** Carpeta `C:\Users\nmonti\Desktop\proyectos\servicios`. Se ejecutan con doble clic; cada uno abre su ventana, hace `cd` a la carpeta correcta y muestra la URL.
+
+| Script | Levanta | Puertos |
+|---|---|---|
+| `backend-estable.cmd` | Backend del worktree estable | 8080 |
+| `backend-refactor.cmd` | Backend del worktree de refactor | 8090 |
+| `frontend.cmd` | Vite; el proxy `/api` sale del `.env.local` (8080) | 5174 |
+| `frontend.cmd http://localhost:8090` | Vite con proxy forzado al refactor, sin editar archivos | 5174 → 8090 |
+| `estable-y-frontend.cmd` | Estable + frontend (flujo del desarrollador frontend) | 8080 / 5174 |
+| `refactor-y-frontend.cmd` | Refactor + frontend apuntando al refactor | 8090 / 5174 |
+
+El frontend no se toca: `VITE_BACKEND_URL` pasado por entorno gana sobre `.env.local` porque `vite.config.ts` usa `loadEnv` y luego el proxy toma ese valor. Verificado con 8080 apagado: la request por 5174 llegó al 8090.
+
 **Reglas de convivencia:**
 
 - Cambios de esquema/índices solo en `mayores_actualizaciones_dev`; nunca correr migraciones destructivas sobre `mayores_actualizaciones`.
