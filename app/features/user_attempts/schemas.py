@@ -19,6 +19,7 @@ class UserAttemptCreateRequest(BaseModel):
     guesses: Optional[List[Any]] = Field(default_factory=list, description="Lista de intentos realizados (palabras, objetos o números)")
     game_data: Optional[Dict[str, Any]] = Field(None, description="Datos adicionales específicos del juego")
     remaining_attempts: Optional[int] = Field(0, description="Vidas/intentos restantes del juego")
+    time_taken_seconds: Optional[int] = Field(None, description="Tiempo en segundos que tardó en completar la partida")
 
 class UserAttemptResponse(BaseModel):
     id: str
@@ -33,6 +34,7 @@ class UserAttemptResponse(BaseModel):
     score: int
     grade: Optional[str] = None
     remaining_attempts: int = 0
+    time_taken_seconds: Optional[int] = None
     puntos_ganados: int = 0
     puntos_totales_usuario: Optional[int] = None
     guesses: List[Any] = []

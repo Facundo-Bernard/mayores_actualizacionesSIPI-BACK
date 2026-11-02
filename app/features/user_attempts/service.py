@@ -23,7 +23,9 @@ def calculate_grade_and_score(
     provided_score: Optional[int] = None,
     provided_stars: Optional[int] = None,
     puntos_por_calificacion: Optional[Dict[str, int]] = None,
-    game_data: Optional[dict] = None
+    game_data: Optional[dict] = None,
+    time_taken_seconds: Optional[int] = None,
+    escalas_tiempo: Optional[List[Any]] = None
 ) -> Tuple[str, int, int]:
     """
     Calcula (grade, score, stars) en base al desempeño o configuración.
@@ -46,7 +48,29 @@ def calculate_grade_and_score(
     if status_clean not in ("completed", "won"):
         return (provided_grade or "C", 0, 0)
 
-    # 1. Si el frontend envía una calificación por letra explícita
+    # 1. Calificación por Tiempo (para juegos cronometrados: sudoku, crucigrama, sopa_letras)
+    gid = (game_id or "").lower().strip()
+    if gid in ("sudoku", "crucigrama", "sopa_letras") and time_taken_seconds is not None and time_taken_seconds >= 0 and escalas_tiempo:
+        escalas_ordenadas = sorted(
+            escalas_tiempo,
+            key=lambda item: getattr(item, "tiempo_max_segundos", item.get("tiempo_max_segundos", 999999) if isinstance(item, dict) else 999999)
+        )
+        matched_tier = None
+        for tier in escalas_ordenadas:
+            t_max = getattr(tier, "tiempo_max_segundos", tier.get("tiempo_max_segundos") if isinstance(tier, dict) else 999999)
+            if time_taken_seconds <= t_max:
+                matched_tier = tier
+                break
+        if not matched_tier and escalas_ordenadas:
+            matched_tier = escalas_ordenadas[-1]
+
+        if matched_tier:
+            grade = getattr(matched_tier, "grade", matched_tier.get("grade") if isinstance(tier, dict) else "C")
+            score = getattr(matched_tier, "puntos", matched_tier.get("puntos", 50) if isinstance(tier, dict) else 50)
+            stars = getattr(matched_tier, "estrellas", matched_tier.get("estrellas", 1) if isinstance(tier, dict) else 1)
+            return (grade, score, stars)
+
+    # 2. Si el frontend envía una calificación por letra explícita
     if provided_grade and provided_grade.upper().strip() in config_pts:
         grade = provided_grade.upper().strip()
         # Los puntos se rigen por la configuración del Administrador para esa calificación
@@ -153,6 +177,7 @@ def _serialize_attempt(
         score=int(doc.get("score", 100)),
         grade=doc.get("grade"),
         remaining_attempts=int(doc.get("remaining_attempts", 0)),
+        time_taken_seconds=doc.get("time_taken_seconds"),
         puntos_ganados=puntos_ganados,
         puntos_totales_usuario=puntos_totales_usuario,
         guesses=doc.get("guesses", []),
@@ -184,6 +209,25 @@ async def save_user_attempt(
         logger.warning(f"No se pudo cargar la configuración de economía: {e}")
         puntos_config = {"S": 100, "A": 90, "B": 75, "C": 50, "F": 0}
 
+    # Extraer tiempo transcurrido si viene informado
+    time_taken = req.time_taken_seconds
+    if time_taken is None and req.game_data:
+        time_taken = (
+            req.game_data.get("timeTaken")
+            or req.game_data.get("time_taken_seconds")
+            or req.game_data.get("elapsedSeconds")
+            or req.game_data.get("elapsed_seconds")
+        )
+    if time_taken is not None:
+        try:
+            time_taken = int(time_taken)
+        except Exception:
+            time_taken = None
+
+    escalas_juego = None
+    if hasattr(econ_config, "escalas_tiempo_por_juego") and econ_config.escalas_tiempo_por_juego:
+        escalas_juego = econ_config.escalas_tiempo_por_juego.get(req.game_id.lower().strip())
+
     # Calcular calificación, puntaje y estrellas según desempeño o datos provistos
     grade, score, stars = calculate_grade_and_score(
         game_id=req.game_id,
@@ -194,7 +238,9 @@ async def save_user_attempt(
         provided_score=req.score,
         provided_stars=req.stars,
         puntos_por_calificacion=puntos_config,
-        game_data=req.game_data
+        game_data=req.game_data,
+        time_taken_seconds=time_taken,
+        escalas_tiempo=escalas_juego
     )
 
     status_normalized = req.status.lower().strip()
@@ -219,6 +265,7 @@ async def save_user_attempt(
         "guesses": req.guesses or [],
         "game_data": req.game_data,
         "remaining_attempts": req.remaining_attempts or 0,
+        "time_taken_seconds": time_taken,
         "updated_at": now_utc
     }
 

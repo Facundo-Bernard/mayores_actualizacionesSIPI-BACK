@@ -13,6 +13,42 @@ class TiendaPaquete(BaseModel):
     descuento: Optional[str] = Field(None, description="Leyenda de ahorro ej: 'Ahorrá 30 pts'")
 
 
+class EscalaCalificacionTiempo(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    grade: str = Field(..., description="Letra o código de la calificación (ej: 'S', 'A', 'B', 'C', 'D')")
+    tiempo_max_segundos: int = Field(..., ge=1, description="Tiempo máximo en segundos para obtener esta calificación")
+    puntos: int = Field(..., ge=0, description="Puntos otorgados al completar en este rango")
+    estrellas: int = Field(3, ge=0, le=3, description="Estrellas visuales otorgadas (0 a 3)")
+    titulo: Optional[str] = Field(None, description="Título amigable ej: '¡Impecable!', '¡Excelente!'")
+    descripcion: Optional[str] = Field(None, description="Descripción del rango ej: 'Menos de 03:00'")
+
+
+DEFAULT_ESCALAS_TIEMPO: Dict[str, List[Dict[str, Any]]] = {
+    "sudoku": [
+        {"grade": "S", "tiempo_max_segundos": 180, "puntos": 100, "estrellas": 3, "titulo": "¡Impecable!", "descripcion": "Menos de 03:00"},
+        {"grade": "A", "tiempo_max_segundos": 300, "puntos": 90, "estrellas": 3, "titulo": "¡Excelente!", "descripcion": "03:01 a 05:00"},
+        {"grade": "B", "tiempo_max_segundos": 480, "puntos": 75, "estrellas": 2, "titulo": "¡Muy Bueno!", "descripcion": "05:01 a 08:00"},
+        {"grade": "C", "tiempo_max_segundos": 720, "puntos": 50, "estrellas": 1, "titulo": "¡Buen Trabajo!", "descripcion": "08:01 a 12:00"},
+        {"grade": "D", "tiempo_max_segundos": 999999, "puntos": 25, "estrellas": 1, "titulo": "¡Completado!", "descripcion": "Más de 12:00"},
+    ],
+    "crucigrama": [
+        {"grade": "S", "tiempo_max_segundos": 240, "puntos": 100, "estrellas": 3, "titulo": "¡Impecable!", "descripcion": "Menos de 04:00"},
+        {"grade": "A", "tiempo_max_segundos": 420, "puntos": 90, "estrellas": 3, "titulo": "¡Excelente!", "descripcion": "04:01 a 07:00"},
+        {"grade": "B", "tiempo_max_segundos": 600, "puntos": 75, "estrellas": 2, "titulo": "¡Muy Bueno!", "descripcion": "07:01 a 10:00"},
+        {"grade": "C", "tiempo_max_segundos": 900, "puntos": 50, "estrellas": 1, "titulo": "¡Buen Trabajo!", "descripcion": "10:01 a 15:00"},
+        {"grade": "D", "tiempo_max_segundos": 999999, "puntos": 25, "estrellas": 1, "titulo": "¡Completado!", "descripcion": "Más de 15:00"},
+    ],
+    "sopa_letras": [
+        {"grade": "S", "tiempo_max_segundos": 120, "puntos": 100, "estrellas": 3, "titulo": "¡Impecable!", "descripcion": "Menos de 02:00"},
+        {"grade": "A", "tiempo_max_segundos": 240, "puntos": 90, "estrellas": 3, "titulo": "¡Excelente!", "descripcion": "02:01 a 04:00"},
+        {"grade": "B", "tiempo_max_segundos": 360, "puntos": 75, "estrellas": 2, "titulo": "¡Muy Bueno!", "descripcion": "04:01 a 06:00"},
+        {"grade": "C", "tiempo_max_segundos": 600, "puntos": 50, "estrellas": 1, "titulo": "¡Buen Trabajo!", "descripcion": "06:01 a 10:00"},
+        {"grade": "D", "tiempo_max_segundos": 999999, "puntos": 25, "estrellas": 1, "titulo": "¡Completado!", "descripcion": "Más de 10:00"},
+    ],
+}
+
+
 class EconomyConfigResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -29,6 +65,13 @@ class EconomyConfigResponse(BaseModel):
             "F": 0,
         },
         description="Puntos otorgados según calificación S, A, B, C, F",
+    )
+    escalas_tiempo_por_juego: Dict[str, List[EscalaCalificacionTiempo]] = Field(
+        default_factory=lambda: {
+            k: [EscalaCalificacionTiempo(**item) for item in v]
+            for k, v in DEFAULT_ESCALAS_TIEMPO.items()
+        },
+        description="Escalas de calificación por tiempo configuradas por juego",
     )
     paquetes_tienda: List[TiendaPaquete] = Field(default_factory=list, description="Opciones de canje en la mini-tienda")
     puntos_por_juego: Dict[str, int] = Field(
@@ -53,6 +96,9 @@ class EconomyConfigUpdateRequest(BaseModel):
     costo_desbloqueo_dia_puntos: Optional[int] = Field(None, ge=0, description="Costo en puntos para desbloquear un día histórico")
     costo_pista_puntos: Optional[int] = Field(None, ge=0, description="Costo en puntos para solicitar una pista")
     puntos_por_calificacion: Optional[Dict[str, int]] = Field(None, description="Puntos otorgados según calificación S, A, B, C, F")
+    escalas_tiempo_por_juego: Optional[Dict[str, List[EscalaCalificacionTiempo]]] = Field(
+        None, description="Escalas de calificación por tiempo por juego (sudoku, crucigrama, sopa_letras)"
+    )
     paquetes_tienda: Optional[List[TiendaPaquete]] = None
     puntos_por_juego: Optional[Dict[str, int]] = None
     vidas_maximas: Optional[int] = None
