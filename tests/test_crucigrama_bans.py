@@ -101,3 +101,5 @@ async def _mensual():
     assert resultado["success"]
     assert llamadas, "La generación mensual debe invocar al generador real."
     assert all(bans == ("NOCHE",) for _, _, bans in llamadas)
+
+pytestmark = pytest.mark.integration

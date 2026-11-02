@@ -4,6 +4,8 @@
 > **Base analizada:** commit `d2a117b` (30/10/2026).
 > **Método:** lectura completa de `tests/` (15 archivos, ~2.594 líneas), `pytest.ini`, `requirements.txt`, `.github/workflows/`, scripts de diagnóstico; ejecución selectiva de tests puros y recolección completa.
 > **Estado:** se ejecutaron tests puros y comandos de diagnóstico. No se levantaron Docker, MongoDB ni servidores. No se modificó código.
+
+> **Errata (2/11/2026):** diferencias verificadas contra el código actual en [05-plan-solucion.md §2](05-plan-solucion.md). Este documento se conserva como foto original del relevamiento.
 > **Audiencia:** desarrolladores que se incorporan al backend y van a refactorizar sin romper el frontend.
 
 ---

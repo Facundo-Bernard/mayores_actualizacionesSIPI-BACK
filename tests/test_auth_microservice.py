@@ -70,3 +70,5 @@ async def test_auth_microservice_flow():
         assert reg_data["user"]["email"] == test_email
         assert reg_data["user"]["codigoAcceso"] is not None
         assert reg_data["token"] is not None
+
+pytestmark = pytest.mark.live

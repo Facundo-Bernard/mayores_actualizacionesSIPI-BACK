@@ -1,3 +1,5 @@
+
+import pytest
 import asyncio
 import datetime
 from httpx import AsyncClient, ASGITransport
@@ -102,3 +104,5 @@ async def _ejecutar_pruebas_consultas():
         assert resp.json()["tiene_partida_activa"] is False
 
     await close_mongo_connection()
+
+pytestmark = pytest.mark.integration

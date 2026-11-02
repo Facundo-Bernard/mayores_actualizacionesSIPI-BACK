@@ -9,6 +9,8 @@ Verifica:
 5. Llamadas HTTP directas a través de /api/narrative/v2/partida/avanzar-nodo.
 """
 
+import pytest
+
 import asyncio
 import datetime
 from unittest.mock import patch
@@ -339,3 +341,5 @@ async def _ejecutar_tests_v2():
     await db[COLL_V2_EVENTS].delete_one({"_id": "evt_prueba_condicional"})
     await db[COLL_RUNS].delete_one({"_id": run_db["_id"]})
     print("\n[SUCCESS] ¡Toda la suite de pruebas del Motor Narrativo V2 pasó exitosamente al 100%!")
+
+pytestmark = pytest.mark.integration

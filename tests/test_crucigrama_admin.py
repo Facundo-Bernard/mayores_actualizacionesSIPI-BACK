@@ -462,3 +462,5 @@ async def _ejecutar_flujo():
                 [FECHA_MANUAL, FECHA_AGENDADA, FECHA_CONFLICTO, FECHA_GENERACION],
                 bans_originales,
             )
+
+pytestmark = pytest.mark.integration

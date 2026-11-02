@@ -115,3 +115,5 @@ async def _ejecutar_tests_admin():
         # 6. Eliminar conversación
         resp_conv_del = await client.delete(f"/api/narrative/admin/v2/conversaciones/{test_conv_id}")
         assert resp_conv_del.status_code == 200
+
+pytestmark = pytest.mark.integration

@@ -94,3 +94,5 @@ async def test_sso_ticket_complete_lifecycle():
     finally:
         await auth_client.aclose()
         await sipi_client.aclose()
+
+pytestmark = pytest.mark.live

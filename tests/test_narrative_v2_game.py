@@ -1,3 +1,5 @@
+
+import pytest
 import asyncio
 import datetime
 from httpx import AsyncClient, ASGITransport
@@ -135,3 +137,5 @@ async def _ejecutar_ciclo_v2():
             assert data_v2["finalizacion"]["rango"] == "F"
 
     await close_mongo_connection()
+
+pytestmark = pytest.mark.integration

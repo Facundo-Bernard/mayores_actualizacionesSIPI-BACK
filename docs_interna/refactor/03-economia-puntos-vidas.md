@@ -4,6 +4,8 @@
 > **Base analizada:** commit `d2a117b` (30/10/2026), con foco en el commit `9442693` (“puntos globales, calificaciones S/A/B/C/F y pistas por puntos”).
 > **Método:** lectura completa de `app/features/economy/**`, `app/features/user_attempts/**`, `app/features/daily_challenges/**`, `app/features/narrative/game/endings_service.py`, `auth`, `usuario`, `progreso`, seeds y tests; búsqueda exhaustiva de términos (`vidas`, `puntos`, `lives`, `points`, `hints`, `pistas`, `coins`, `ledger`, etc.).
 > **Estado:** análisis estático. No se ejecutó la app contra MongoDB ni se modificó código.
+
+> **Errata (2/11/2026):** diferencias verificadas contra el código actual en [05-plan-solucion.md §2](05-plan-solucion.md). Este documento se conserva como foto original del relevamiento.
 > **Audiencia:** desarrolladores que se incorporan al backend y van a refactorizar sin romper el frontend.
 
 ---

@@ -121,3 +121,5 @@ async def test_vite_proxy_auth():
         data_vite = r_vite.json()
         assert data_vite["success"] is True
         assert data_vite["user"]["codigoAcceso"] == "123456"
+
+pytestmark = pytest.mark.live

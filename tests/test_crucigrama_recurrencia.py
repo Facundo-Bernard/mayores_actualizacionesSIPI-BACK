@@ -226,3 +226,5 @@ async def _ejecutar_flujo():
         finally:
             app.dependency_overrides.clear()
             await _limpiar(ids_creados, DIAS_GENERADOS, bans_originales)
+
+pytestmark = pytest.mark.integration

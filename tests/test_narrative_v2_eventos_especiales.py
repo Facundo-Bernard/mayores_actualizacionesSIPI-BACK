@@ -7,6 +7,8 @@ Verifica el disparo por cruce de umbral en graph_engine.avanzar_nodo:
 3. Sin cruce: no se encadena ningún especial y la partida avanza a BALANCE_MES.
 """
 
+import pytest
+
 import asyncio
 from unittest.mock import patch
 
@@ -149,3 +151,5 @@ async def _ejecutar_tests():
     await db[COLL_V2_EVENTS].delete_one({"_id": "evt_test_disparador_especial"})
     await db[COLL_RUNS].delete_many({"user_id": test_user_id, "game_id": "narrativo"})
     print("\n[SUCCESS] ¡La suite de Eventos Especiales de Afinidad V2 pasó exitosamente al 100%!")
+
+pytestmark = pytest.mark.integration

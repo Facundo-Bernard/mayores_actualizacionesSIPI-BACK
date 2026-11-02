@@ -6,6 +6,8 @@ Suite de tests de integración para las extensiones del motor V2:
 Verifica además el anti-spoiler: los desenlaces no se filtran al cliente.
 """
 
+import pytest
+
 import asyncio
 from unittest.mock import patch
 
@@ -131,3 +133,5 @@ async def _ejecutar_tests():
     await db[COLL_V2_EVENTS].delete_one({"_id": "evt_test_desenlaces_tags"})
     await db[COLL_RUNS].delete_many({"user_id": test_user_id, "game_id": "narrativo"})
     print("\n[SUCCESS] ¡La suite de Desenlaces Ponderados y Tags V2 pasó exitosamente al 100%!")
+
+pytestmark = pytest.mark.integration

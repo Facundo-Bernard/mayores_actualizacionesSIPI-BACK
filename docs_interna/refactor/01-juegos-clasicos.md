@@ -4,6 +4,8 @@
 > **Base analizada:** commit `d2a117b` (30/10/2026).
 > **Método:** lectura completa de `app/features/daily_challenges/**`, `app/features/daily_challenges/crucigrama_admin/**`, seeds, `user_attempts` y `economy`; verificación puntual del código.
 > **Estado:** análisis estático. No se ejecutó la app contra MongoDB ni se modificó código.
+
+> **Errata (2/11/2026):** diferencias verificadas contra el código actual en [05-plan-solucion.md §2](05-plan-solucion.md). Este documento se conserva como foto original del relevamiento.
 > **Audiencia:** desarrolladores que se incorporan al backend y van a refactorizar sin romper el frontend.
 
 ---
