@@ -1683,8 +1683,8 @@ async def seed_v2_graphs():
     ]
     for ev in eventos_todos:
         doc = ev.model_dump(by_alias=True)
-        await col_events.update_one({"_id": doc["_id"]}, {"$set": doc}, upsert=True)
-        logger.info(f"[NARRATIVE V2 SEED] Evento V2 '{doc['_id']}' sembrado correctamente.")
+        await col_events.update_one({"_id": doc["_id"]}, {"$setOnInsert": doc}, upsert=True)
+        logger.info(f"[NARRATIVE V2 SEED] Evento V2 '{doc['_id']}' asegurado (sin pisar ediciones).")
 
     conversaciones_todas = [
         conv_presupuesto,
@@ -1696,8 +1696,8 @@ async def seed_v2_graphs():
     ]
     for conv in conversaciones_todas:
         doc = conv.model_dump(by_alias=True)
-        await col_convs.update_one({"_id": doc["_id"]}, {"$set": doc}, upsert=True)
-        logger.info(f"[NARRATIVE V2 SEED] Conversación V2 '{doc['_id']}' sembrada correctamente.")
+        await col_convs.update_one({"_id": doc["_id"]}, {"$setOnInsert": doc}, upsert=True)
+        logger.info(f"[NARRATIVE V2 SEED] Conversación V2 '{doc['_id']}' asegurada (sin pisar ediciones).")
 
     especiales_todos = [
         esp_lealtad_elena,
@@ -1713,8 +1713,8 @@ async def seed_v2_graphs():
     ]
     for esp in especiales_todos:
         doc = esp.model_dump(by_alias=True)
-        await col_especiales.update_one({"_id": doc["_id"]}, {"$set": doc}, upsert=True)
-        logger.info(f"[NARRATIVE V2 SEED] Evento especial '{doc['_id']}' sembrado correctamente.")
+        await col_especiales.update_one({"_id": doc["_id"]}, {"$setOnInsert": doc}, upsert=True)
+        logger.info(f"[NARRATIVE V2 SEED] Evento especial '{doc['_id']}' asegurado (sin pisar ediciones).")
 
     logger.info("[NARRATIVE V2 SEED] ¡Siembra de grafos V2 completada exitosamente!")
 

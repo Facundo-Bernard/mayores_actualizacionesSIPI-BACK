@@ -1,6 +1,6 @@
 # Plan de solución — backend de juegos
 
-> **Estado:** propuesta. No se implementó nada todavía.
+> **Estado:** Fases 0, 0.5, 1, 2 y 3 implementadas en `feature/refactor-backend` (2/11/2026). Pendiente: Fase 4 (estructura/operación) y Fase 5 (V2 oficial, gated).
 > **Base:** commit `d2a117b` + relevamiento de solo lectura del frontend (`Desktop/proyectos/frontend`, 2/11/2026).
 > **Restricciones acordadas:**
 > - Los routers son contrato sagrado: no se cambian paths, métodos, campos ni códigos del camino feliz.
@@ -400,6 +400,8 @@ Objetivo: que V1 sea seguro y que V2 tenga una prueba objetiva de que puede ser 
    - **Riesgo asumido:** el saldo de `localStorage` es manipulable por el cliente; el tope de migración es la única defensa. Documentarlo.
 
 **Criterio de aceptación:** el dry-run de 12 meses pasa; los endpoints manuales no permiten saltar fases; el seed no pisa ediciones; V2 se puede activar y desactivar sin migración de datos; una partida narrativa acredita puntos una sola vez, también para invitados con `guest_id`.
+
+**Estado al 2/11/2026:** Fase 3 implementada. El seed es idempotente (`$setOnInsert` por `_id`) y no pisa ediciones del admin ni el flag `motor`; V2 se siembra solo con `SEED_NARRATIVE_V2=true`. Índices V2 por `universo_id` y compuesto `(universo_id, personaje_id, direccion)` para eventos especiales. Validador de grafos en `app/features/narrative/validation/graph_validator.py` (raíz, referencias, terminales alcanzables, ciclos, pesos) expuesto por `POST /api/narrative/admin/v2/validar`, con validación inline y de grafos almacenados; el rechazo 409 en create/update queda para cuando la SPA admin consuma el validador. Historial V2 persistido (`opcion_elegida_id`, `resultado_obtenido_id`, desenlace) y concurrencia optimista por `version` con 409 en escritura obsoleta (documentos sin `version` se tratan como 0). Economía narrativa D4/D6: los cuatro DTO de V2 devuelven `puntos_ganados`; la cuenta acredita una sola vez por ledger y el invitado recibe sus puntos sin escribir `usuarios`/`user_attempts`; la identidad de invitado es un `user_id` interno negativo estable derivado de `X-Guest-Id`, lo que aísla partidas sin romper los índices únicos existentes; `POST /api/economy/guest-migration` vuelca el saldo local una sola vez por cuenta, con tope configurable (`guest_migration_max_points`, default 1.000) y asiento de auditoría `guest_migration`. Readiness: `scripts/v2_readiness.py` juega 12 meses contra `mayores_actualizaciones_test`; con los 7 eventos sembrados el dry-run falla por soft-lock en el mes 8, y con reciclaje explícito (`--reciclar`, o `reciclaje_eventos_v2` por universo, default `false`) completa 12/12 meses con 0 errores, 0 soft-locks, 1 reciclaje y 5 eventos repetidos. Por eso V2 no puede declararse oficial todavía: requiere autorar más eventos o habilitar el reciclaje por universo (Fase 5). Snapshot OpenAPI regenerado por rutas y campos opcionales nuevos; la migración del frontend a esos campos sigue en backlog (Anexo F). Suite: 156 passed, 18 integration/live deseleccionados.
 
 ### Fase 4 — Estructura y operación (continuo)
 

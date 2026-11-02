@@ -19,6 +19,7 @@ from app.features.narrative.schemas.v2_graph_schemas import (
     NodoNarrativoSchema
 )
 from app.features.narrative.engine.graph_engine import graph_engine
+from app.features.narrative.game.identity import filtro_run
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ _FASES_CONVERSACION = {RunPhaseEnum.RESOLVER_CONVERSACION.value}
 
 async def _obtener_run_activo(user_id: int, date: str) -> Dict[str, Any]:
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada para la fecha especificada.")
     return run

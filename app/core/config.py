@@ -84,6 +84,9 @@ class Settings(BaseSettings):
     GRADING_ENFORCE_SUDOKU: bool = False
     GRADING_ENFORCE_CRUCIGRAMA: bool = False
 
+    # Siembra del contenido V2 al arrancar. Opt-in hasta completar el dry-run de readiness.
+    SEED_NARRATIVE_V2: bool = False
+
     # RAE API (Wordle / Desafíos)
     RAE_API_KEY: Optional[str] = None
 

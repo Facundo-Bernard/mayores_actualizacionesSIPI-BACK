@@ -30,6 +30,10 @@ class UniversoCreateRequest(BaseModel):
     icono: str = "crown"
     imagen: str = "/assets/narrative/universos/default.webp"
     motor: str = Field("v1", description="Motor de resolución del universo: 'v1' (clásico) o 'v2' (grafos)")
+    reciclaje_eventos_v2: bool = Field(
+        False,
+        description="V2: al agotar los eventos elegibles, libera el historial para poder cerrar los 12 meses",
+    )
     recursos: List[RecursoDefinicionSchema]
 
     model_config = {"populate_by_name": True}
@@ -41,6 +45,7 @@ class UniversoResponse(BaseModel):
     icono: str
     imagen: str = "/assets/narrative/universos/default.webp"
     motor: str = "v1"
+    reciclaje_eventos_v2: bool = False
     recursos: List[RecursoDefinicionSchema]
 
     model_config = {"populate_by_name": True}

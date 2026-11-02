@@ -67,6 +67,7 @@ from app.features.narrative.game.modals_service import (
     obtener_resultado_actual_partida,
     obtener_draft_actual_partida
 )
+from app.features.narrative.game.identity import cargar_guest_id
 from app.features.narrative.admin.crud_service import (
     obtener_conversaciones_posibles_por_personajes
 )
@@ -89,7 +90,11 @@ def _get_current_user_id(authorization: Optional[str] = Header(None)) -> int:
 # ROUTER V2: CICLO MENSUAL NATIVO LIGERO (/api/narrative/v2/partida)
 # ============================================================================
 
-router_v2 = APIRouter(prefix="/api/narrative/v2/partida", tags=["Juego Narrativo - Partidas (V2 Ligero)"])
+router_v2 = APIRouter(
+    prefix="/api/narrative/v2/partida",
+    tags=["Juego Narrativo - Partidas (V2 Ligero)"],
+    dependencies=[Depends(cargar_guest_id)],
+)
 
 @router_v2.post(
     "/iniciar",
@@ -219,7 +224,11 @@ async def endpoint_v2_iniciar_conversacion_grafo(
 # ROUTER CONSULTAS: MODALES Y SETUP (/api/narrative/partida)
 # ============================================================================
 
-router = APIRouter(prefix="/api/narrative/partida", tags=["Juego Narrativo - Consultas"])
+router = APIRouter(
+    prefix="/api/narrative/partida",
+    tags=["Juego Narrativo - Consultas"],
+    dependencies=[Depends(cargar_guest_id)],
+)
 
 @router.get(
     "/setup",

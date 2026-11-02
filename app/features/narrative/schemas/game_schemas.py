@@ -206,6 +206,7 @@ class IniciarPartidaV2Response(BaseModel):
     cartas_draft_actual: List[CartaResponse]
     finalizacion: Optional[FinalizacionResponse] = None
     motor: Optional[str] = "v1"
+    puntos_ganados: Optional[int] = None
 
 class ElegirCartaMesV2Response(BaseModel):
     fase_actual: str = "TOMA_DECISION_EVENTO"
@@ -213,6 +214,7 @@ class ElegirCartaMesV2Response(BaseModel):
     evento_actual: Optional[EventoTurnoResponse] = None
     finalizacion: Optional[FinalizacionResponse] = None
     grafo_actual: Optional[EstadoGrafoV2Response] = None
+    puntos_ganados: Optional[int] = None
 
 class DecidirEventoV2Response(BaseModel):
     fase_actual: str
@@ -220,6 +222,7 @@ class DecidirEventoV2Response(BaseModel):
     resultado_actual: ResultadoResponse
     conversacion_actual: Optional[ConversacionResponse] = None
     finalizacion: Optional[FinalizacionResponse] = None
+    puntos_ganados: Optional[int] = None
 
 class ResponderConversacionV2Response(BaseModel):
     fase_actual: str = "BALANCE_MES"
@@ -234,3 +237,4 @@ class AvanzarMesV2Response(BaseModel):
     recursos: Dict[str, int]
     cartas_draft_actual: List[CartaResponse] = []
     finalizacion: Optional[FinalizacionResponse] = None
+    puntos_ganados: Optional[int] = None

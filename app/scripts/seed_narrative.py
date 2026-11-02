@@ -10,13 +10,13 @@ import logging
 from datetime import datetime
 
 from app.core.database import get_database, connect_to_mongo
-from app.features.narrative.admin.crud_service import (
-    crear_o_actualizar_universo,
-    crear_o_actualizar_personaje,
-    crear_o_actualizar_carta,
-    crear_o_actualizar_resultado,
-    crear_o_actualizar_evento,
-    crear_o_actualizar_conversacion,
+from app.features.narrative.constants import (
+    COLL_SETTINGS,
+    COLL_CHARACTERS,
+    COLL_CARDS,
+    COLL_RESULTS,
+    COLL_EVENTS,
+    COLL_CONVERSATIONS,
 )
 from app.features.narrative.admin.challenge_service import generar_mes_narrativo
 from app.features.narrative.schemas import (
@@ -53,6 +53,17 @@ logger = logging.getLogger(__name__)
 
 UNIVERSO_ID = "corte_medieval"
 
+
+async def _insertar_si_no_existe(collection_name: str, item) -> None:
+    """Siembra inicial idempotente: nunca pisa documentos existentes ni el flag ``motor``."""
+    doc = item.model_dump(by_alias=True)
+    await get_database()[collection_name].update_one(
+        {"_id": doc["_id"]},
+        {"$setOnInsert": doc},
+        upsert=True,
+    )
+
+
 async def seed_narrative_game():
     logger.info("[NARRATIVE SEED] Iniciando siembra de contenido narrativo...")
 
@@ -69,7 +80,7 @@ async def seed_narrative_game():
             RecursoDefinicionSchema(clave="fe", nombre="Fervor Religioso", icono="church", min=0, max=100, inicial=50)
         ]
     )
-    await crear_o_actualizar_universo(universo)
+    await _insertar_si_no_existe(COLL_SETTINGS, universo)
 
     # 2. PERSONAJES (5 iniciales)
     personajes = [
@@ -191,7 +202,7 @@ async def seed_narrative_game():
         )
     ]
     for p in personajes:
-        await crear_o_actualizar_personaje(p)
+        await _insertar_si_no_existe(COLL_CHARACTERS, p)
 
     # 3. CARTAS (10 cartas variadas)
     cartas = [
@@ -313,7 +324,7 @@ async def seed_narrative_game():
         )
     ]
     for c in cartas:
-        await crear_o_actualizar_carta(c)
+        await _insertar_si_no_existe(COLL_CARDS, c)
 
     # 4. RESULTADOS (15 desenlaces reutilizables y temáticos)
     resultados = [
@@ -498,7 +509,7 @@ async def seed_narrative_game():
         )
     ]
     for r in resultados:
-        await crear_o_actualizar_resultado(r)
+        await _insertar_si_no_existe(COLL_RESULTS, r)
 
     # 5. EVENTOS DEL AÑO (12 eventos únicos con opciones dinámicas, probabilidades y secretas)
     eventos = [
@@ -1239,7 +1250,7 @@ async def seed_narrative_game():
     ]
 
     for e in eventos:
-        await crear_o_actualizar_evento(e)
+        await _insertar_si_no_existe(COLL_EVENTS, e)
 
     # 6. CONVERSACIONES DE CORTE (3 diálogos)
     conversaciones = [
@@ -1808,7 +1819,7 @@ async def seed_narrative_game():
         )
     ]
     for conv in conversaciones:
-        await crear_o_actualizar_conversacion(conv)
+        await _insertar_si_no_existe(COLL_CONVERSATIONS, conv)
 
     # 7. GENERAR EL MES ACTUAL EN daily_challenges
     ahora = datetime.now()

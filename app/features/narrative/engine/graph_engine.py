@@ -17,9 +17,9 @@ from app.features.narrative.constants import (
     COLL_V2_EVENTS,
     COLL_V2_CONVERSATIONS,
     COLL_V2_EVENTOS_ESPECIALES,
-    COLL_RUNS,
     COLL_CHARACTERS,
     COLL_CARDS,
+    COLL_SETTINGS,
     AFINIDAD_UMBRAL_LEALTAD,
     AFINIDAD_UMBRAL_TRAICION
 )
@@ -29,6 +29,7 @@ from app.features.narrative.schemas.v2_graph_schemas import (
     NodoClienteSchema,
     EstadoGrafoV2Response
 )
+from app.features.narrative.game.run_repository import persistir_run
 
 logger = logging.getLogger(__name__)
 
@@ -102,44 +103,62 @@ class GraphTraversalEngine:
 
         from app.features.narrative.engine.rule_engine import evaluar_condiciones
 
-        disponibles = []
-        pesos = []
+        def _elegibles(eventos_previos: set) -> tuple[list, list]:
+            disponibles_elegibles = []
+            pesos_elegibles = []
+            for evt in candidatos:
+                evt_id = evt.get("_id")
+                if evt_id in eventos_previos:
+                    continue
 
-        for evt in candidatos:
-            evt_id = evt.get("_id")
-            if evt_id in eventos_jugados:
-                continue
+                # Validar requisitos de eventos previos (Arcos Narrativos)
+                requisitos_previos = evt.get("requisitos_eventos_previos", [])
+                if requisitos_previos and not set(requisitos_previos).issubset(eventos_previos):
+                    continue
 
-            # Validar requisitos de eventos previos (Arcos Narrativos)
-            requisitos_previos = evt.get("requisitos_eventos_previos", [])
-            if requisitos_previos and not set(requisitos_previos).issubset(eventos_jugados):
-                continue
+                # Validar requisitos de personajes de la corte
+                requisitos_personajes = evt.get("requisitos_personajes", [])
+                if requisitos_personajes and not set(requisitos_personajes).issubset(corte_activa):
+                    continue
 
-            # Validar requisitos de personajes de la corte
-            requisitos_personajes = evt.get("requisitos_personajes", [])
-            if requisitos_personajes and not set(requisitos_personajes).issubset(corte_activa):
-                continue
+                # Validar condiciones de disparo del estado del reino
+                condiciones_disparo = evt.get("condiciones_disparo", [])
+                if condiciones_disparo and not evaluar_condiciones(condiciones_disparo, run):
+                    continue
 
-            # Validar condiciones de disparo del estado del reino
-            condiciones_disparo = evt.get("condiciones_disparo", [])
-            if condiciones_disparo and not evaluar_condiciones(condiciones_disparo, run):
-                continue
+                # Cálculo de peso ponderado (sinergias con corte, cartas y urgencia)
+                peso = float(evt.get("peso_base", 100.0))
+                tags_evento = {t.lower() for t in evt.get("tags_tematicos", [])}
 
-            # Cálculo de peso ponderado (sinergias con corte, cartas y urgencia)
-            peso = float(evt.get("peso_base", 100.0))
-            tags_evento = {t.lower() for t in evt.get("tags_tematicos", [])}
+                if tags_corte.intersection(tags_evento):
+                    peso *= 2.0
 
-            if tags_corte.intersection(tags_evento):
-                peso *= 2.0
+                if tags_cartas.intersection(tags_evento):
+                    peso *= 2.5
 
-            if tags_cartas.intersection(tags_evento):
-                peso *= 2.5
+                if recursos_en_crisis.intersection(tags_evento):
+                    peso *= 3.0
 
-            if recursos_en_crisis.intersection(tags_evento):
-                peso *= 3.0
+                disponibles_elegibles.append(evt)
+                pesos_elegibles.append(max(1.0, peso))
+            return disponibles_elegibles, pesos_elegibles
 
-            disponibles.append(evt)
-            pesos.append(max(1.0, peso))
+        disponibles, pesos = _elegibles(eventos_jugados)
+
+        if not disponibles and eventos_jugados:
+            universo_doc = await db[COLL_SETTINGS].find_one(
+                {"_id": universo_id}, {"reciclaje_eventos_v2": 1}
+            )
+            reciclar = bool(
+                run.get("reciclaje_eventos_v2")
+                or (universo_doc or {}).get("reciclaje_eventos_v2")
+            )
+            if reciclar:
+                # Reciclaje controlado: al agotar los eventos elegibles se libera el
+                # historial para que la partida pueda cerrar los 12 meses.
+                run["eventos_jugados"] = []
+                run["reciclajes_eventos_v2"] = int(run.get("reciclajes_eventos_v2", 0)) + 1
+                disponibles, pesos = _elegibles(set())
 
         if not disponibles:
             return None
@@ -204,7 +223,6 @@ class GraphTraversalEngine:
         """
         Inicia un grafo en la partida, fijando el nodo raíz y devolviendo el estado inicial sanitizado y evaluado.
         """
-        db = get_database()
         grafo_id = grafo["_id"]
         nodo_raiz_id = grafo["nodo_raiz"]
         nodos = grafo.get("nodos", {})
@@ -224,13 +242,7 @@ class GraphTraversalEngine:
         }
         run["fase_actual"] = fase
 
-        await db[COLL_RUNS].update_one(
-            {"_id": run["_id"]},
-            {"$set": {
-                "grafo_activo": run["grafo_activo"],
-                "fase_actual": run["fase_actual"]
-            }}
-        )
+        await persistir_run(run, ["grafo_activo", "fase_actual"])
 
         return EstadoGrafoV2Response(
             fase_actual=fase,
@@ -384,7 +396,6 @@ class GraphTraversalEngine:
 
         siguiente_nodo = NodoNarrativoSchema(**siguiente_nodo_data)
         nodo_cliente = siguiente_nodo.to_cliente_schema(run)
-        db = get_database()
 
         # ====================================================================
         # CASO 1: NODO INTERMEDIO (es_final == False)
@@ -393,10 +404,7 @@ class GraphTraversalEngine:
             grafo_activo["nodo_actual_id"] = siguiente_nodo_id
             turno = run.setdefault("turno_actual", {})
             turno["opcion_elegida_id"] = opcion_id
-            await db[COLL_RUNS].update_one(
-                {"_id": run["_id"]},
-                {"$set": {"grafo_activo": grafo_activo, "turno_actual": turno}}
-            )
+            await persistir_run(run, ["grafo_activo", "turno_actual"])
 
             return EstadoGrafoV2Response(
                 fase_actual=run["fase_actual"],
@@ -460,12 +468,21 @@ class GraphTraversalEngine:
         turno["resultado_obtenido_id"] = siguiente_nodo_id
         run["grafo_activo"] = None
 
+        run.setdefault("historial_grafos", []).append({
+            "mes": run.get("mes_actual", 1),
+            "tipo": tipo,
+            "grafo_id": grafo_id,
+            "opcion_elegida_id": opcion_id,
+            "resultado_obtenido_id": siguiente_nodo_id,
+            "resultado_texto": siguiente_nodo.resultado_texto,
+        })
+
         # 5. Comprobar Derrota por colapso de recursos (epílogo + sincronización de intento)
         derrota = await verificar_colapso_recursos(run)
         if derrota:
             run["updated_at"] = datetime.now(timezone.utc).isoformat()
-            await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
-            await sincronizar_intento_usuario(run)
+            await persistir_run(run)
+            puntos_ganados = await sincronizar_intento_usuario(run)
 
             return EstadoGrafoV2Response(
                 fase_actual=run["fase_actual"],
@@ -477,7 +494,8 @@ class GraphTraversalEngine:
                 afinidad=afinidad,
                 recursos=recursos,
                 finalizacion=run.get("finalizacion"),
-                status=run.get("status", "game_over")
+                status=run.get("status", "game_over"),
+                puntos_ganados=puntos_ganados,
             )
 
         # 5.5 Encadenar evento especial de afinidad (lealtad/traición) si se cruzó un umbral
@@ -492,7 +510,7 @@ class GraphTraversalEngine:
         estado_especial = await self._encadenar_especial_pendiente(run)
         if estado_especial is not None:
             run["updated_at"] = datetime.now(timezone.utc).isoformat()
-            await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+            await persistir_run(run)
             return estado_especial
 
         # 6. (solo tras un evento) Conversación incidental de corte con 40% de probabilidad
@@ -511,13 +529,13 @@ class GraphTraversalEngine:
                     fase=RunPhaseEnum.RESOLVER_CONVERSACION.value
                 )
                 run["updated_at"] = datetime.now(timezone.utc).isoformat()
-                await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+                await persistir_run(run)
                 return estado_conv
 
         # 7. Transición de Fase a balance mensual
         run["fase_actual"] = RunPhaseEnum.BALANCE_MES.value
         run["updated_at"] = datetime.now(timezone.utc).isoformat()
-        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+        await persistir_run(run)
 
         return EstadoGrafoV2Response(
             fase_actual=run["fase_actual"],

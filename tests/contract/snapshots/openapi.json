@@ -252,6 +252,17 @@
             "title": "Mes Actual",
             "type": "integer"
           },
+          "puntos_ganados": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puntos Ganados"
+          },
           "recursos": {
             "additionalProperties": {
               "type": "integer"
@@ -2129,6 +2140,17 @@
               }
             ]
           },
+          "puntos_ganados": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puntos Ganados"
+          },
           "recursos": {
             "additionalProperties": {
               "type": "integer"
@@ -2220,6 +2242,13 @@
             "description": "Escalas de calificación por tiempo configuradas por juego",
             "title": "Escalas Tiempo Por Juego",
             "type": "object"
+          },
+          "guest_migration_max_points": {
+            "default": 1000,
+            "description": "Tope de puntos de invitado que una cuenta puede reclamar al registrarse",
+            "minimum": 0.0,
+            "title": "Guest Migration Max Points",
+            "type": "integer"
           },
           "paquetes_tienda": {
             "description": "Opciones de canje en la mini-tienda",
@@ -2337,6 +2366,19 @@
             ],
             "description": "Escalas de calificación por tiempo por juego (sudoku, crucigrama, sopa_letras)",
             "title": "Escalas Tiempo Por Juego"
+          },
+          "guest_migration_max_points": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Tope de puntos de invitado reclamables por cuenta",
+            "title": "Guest Migration Max Points"
           },
           "paquetes_tienda": {
             "anyOf": [
@@ -2488,6 +2530,17 @@
               }
             ]
           },
+          "puntos_ganados": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puntos Ganados"
+          },
           "recursos": {
             "additionalProperties": {
               "type": "integer"
@@ -2610,6 +2663,18 @@
           "nodo_actual": {
             "$ref": "#/components/schemas/NodoClienteSchema",
             "description": "Nodo activo en el que se encuentra el jugador"
+          },
+          "puntos_ganados": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Puntos acreditados por finalizar la partida (solo en transición terminal)",
+            "title": "Puntos Ganados"
           },
           "recursos": {
             "anyOf": [
@@ -3253,6 +3318,73 @@
         "title": "FinalizacionResponse",
         "type": "object"
       },
+      "GuestMigrationRequest": {
+        "properties": {
+          "guest_id": {
+            "description": "Identificador anónimo (X-Guest-Id) con el que se acumularon puntos sin cuenta",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Guest Id",
+            "type": "string"
+          },
+          "puntos": {
+            "description": "Puntos informados por el cliente; el servidor aplica el tope configurado",
+            "minimum": 0.0,
+            "title": "Puntos",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "guest_id",
+          "puntos"
+        ],
+        "title": "GuestMigrationRequest",
+        "type": "object"
+      },
+      "GuestMigrationResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "puntos_migrados": {
+            "title": "Puntos Migrados",
+            "type": "integer"
+          },
+          "puntos_solicitados": {
+            "title": "Puntos Solicitados",
+            "type": "integer"
+          },
+          "puntos_totales": {
+            "description": "Saldo total de puntos de la cuenta tras la migración",
+            "title": "Puntos Totales",
+            "type": "integer"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          },
+          "tope": {
+            "title": "Tope",
+            "type": "integer"
+          },
+          "ya_migrado": {
+            "description": "True si la cuenta ya había reclamado puntos de invitado",
+            "title": "Ya Migrado",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "ya_migrado",
+          "puntos_solicitados",
+          "puntos_migrados",
+          "tope",
+          "puntos_totales",
+          "message"
+        ],
+        "title": "GuestMigrationResponse",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3264,6 +3396,50 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HallazgoValidacionSchema": {
+        "properties": {
+          "codigo": {
+            "description": "Código estable del hallazgo",
+            "title": "Codigo",
+            "type": "string"
+          },
+          "mensaje": {
+            "description": "Descripción legible del problema",
+            "title": "Mensaje",
+            "type": "string"
+          },
+          "nodo_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nodo involucrado, si aplica",
+            "title": "Nodo Id"
+          },
+          "opcion_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opción involucrada, si aplica",
+            "title": "Opcion Id"
+          }
+        },
+        "required": [
+          "codigo",
+          "mensaje"
+        ],
+        "title": "HallazgoValidacionSchema",
         "type": "object"
       },
       "HistorialMes": {
@@ -3516,6 +3692,17 @@
             ],
             "default": "v1",
             "title": "Motor"
+          },
+          "puntos_ganados": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puntos Ganados"
           },
           "recursos": {
             "additionalProperties": {
@@ -4721,6 +4908,54 @@
         "title": "ResultadoResponse",
         "type": "object"
       },
+      "ResultadoValidacionGrafoSchema": {
+        "properties": {
+          "advertencias": {
+            "description": "Problemas no bloqueantes",
+            "items": {
+              "$ref": "#/components/schemas/HallazgoValidacionSchema"
+            },
+            "title": "Advertencias",
+            "type": "array"
+          },
+          "errores": {
+            "description": "Problemas bloqueantes",
+            "items": {
+              "$ref": "#/components/schemas/HallazgoValidacionSchema"
+            },
+            "title": "Errores",
+            "type": "array"
+          },
+          "grafo_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ID del grafo validado",
+            "title": "Grafo Id"
+          },
+          "tipo": {
+            "description": "Tipo de grafo validado",
+            "title": "Tipo",
+            "type": "string"
+          },
+          "valido": {
+            "description": "True si no hay errores bloqueantes",
+            "title": "Valido",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "tipo",
+          "valido"
+        ],
+        "title": "ResultadoValidacionGrafoSchema",
+        "type": "object"
+      },
       "SearchUserEconomyResponse": {
         "properties": {
           "codigoAcceso": {
@@ -5011,6 +5246,12 @@
             "title": "Nombre",
             "type": "string"
           },
+          "reciclaje_eventos_v2": {
+            "default": false,
+            "description": "V2: al agotar los eventos elegibles, libera el historial para poder cerrar los 12 meses",
+            "title": "Reciclaje Eventos V2",
+            "type": "boolean"
+          },
           "recursos": {
             "items": {
               "$ref": "#/components/schemas/RecursoDefinicionSchema"
@@ -5055,6 +5296,11 @@
           "nombre": {
             "title": "Nombre",
             "type": "string"
+          },
+          "reciclaje_eventos_v2": {
+            "default": false,
+            "title": "Reciclaje Eventos V2",
+            "type": "boolean"
           },
           "recursos": {
             "items": {
@@ -5863,6 +6109,86 @@
           "email"
         ],
         "title": "UsuarioResponse",
+        "type": "object"
+      },
+      "ValidarGrafoV2Request": {
+        "properties": {
+          "grafo": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Grafo inline a validar sin persistirlo (útil desde el editor admin)",
+            "title": "Grafo"
+          },
+          "grafo_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ID del grafo almacenado a validar",
+            "title": "Grafo Id"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "'evento', 'conversacion' o 'evento_especial'. Obligatorio si se envía 'grafo'.",
+            "title": "Tipo"
+          },
+          "universo_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filtro por universo al validar en lote",
+            "title": "Universo Id"
+          }
+        },
+        "title": "ValidarGrafoV2Request",
+        "type": "object"
+      },
+      "ValidarGrafoV2Response": {
+        "properties": {
+          "invalidos": {
+            "default": 0,
+            "description": "Cantidad de grafos con errores",
+            "title": "Invalidos",
+            "type": "integer"
+          },
+          "resultados": {
+            "items": {
+              "$ref": "#/components/schemas/ResultadoValidacionGrafoSchema"
+            },
+            "title": "Resultados",
+            "type": "array"
+          },
+          "total": {
+            "default": 0,
+            "description": "Cantidad de grafos validados",
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "title": "ValidarGrafoV2Response",
         "type": "object"
       },
       "ValidationError": {
@@ -7713,6 +8039,52 @@
           }
         ],
         "summary": "Consumir 1 vida global (Al cometer un error o reiniciar desafío)",
+        "tags": [
+          "Economía, Vidas y Mini-Tienda"
+        ]
+      }
+    },
+    "/api/economy/guest-migration": {
+      "post": {
+        "operationId": "endpoint_guest_migration_api_economy_guest_migration_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestMigrationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestMigrationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Migrar por única vez los puntos acumulados como invitado a la cuenta autenticada",
         "tags": [
           "Economía, Vidas y Mini-Tienda"
         ]
@@ -10470,6 +10842,53 @@
         ]
       }
     },
+    "/api/narrative/admin/v2/validar": {
+      "post": {
+        "description": "Valida un grafo inline, uno almacenado o todos los grafos de un universo.",
+        "operationId": "endpoint_validar_grafos_v2_api_narrative_admin_v2_validar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidarGrafoV2Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidarGrafoV2Response"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Validar grafos V2 (referencias, hojas, pesos y ciclos)",
+        "tags": [
+          "Juego Narrativo - Torre de Control"
+        ]
+      }
+    },
     "/api/narrative/partida/conversacion-actual": {
       "get": {
         "description": "Retorna únicamente el diálogo activo del mes o null si no se activó diálogo.",
@@ -10485,6 +10904,22 @@
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
               "title": "Date",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
             }
           },
           {
@@ -10573,6 +11008,22 @@
               "description": "Filtro opcional por universo",
               "title": "Universo Id"
             }
+          },
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
           }
         ],
         "responses": {
@@ -10609,6 +11060,24 @@
       "post": {
         "description": "Retorna los diálogos de corte disponibles según los personajes provistos vía payload JSON.",
         "operationId": "endpoint_conversaciones_posibles_post_api_narrative_partida_conversaciones_posibles_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -10666,6 +11135,22 @@
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
               "title": "Date",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
             }
           },
           {
@@ -10732,6 +11217,22 @@
           },
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -10794,6 +11295,22 @@
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
               "title": "Date",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
             }
           },
           {
@@ -10868,6 +11385,22 @@
           },
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -10926,6 +11459,22 @@
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
               "title": "Date",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
             }
           },
           {
@@ -10992,6 +11541,22 @@
           },
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -11040,6 +11605,22 @@
         "description": "Elimina la run en curso para permitir comenzar de nuevo desde el setup.",
         "operationId": "endpoint_reiniciar_partida_api_narrative_partida_reiniciar_post",
         "parameters": [
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
           {
             "in": "header",
             "name": "authorization",
@@ -11108,6 +11689,22 @@
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
               "title": "Date",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
             }
           },
           {
@@ -11182,6 +11779,22 @@
           },
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -11230,6 +11843,22 @@
         "description": "Aplica pasivos mensuales, guarda el historial y avanza al siguiente mes (o decreta fin de año).",
         "operationId": "endpoint_v2_avanzar_mes_api_narrative_v2_partida_avanzar_mes_post",
         "parameters": [
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
           {
             "in": "header",
             "name": "authorization",
@@ -11292,6 +11921,22 @@
         "parameters": [
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -11352,6 +11997,22 @@
         "parameters": [
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -11410,6 +12071,22 @@
         "description": "Aplica la carta seleccionada y retorna el evento sorteado del mes (o finalización si colapsó).",
         "operationId": "endpoint_v2_elegir_carta_mes_api_narrative_v2_partida_elegir_carta_mes_post",
         "parameters": [
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
           {
             "in": "header",
             "name": "authorization",
@@ -11484,6 +12161,22 @@
           },
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -11546,6 +12239,22 @@
           },
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -11602,6 +12311,22 @@
         "description": "Inicia la partida para la fecha actual devolviendo recursos y mazo de draft inicial.",
         "operationId": "endpoint_v2_iniciar_partida_api_narrative_v2_partida_iniciar_post",
         "parameters": [
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
           {
             "in": "header",
             "name": "authorization",
@@ -11676,6 +12401,22 @@
           },
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -11746,6 +12487,22 @@
           },
           {
             "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {
@@ -11794,6 +12551,22 @@
         "description": "Interviene en la conversación entre consejeros y retorna afinidades actualizadas.",
         "operationId": "endpoint_v2_responder_conversacion_api_narrative_v2_partida_responder_conversacion_post",
         "parameters": [
+          {
+            "in": "header",
+            "name": "x-guest-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Id"
+            }
+          },
           {
             "in": "header",
             "name": "authorization",

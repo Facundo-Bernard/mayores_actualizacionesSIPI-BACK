@@ -58,6 +58,12 @@ async def lifespan(app: FastAPI):
                 await seed_narrative_game()
             except Exception as e_seed:
                 logger.warning(f"Aviso durante la siembra de narrativa: {e_seed}")
+            if settings.SEED_NARRATIVE_V2:
+                try:
+                    from app.scripts.seed_narrative_v2_graphs import seed_v2_graphs
+                    await seed_v2_graphs()
+                except Exception as e_seed_v2:
+                    logger.warning(f"Aviso durante la siembra de grafos V2: {e_seed_v2}")
             try:
                 from app.features.narrative.admin.challenge_service import sembrar_finalizaciones_default
                 await sembrar_finalizaciones_default()

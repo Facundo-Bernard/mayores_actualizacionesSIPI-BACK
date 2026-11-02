@@ -85,6 +85,9 @@ class EconomyConfigResponse(BaseModel):
         description="Puntos que otorga cada juego al completar un desafío",
     )
     vidas_maximas: Optional[int] = Field(None, description="Tope de vidas acumulables (null para ilimitado)")
+    guest_migration_max_points: int = Field(
+        1000, ge=0, description="Tope de puntos de invitado que una cuenta puede reclamar al registrarse"
+    )
     updated_at: Optional[str] = None
 
 
@@ -102,6 +105,9 @@ class EconomyConfigUpdateRequest(BaseModel):
     paquetes_tienda: Optional[List[TiendaPaquete]] = None
     puntos_por_juego: Optional[Dict[str, int]] = None
     vidas_maximas: Optional[int] = None
+    guest_migration_max_points: Optional[int] = Field(
+        None, ge=0, description="Tope de puntos de invitado reclamables por cuenta"
+    )
 
 
 class UserEconomyResponse(BaseModel):
@@ -247,4 +253,27 @@ class UseHintResponse(BaseModel):
     vidas_descontadas: Optional[int] = Field(0, description="Deprecado / informativo")
     pista: Optional[str] = Field(None, description="Texto de la pista generada o definición RAE")
     valor_revelado: Optional[Any] = Field(None, description="Número o letra revelada si aplica (ej: celda de Sudoku o letra de Crucigrama)")
+    message: str
+
+
+class GuestMigrationRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    guest_id: str = Field(
+        ...,
+        pattern=r"^[A-Za-z0-9_-]{1,64}$",
+        description="Identificador anónimo (X-Guest-Id) con el que se acumularon puntos sin cuenta",
+    )
+    puntos: int = Field(..., ge=0, description="Puntos informados por el cliente; el servidor aplica el tope configurado")
+
+
+class GuestMigrationResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    success: bool
+    ya_migrado: bool = Field(..., description="True si la cuenta ya había reclamado puntos de invitado")
+    puntos_solicitados: int
+    puntos_migrados: int
+    tope: int
+    puntos_totales: int = Field(..., description="Saldo total de puntos de la cuenta tras la migración")
     message: str

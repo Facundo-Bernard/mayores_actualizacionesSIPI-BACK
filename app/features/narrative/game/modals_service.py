@@ -40,13 +40,14 @@ from app.features.narrative.schemas.game_schemas import (
 )
 from app.features.narrative.engine.event_director import calcular_opciones_evento
 from app.features.narrative.game.v2_graph_service import obtener_grafo_actual_v2
+from app.features.narrative.game.identity import filtro_run
 
 logger = logging.getLogger(__name__)
 
 async def obtener_historial_partida(user_id: int, date: str) -> HistorialPartidaResponse:
     """Consulta la bitácora mensual acumulada de los meses transcurridos en la partida."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
     return HistorialPartidaResponse(
@@ -60,7 +61,7 @@ async def obtener_historial_partida(user_id: int, date: str) -> HistorialPartida
 async def obtener_inventario_partida(user_id: int, date: str) -> InventarioPartidaResponse:
     """Consulta las cartas en mano y tags activos acumulados por el jugador."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
     cartas_ids = run.get("cartas_en_mano", [])
@@ -74,7 +75,7 @@ async def obtener_inventario_partida(user_id: int, date: str) -> InventarioParti
 async def obtener_corte_partida(user_id: int, date: str) -> CortePartidaResponse:
     """Consulta los miembros activos de la corte y sus afinidades numéricas actuales."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
     afinidades = run.get("afinidad", {})
@@ -96,7 +97,7 @@ async def obtener_corte_partida(user_id: int, date: str) -> CortePartidaResponse
 async def obtener_finalizacion_partida(user_id: int, date: str) -> FinalizacionPartidaResponse:
     """Consulta la tarjeta de finalización o derrota al término de la partida."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
     fin_doc = run.get("finalizacion")
@@ -112,7 +113,7 @@ async def obtener_finalizacion_partida(user_id: int, date: str) -> FinalizacionP
 async def obtener_turno_actual(user_id: int, date: str) -> EstadoTurnoResponse:
     """Retorna el estado reactivo del turno actual para sincronización de frontend o recarga F5."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
 
@@ -159,7 +160,7 @@ async def obtener_turno_actual(user_id: int, date: str) -> EstadoTurnoResponse:
 async def obtener_evento_actual_partida(user_id: int, date: str) -> Optional[EventoTurnoResponse]:
     """Retorna únicamente el evento activo del mes con sus opciones y probabilidades calculadas."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
     evento_id = run.get("turno_actual", {}).get("evento_actual_id")
@@ -183,7 +184,7 @@ async def obtener_evento_actual_partida(user_id: int, date: str) -> Optional[Eve
 async def obtener_conversacion_actual_partida(user_id: int, date: str) -> Optional[ConversacionResponse]:
     """Retorna únicamente el diálogo de corte sorteado para el mes activo (o None si no hubo)."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
     conv_id = run.get("turno_actual", {}).get("conversacion_actual_id")
@@ -195,7 +196,7 @@ async def obtener_conversacion_actual_partida(user_id: int, date: str) -> Option
 async def obtener_resultado_actual_partida(user_id: int, date: str) -> Optional[ResultadoResponse]:
     """Retorna únicamente el resultado del desenlace recién resuelto."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
     res_id = run.get("turno_actual", {}).get("resultado_obtenido_id")
@@ -207,7 +208,7 @@ async def obtener_resultado_actual_partida(user_id: int, date: str) -> Optional[
 async def obtener_draft_actual_partida(user_id: int, date: str) -> List[CartaResponse]:
     """Retorna las 3 cartas ofrecidas en el draft del mes activo."""
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
     draft_ids = run.get("turno_actual", {}).get("cartas_ofrecidas_ids", [])

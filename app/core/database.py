@@ -153,6 +153,13 @@ async def init_indexes():
         for col_name in ["narrative_characters", "narrative_cards", "narrative_events", "narrative_results", "narrative_conversations"]:
             await db[col_name].create_index([("universo_id", ASCENDING)])
 
+        # Motor V2 de grafos: búsquedas por universo y eventos especiales por personaje/dirección
+        for col_name in ["narrative_v2_events", "narrative_v2_conversations", "narrative_v2_eventos_especiales"]:
+            await db[col_name].create_index([("universo_id", ASCENDING)])
+        await db["narrative_v2_eventos_especiales"].create_index(
+            [("universo_id", ASCENDING), ("personaje_id", ASCENDING), ("direccion", ASCENDING)]
+        )
+
         # Índices de Plantillas de Crucigrama (diseñador administrativo)
         crucigrama_templates = db["crucigrama_templates"]
         await crucigrama_templates.create_index([("id", ASCENDING)], unique=True)

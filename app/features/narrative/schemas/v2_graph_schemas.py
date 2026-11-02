@@ -221,3 +221,38 @@ class EstadoGrafoV2Response(BaseModel):
     recursos: Optional[Dict[str, int]] = Field(default=None, description="Recursos actualizados si es nodo final")
     finalizacion: Optional[Dict[str, Any]] = Field(default=None, description="Datos del epílogo si la partida terminó (derrota)")
     status: str = Field(default="CONTINUA", description="Estado de la partida ('CONTINUA', 'VICTORIA', 'DERROTA')")
+    puntos_ganados: Optional[int] = Field(default=None, description="Puntos acreditados por finalizar la partida (solo en transición terminal)")
+
+# ============================================================================
+# VALIDACIÓN ESTÁTICA DE GRAFOS V2
+# ============================================================================
+
+class ValidarGrafoV2Request(BaseModel):
+    tipo: Optional[str] = Field(
+        default=None,
+        description="'evento', 'conversacion' o 'evento_especial'. Obligatorio si se envía 'grafo'."
+    )
+    grafo_id: Optional[str] = Field(default=None, description="ID del grafo almacenado a validar")
+    universo_id: Optional[str] = Field(default=None, description="Filtro por universo al validar en lote")
+    grafo: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Grafo inline a validar sin persistirlo (útil desde el editor admin)"
+    )
+
+class HallazgoValidacionSchema(BaseModel):
+    codigo: str = Field(..., description="Código estable del hallazgo")
+    mensaje: str = Field(..., description="Descripción legible del problema")
+    nodo_id: Optional[str] = Field(default=None, description="Nodo involucrado, si aplica")
+    opcion_id: Optional[str] = Field(default=None, description="Opción involucrada, si aplica")
+
+class ResultadoValidacionGrafoSchema(BaseModel):
+    tipo: str = Field(..., description="Tipo de grafo validado")
+    grafo_id: Optional[str] = Field(default=None, description="ID del grafo validado")
+    valido: bool = Field(..., description="True si no hay errores bloqueantes")
+    errores: List[HallazgoValidacionSchema] = Field(default_factory=list, description="Problemas bloqueantes")
+    advertencias: List[HallazgoValidacionSchema] = Field(default_factory=list, description="Problemas no bloqueantes")
+
+class ValidarGrafoV2Response(BaseModel):
+    resultados: List[ResultadoValidacionGrafoSchema] = Field(default_factory=list)
+    total: int = Field(default=0, description="Cantidad de grafos validados")
+    invalidos: int = Field(default=0, description="Cantidad de grafos con errores")

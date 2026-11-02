@@ -18,6 +18,8 @@ from app.features.narrative.enums import (
     RunPhaseEnum,
     TipoFinalizacionEnum
 )
+from app.shared.economy_points import DEFAULT_PUNTOS_POR_CALIFICACION, obtener_puntos_por_calificacion
+from app.shared.ledger import LedgerKey, get_points_ledger
 
 logger = logging.getLogger(__name__)
 
@@ -124,21 +126,56 @@ def calcular_finalizacion_victoria(
         "rango": rango
     }
 
-async def sincronizar_intento_usuario(run_doc: Dict[str, Any]):
+async def sincronizar_intento_usuario(run_doc: Dict[str, Any]) -> int:
     """
-    Registra el intento diario en la colección user_attempts con el puntaje normalizado
-    (1000, 850, 700, 500, 250) y estrellas (3, 2, 1) para impactar en el progreso del alumno.
+    Registra el intento narrativo y acredita puntos al cerrar la partida.
+
+    - Autenticados: intento en ``user_attempts`` + asiento idempotente en el ledger
+      con clave ``(usuario, narrativo, fecha, normal)``.
+    - Invitados (``guest_id``): no se escribe ``user_attempts`` ni se toca ``usuarios``;
+      se devuelven los puntos para que el cliente los guarde localmente y se audita el cierre.
+
+    Devuelve los puntos ganados en esta llamada (0 si es replay, derrota o invitado repetido).
     """
     try:
         db = get_database()
-        user_id = run_doc.get("user_id")
+        user_id = int(run_doc.get("user_id") or 0)
+        guest_id = run_doc.get("guest_id")
         date_str = run_doc.get("date")
-        if not user_id or not date_str:
-            return
+        if not date_str or (user_id <= 0 and not guest_id):
+            return 0
 
         is_completed = run_doc.get("status") == "completed"
-        status_str = "completed" if is_completed else "failed"
         rango = run_doc.get("finalizacion", {}).get("rango", "F")
+        grade = rango if rango in DEFAULT_PUNTOS_POR_CALIFICACION else "F"
+
+        if guest_id:
+            if not is_completed:
+                return 0
+            puntos_config = await obtener_puntos_por_calificacion()
+            puntos = int(puntos_config.get(grade, 0))
+            idempotency_key = f"guest_narrative:{guest_id}:narrativo:{date_str}"
+            if await db["economy_ledger"].find_one({"_id": idempotency_key}):
+                return 0
+            await get_points_ledger().record_event(
+                user_id=0,
+                motivo="guest_narrative",
+                puntos=puntos,
+                idempotency_key=idempotency_key,
+                metadata={
+                    "guest_id": guest_id,
+                    "game_id": "narrativo",
+                    "date": date_str,
+                    "difficulty": "normal",
+                    "grade": grade,
+                    "rango": rango,
+                    "mes_final": run_doc.get("mes_actual", 1),
+                },
+                status="recorded",
+            )
+            return puntos
+
+        status_str = "completed" if is_completed else "failed"
 
         scores_map = {"S": 1000, "A": 850, "B": 700, "C": 500, "F": 250}
         stars_map = {"S": 3, "A": 3, "B": 2, "C": 1, "F": 1}
@@ -152,21 +189,45 @@ async def sincronizar_intento_usuario(run_doc: Dict[str, Any]):
                     "user_id": user_id,
                     "game_id": "narrativo",
                     "date": date_str,
+                    "difficulty": "normal",
                     "mode": "daily",
                     "status": status_str,
                     "attempts": run_doc.get("mes_actual", 1),
                     "stars": stars,
                     "score": score,
+                    "grade": grade,
                     "game_data": {
                         "rango": rango,
                         "mes_final": run_doc.get("mes_actual", 1),
                         "recursos_finales": run_doc.get("recursos", {}),
-                        "finalizacion": run_doc.get("finalizacion")
+                        "finalizacion": run_doc.get("finalizacion"),
                     },
-                    "updated_at": datetime.now(timezone.utc)
+                    "updated_at": datetime.now(timezone.utc),
                 }
             },
-            upsert=True
+            upsert=True,
         )
+
+        if not is_completed:
+            return 0
+
+        puntos_config = await obtener_puntos_por_calificacion()
+        puntos = int(puntos_config.get(grade, 0))
+        if puntos <= 0:
+            return 0
+
+        resultado = await get_points_ledger().credit(
+            LedgerKey(
+                user_id=user_id,
+                motivo="attempt",
+                game_id="narrativo",
+                date=date_str,
+                difficulty="normal",
+            ),
+            puntos,
+            metadata={"grade": grade, "rango": rango, "source": "narrativo"},
+        )
+        return puntos if resultado.applied else 0
     except Exception as e:
         logger.warning(f"Aviso al sincronizar partida narrativa con user_attempts: {e}")
+        return 0

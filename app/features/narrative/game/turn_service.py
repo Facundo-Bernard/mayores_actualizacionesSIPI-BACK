@@ -56,6 +56,8 @@ from app.features.narrative.game.endings_service import (
     sincronizar_intento_usuario
 )
 from app.features.narrative.game.setup_service import _obtener_mapa_recursos_universo
+from app.features.narrative.game.run_repository import persistir_run
+from app.features.narrative.game.identity import filtro_run
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +71,7 @@ async def elegir_carta_mes_v2(user_id: int, req: ElegirCartaMesRequest) -> Elegi
     las probabilidades de sus opciones. Retorna únicamente el evento y los recursos vivos.
     """
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": req.date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, req.date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
 
@@ -98,14 +100,15 @@ async def elegir_carta_mes_v2(user_id: int, req: ElegirCartaMesRequest) -> Elegi
     derrota = await verificar_colapso_recursos(run)
     if derrota:
         run["updated_at"] = datetime.now(timezone.utc).isoformat()
-        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
-        await sincronizar_intento_usuario(run)
+        await persistir_run(run)
+        puntos_ganados = await sincronizar_intento_usuario(run)
         fin_resp = FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None
         return ElegirCartaMesV2Response(
             fase_actual=run["fase_actual"],
             recursos=run["recursos"],
             evento_actual=None,
-            finalizacion=fin_resp
+            finalizacion=fin_resp,
+            puntos_ganados=puntos_ganados,
         )
 
     # Si el universo usa el motor V2 de grafos, sortea e inicia un grafo de evento
@@ -127,7 +130,7 @@ async def elegir_carta_mes_v2(user_id: int, req: ElegirCartaMesRequest) -> Elegi
             fase=RunPhaseEnum.TOMA_DECISION_EVENTO.value
         )
         run["updated_at"] = datetime.now(timezone.utc).isoformat()
-        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+        await persistir_run(run)
 
         return ElegirCartaMesV2Response(
             fase_actual=run["fase_actual"],
@@ -164,7 +167,7 @@ async def elegir_carta_mes_v2(user_id: int, req: ElegirCartaMesRequest) -> Elegi
     run["fase_actual"] = RunPhaseEnum.TOMA_DECISION_EVENTO.value
     run["updated_at"] = datetime.now(timezone.utc).isoformat()
 
-    await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+    await persistir_run(run)
 
     # Cargar y calcular probabilidades únicamente para el evento sorteado
     res_ids = set()
@@ -200,7 +203,7 @@ async def decidir_evento_v2(user_id: int, req: DecidirEventoRequest) -> DecidirE
     y sortea diálogo incidental si aplica. Retorna únicamente el resultado obtenido y el diálogo.
     """
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": req.date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, req.date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
 
@@ -251,8 +254,8 @@ async def decidir_evento_v2(user_id: int, req: DecidirEventoRequest) -> DecidirE
     derrota = await verificar_colapso_recursos(run)
     if derrota:
         run["updated_at"] = datetime.now(timezone.utc).isoformat()
-        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
-        await sincronizar_intento_usuario(run)
+        await persistir_run(run)
+        puntos_ganados = await sincronizar_intento_usuario(run)
         fin_resp = FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None
         res_dto = ResultadoResponse(**res_doc)
         return DecidirEventoV2Response(
@@ -260,7 +263,8 @@ async def decidir_evento_v2(user_id: int, req: DecidirEventoRequest) -> DecidirE
             recursos=run["recursos"],
             resultado_actual=res_dto,
             conversacion_actual=None,
-            finalizacion=fin_resp
+            finalizacion=fin_resp,
+            puntos_ganados=puntos_ganados,
         )
 
     # 3. Evaluar si ocurre conversación incidental de corte (40% de probabilidad)
@@ -297,7 +301,7 @@ async def decidir_evento_v2(user_id: int, req: DecidirEventoRequest) -> DecidirE
         run["fase_actual"] = RunPhaseEnum.BALANCE_MES.value
 
     run["updated_at"] = datetime.now(timezone.utc).isoformat()
-    await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+    await persistir_run(run)
 
     res_dto = ResultadoResponse(**res_doc)
     return DecidirEventoV2Response(
@@ -318,7 +322,7 @@ async def responder_conversacion_v2(user_id: int, req: ResponderConversacionRequ
     Retorna afinidades actualizadas y texto de consecuencia en 1 única lectura y guardado.
     """
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": req.date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, req.date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
 
@@ -352,7 +356,7 @@ async def responder_conversacion_v2(user_id: int, req: ResponderConversacionRequ
     run["fase_actual"] = RunPhaseEnum.BALANCE_MES.value
     run["updated_at"] = datetime.now(timezone.utc).isoformat()
 
-    await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+    await persistir_run(run)
 
     return ResponderConversacionV2Response(
         fase_actual=run["fase_actual"],

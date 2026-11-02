@@ -41,6 +41,8 @@ from app.features.narrative.game.endings_service import (
     verificar_colapso_recursos,
     sincronizar_intento_usuario
 )
+from app.features.narrative.game.run_repository import crear_run
+from app.features.narrative.game.identity import filtro_run, id_run, resolver_identidad
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +102,7 @@ async def obtener_setup_desafio(user_id: int, date: str) -> SetupDesafioResponse
     cartas_docs = await db[COLL_CARDS].find({"_id": {"$in": c_ids}}).to_list(length=10)
 
     # Verificar si el alumno ya tiene una partida iniciada para este día
-    run_activa = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    run_activa = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
 
     return SetupDesafioResponse(
         date=date,
@@ -117,7 +119,7 @@ async def obtener_setup_desafio(user_id: int, date: str) -> SetupDesafioResponse
 async def reiniciar_partida(user_id: int, date: str) -> Dict[str, Any]:
     """Elimina la run del día para reiniciar la partida limpia desde Fase 0."""
     db = get_database()
-    res = await db[COLL_RUNS].delete_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
+    res = await db[COLL_RUNS].delete_one(filtro_run(user_id, date))
     return {
         "success": True,
         "message": f"Partida del {date} reiniciada con éxito.",
@@ -136,7 +138,7 @@ async def iniciar_partida_v2(user_id: int, req: IniciarPartidaRequest) -> Inicia
     db = get_database()
 
     # 1. Verificar si ya existe run activa
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": req.date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, req.date))
     if not run:
         # Obtener desafío diario
         challenge = await db[COLL_CHALLENGES].find_one({"game_id": "narrativo", "date": req.date})
@@ -181,8 +183,8 @@ async def iniciar_partida_v2(user_id: int, req: IniciarPartidaRequest) -> Inicia
                 tags_activos.add(t)
 
         run = {
-            "_id": f"run_{user_id}_{req.date}",
-            "user_id": user_id,
+            "_id": id_run(user_id, req.date),
+            "user_id": resolver_identidad(user_id)[0],
             "date": req.date,
             "game_id": "narrativo",
             "universo_id": universo_id,
@@ -208,6 +210,10 @@ async def iniciar_partida_v2(user_id: int, req: IniciarPartidaRequest) -> Inicia
             "updated_at": datetime.now(timezone.utc).isoformat()
         }
 
+        guest_id = resolver_identidad(user_id)[1]
+        if guest_id:
+            run["guest_id"] = guest_id
+
         # Aplicar efectos "al_obtener" de la corte y cartas iniciales
         for p in personajes_docs:
             efectos_p = [EfectoSchema(**e) for e in p.get("efectos", [])]
@@ -220,8 +226,8 @@ async def iniciar_partida_v2(user_id: int, req: IniciarPartidaRequest) -> Inicia
         # Si colapsó recurso con las cartas iniciales:
         derrota = await verificar_colapso_recursos(run)
         if derrota:
-            await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run, upsert=True)
-            await sincronizar_intento_usuario(run)
+            await crear_run(run)
+            puntos_ganados = await sincronizar_intento_usuario(run)
             fin_resp = FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None
             return IniciarPartidaV2Response(
                 mes_actual=run["mes_actual"],
@@ -230,14 +236,15 @@ async def iniciar_partida_v2(user_id: int, req: IniciarPartidaRequest) -> Inicia
                 afinidad=run["afinidad"],
                 cartas_draft_actual=[],
                 finalizacion=fin_resp,
-                motor=run.get("motor", "v1")
+                motor=run.get("motor", "v1"),
+                puntos_ganados=puntos_ganados,
             )
 
         # Sortear las 3 cartas para el Draft del Mes 1
         pool_mensuales = cfg.get("pool_cartas_mensuales_ids", [])
         cartas_ofrecidas_mes = random.sample(pool_mensuales, min(3, len(pool_mensuales)))
         run["turno_actual"]["cartas_ofrecidas_ids"] = cartas_ofrecidas_mes
-        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run, upsert=True)
+        await crear_run(run)
 
     # Cargar ÚNICAMENTE las 3 cartas del draft actual para responder al frontend V2
     draft_ids = run.get("turno_actual", {}).get("cartas_ofrecidas_ids", [])

@@ -43,6 +43,8 @@ from app.features.narrative.game.endings_service import (
     sincronizar_intento_usuario
 )
 from app.features.narrative.game.setup_service import _obtener_mapa_recursos_universo
+from app.features.narrative.game.run_repository import persistir_run
+from app.features.narrative.game.identity import filtro_run
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +54,7 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
     Retorna los recursos post-pasivos y únicamente las 3 nuevas cartas de draft (o epílogo si terminó).
     """
     db = get_database()
-    run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": req.date, "game_id": "narrativo"})
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, req.date))
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
 
@@ -63,6 +65,11 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
     mes_actual = run.get("mes_actual", 1)
 
     # 1. Guardar resumen del mes en historial acumulado
+    decisiones_v2 = [
+        dict(decision)
+        for decision in run.get("historial_grafos", [])
+        if decision.get("mes") == mes_actual
+    ]
     historial_item = {
         "mes": mes_actual,
         "carta_elegida_id": turno.get("carta_elegida_id"),
@@ -71,6 +78,7 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
         "resultado_id": turno.get("resultado_obtenido_id"),
         "conversacion_id": turno.get("conversacion_actual_id"),
         "decision_conversacion_opcion": turno.get("decision_conversacion_opcion"),
+        "decisiones_v2": decisiones_v2,
         "recursos_fin_mes": dict(run.get("recursos", {}))
     }
     run["historial_mensual"].append(historial_item)
@@ -87,8 +95,8 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
         universo_doc = await db[COLL_SETTINGS].find_one({"_id": run.get("universo_id")})
         run["finalizacion"] = calcular_finalizacion_victoria(run, universo_doc)
         run["updated_at"] = datetime.now(timezone.utc).isoformat()
-        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
-        await sincronizar_intento_usuario(run)
+        await persistir_run(run)
+        puntos_ganados = await sincronizar_intento_usuario(run)
         fin_resp = FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None
         return AvanzarMesV2Response(
             mes_actual=run["mes_actual"],
@@ -96,7 +104,8 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
             status=run["status"],
             recursos=run["recursos"],
             cartas_draft_actual=[],
-            finalizacion=fin_resp
+            finalizacion=fin_resp,
+            puntos_ganados=puntos_ganados,
         )
 
     # Avanzar al siguiente mes
@@ -121,8 +130,8 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
     derrota = await verificar_colapso_recursos(run)
     if derrota:
         run["updated_at"] = datetime.now(timezone.utc).isoformat()
-        await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
-        await sincronizar_intento_usuario(run)
+        await persistir_run(run)
+        puntos_ganados = await sincronizar_intento_usuario(run)
         fin_resp = FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None
         return AvanzarMesV2Response(
             mes_actual=run["mes_actual"],
@@ -130,7 +139,8 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
             status=run["status"],
             recursos=run["recursos"],
             cartas_draft_actual=[],
-            finalizacion=fin_resp
+            finalizacion=fin_resp,
+            puntos_ganados=puntos_ganados,
         )
 
     # Sortear 3 cartas para el nuevo mes
@@ -151,7 +161,7 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
     }
 
     run["updated_at"] = datetime.now(timezone.utc).isoformat()
-    await db[COLL_RUNS].replace_one({"_id": run["_id"]}, run)
+    await persistir_run(run)
 
     # Cargar ÚNICAMENTE las 3 cartas sorteadas para la respuesta
     draft_docs = await db[COLL_CARDS].find({"_id": {"$in": cartas_sorteadas}}).to_list(None)

@@ -27,7 +27,14 @@ from app.features.narrative.schemas import (
 from app.features.narrative.schemas.v2_graph_schemas import (
     EventoV2GrafoSchema,
     ConversacionV2GrafoSchema,
-    EventoEspecialV2GrafoSchema
+    EventoEspecialV2GrafoSchema,
+    ValidarGrafoV2Request,
+    ValidarGrafoV2Response
+)
+from app.features.narrative.validation import (
+    TIPOS_VALIDOS,
+    validar_grafo,
+    validar_grafos_almacenados
 )
 from app.features.narrative.admin.rules_catalog import obtener_catalogo_reglas_dict
 from app.features.narrative.admin.image_service import procesar_y_guardar_imagen_narrativa
@@ -424,4 +431,40 @@ async def endpoint_eliminar_evento_especial_v2(evento_id: str = Path(...)):
     if not exito:
         raise HTTPException(status_code=404, detail="Evento especial V2 no encontrado.")
     return {"message": "Evento especial V2 eliminado correctamente."}
+
+@router.post(
+    "/v2/validar",
+    response_model=ValidarGrafoV2Response,
+    summary="Validar grafos V2 (referencias, hojas, pesos y ciclos)"
+)
+async def endpoint_validar_grafos_v2(req: ValidarGrafoV2Request):
+    """Valida un grafo inline, uno almacenado o todos los grafos de un universo."""
+    if req.tipo is not None and req.tipo not in TIPOS_VALIDOS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Tipo inválido: '{req.tipo}'. Válidos: {list(TIPOS_VALIDOS)}."
+        )
+
+    if req.grafo is not None:
+        if not req.tipo:
+            raise HTTPException(
+                status_code=400,
+                detail="Para validar un grafo inline se requiere indicar 'tipo'."
+            )
+        resultados = [validar_grafo(req.grafo, req.tipo)]
+    else:
+        tipos = [req.tipo] if req.tipo else None
+        resultados = await validar_grafos_almacenados(
+            tipos=tipos,
+            grafo_id=req.grafo_id,
+            universo_id=req.universo_id
+        )
+        if req.grafo_id and not resultados:
+            raise HTTPException(status_code=404, detail=f"Grafo '{req.grafo_id}' no encontrado.")
+
+    return {
+        "resultados": [r.as_dict() for r in resultados],
+        "total": len(resultados),
+        "invalidos": sum(1 for r in resultados if not r.valido)
+    }
 

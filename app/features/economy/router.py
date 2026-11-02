@@ -19,6 +19,8 @@ from app.features.economy.schemas import (
     CambiarSuscripcionRequest,
     UseHintRequest,
     UseHintResponse,
+    GuestMigrationRequest,
+    GuestMigrationResponse,
 )
 from app.features.economy.service import (
     get_economy_config,
@@ -32,6 +34,7 @@ from app.features.economy.service import (
     unlock_historical_day,
     change_user_subscription,
     use_hint,
+    migrate_guest_points,
 )
 
 router = APIRouter(tags=["Economía, Vidas y Mini-Tienda"])
@@ -124,6 +127,21 @@ async def endpoint_use_hint(
 ):
     user_id = int(current_user["id"])
     return await use_hint(user_id=user_id, req=req)
+
+
+@router.post(
+    "/api/economy/guest-migration",
+    response_model=GuestMigrationResponse,
+    summary="Migrar por única vez los puntos acumulados como invitado a la cuenta autenticada",
+)
+async def endpoint_guest_migration(
+    req: GuestMigrationRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+):
+    user_id = int(current_user["id"])
+    return await migrate_guest_points(
+        user_id=user_id, guest_id=req.guest_id, puntos_solicitados=req.puntos
+    )
 
 
 # Endpoints de Administración (Torre de Control)
