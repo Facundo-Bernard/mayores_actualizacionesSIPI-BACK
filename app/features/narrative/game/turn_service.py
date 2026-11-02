@@ -204,6 +204,12 @@ async def decidir_evento_v2(user_id: int, req: DecidirEventoRequest) -> DecidirE
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
 
+    if run.get("motor", "v1") == "v2":
+        raise HTTPException(
+            status_code=409,
+            detail="La partida usa el motor V2 de grafos; resolvé el evento con '/api/narrative/v2/partida/avanzar-nodo'."
+        )
+
     if run.get("fase_actual") != RunPhaseEnum.TOMA_DECISION_EVENTO.value:
         raise HTTPException(status_code=400, detail="La partida no se encuentra en fase de decisión de evento.")
 
@@ -315,6 +321,12 @@ async def responder_conversacion_v2(user_id: int, req: ResponderConversacionRequ
     run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": req.date, "game_id": "narrativo"})
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada.")
+
+    if run.get("motor", "v1") == "v2":
+        raise HTTPException(
+            status_code=409,
+            detail="La partida usa el motor V2 de grafos; resolvé el diálogo con '/api/narrative/v2/partida/avanzar-nodo'."
+        )
 
     if run.get("fase_actual") != RunPhaseEnum.RESOLVER_CONVERSACION.value:
         raise HTTPException(status_code=400, detail="La partida no se encuentra en fase de diálogo.")

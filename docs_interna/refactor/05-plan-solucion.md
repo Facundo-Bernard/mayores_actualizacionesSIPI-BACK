@@ -318,6 +318,8 @@ Objetivo: que el servidor no pueda ser convencido de acreditar puntos falsos por
 
 **Criterio de aceptación:** replay y doble POST concurrente producen una sola acreditación; un intento `completed` no vuelve a `in_progress/failed`; fácil y difícil acreditan una vez cada uno; una pista sin contenido no cobra; la recarga no acepta cantidades del cliente; un jugador no puede leer ni escribir intentos de otro; los endpoints manuales rechazan fases inválidas con 409.
 
+**Estado al 2/11/2026:** Fase 1 completa. Ledger idempotente con reconciliador, identidad por token en intentos, dificultad con `by_difficulty`, rechazo de replay con auditoría, pistas idempotentes y cobro posterior a la resolución, `refill-lives` de precio fijo del servidor, admin adjust atómico con actor, backfill de dificultad en dev y guardas narrativas P0 (409 por motor/fase/grafo inválido, persistencia de opción y resultado). Suite: 78 passed, 18 integration/live deseleccionados.
+
 ### Fase 2 — Validación server-side con el payload actual (2-3 semanas)
 
 Objetivo: que el servidor recalcule grado/score a partir de la submission, sin exigir un contrato nuevo.

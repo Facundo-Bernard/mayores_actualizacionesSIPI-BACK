@@ -1,9 +1,11 @@
 import re
 import logging
+import uuid
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 from fastapi import HTTPException, status
 from pymongo import ReturnDocument
+from pymongo.errors import DuplicateKeyError
 
 from app.core.database import get_database
 from app.features.economy.schemas import (
@@ -13,14 +15,20 @@ from app.features.economy.schemas import (
     ConsumeLifeResponse,
     BuyLivesResponse,
     BuyLivesRequest,
+    RefillLivesResponse,
+    UseHintResponse,
     TiendaPaquete,
     EscalaCalificacionTiempo,
     DEFAULT_ESCALAS_TIEMPO,
 )
+from app.shared.clock import today_str
+from app.shared.ledger import get_points_ledger
 
 logger = logging.getLogger("EconomyService")
 
 COLL_CONFIG = "configuracion_economia"
+COLL_HINTS = "user_hints"
+REFILL_LIVES_COST = 50
 
 DEFAULT_ECONOMY_CONFIG: Dict[str, Any] = {
     "_id": "global_economy",
@@ -230,7 +238,7 @@ async def buy_lives(user_id: int, req: BuyLivesRequest) -> BuyLivesResponse:
     vidas_a_sumar = 1
     costo_puntos = config.costo_vida_puntos
 
-    # Si se especificó un paquete predeterminado
+    # El paquete define vidas y precio; la vía directa req.vidas queda ignorada.
     if req.package_id:
         paquete = next((p for p in config.paquetes_tienda if p.id == req.package_id), None)
         if not paquete:
@@ -240,17 +248,33 @@ async def buy_lives(user_id: int, req: BuyLivesRequest) -> BuyLivesResponse:
             )
         vidas_a_sumar = paquete.vidas
         costo_puntos = paquete.puntos
-    elif req.vidas and req.vidas > 0:
-        vidas_a_sumar = req.vidas
-        costo_puntos = req.vidas * config.costo_vida_puntos
+
+    max_vidas = config.vidas_maximas
+    if max_vidas is not None:
+        update_query: Any = [
+            {
+                "$set": {
+                    "puntos": {"$subtract": ["$puntos", costo_puntos]},
+                    "vidas": {
+                        "$min": [
+                            {"$add": [{"$ifNull": ["$vidas", 0]}, vidas_a_sumar]},
+                            max_vidas,
+                        ]
+                    },
+                    "updated_at": datetime.now(timezone.utc),
+                }
+            }
+        ]
+    else:
+        update_query = {
+            "$inc": {"puntos": -costo_puntos, "vidas": vidas_a_sumar},
+            "$set": {"updated_at": datetime.now(timezone.utc)},
+        }
 
     # Ejecutar transacción atómica con guarda de puntos suficientes
     result = await db["usuarios"].find_one_and_update(
         {"id": user_id, "puntos": {"$gte": costo_puntos}},
-        {
-            "$inc": {"puntos": -costo_puntos, "vidas": vidas_a_sumar},
-            "$set": {"updated_at": datetime.now(timezone.utc)},
-        },
+        update_query,
         return_document=ReturnDocument.AFTER,
     )
 
@@ -277,6 +301,59 @@ async def buy_lives(user_id: int, req: BuyLivesRequest) -> BuyLivesResponse:
         compradas=vidas_a_sumar,
         costo=costo_puntos,
         message=f"¡Canje exitoso! Sumaste {vidas_a_sumar} {'vida' if vidas_a_sumar == 1 else 'vidas'}.",
+    )
+
+
+async def refill_lives(user_id: int) -> RefillLivesResponse:
+    """
+    Recarga de vidas de partida con precio y beneficio fijados por el servidor.
+
+    Las vidas de partida son locales: el backend cobra 50 puntos y el cliente
+    reinicia su contador. Cualquier cantidad, costo o vidas enviada por el
+    cliente se ignora porque el endpoint no acepta body.
+    """
+    db = get_database()
+
+    await db["usuarios"].update_one(
+        {"id": user_id, "puntos": {"$exists": False}},
+        {"$set": {"puntos": 0}},
+    )
+
+    result = await db["usuarios"].find_one_and_update(
+        {"id": user_id, "puntos": {"$gte": REFILL_LIVES_COST}},
+        {
+            "$inc": {"puntos": -REFILL_LIVES_COST},
+            "$set": {"updated_at": datetime.now(timezone.utc)},
+        },
+        return_document=ReturnDocument.AFTER,
+    )
+
+    if not result:
+        user = await db["usuarios"].find_one({"id": user_id})
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Usuario {user_id} no encontrado.",
+            )
+        puntos_actuales = int(user.get("puntos", 0))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Puntos insuficientes. Necesitás {REFILL_LIVES_COST} pts "
+                f"y tenés {puntos_actuales} pts."
+            ),
+        )
+
+    nuevos_puntos = int(result.get("puntos", 0))
+    logger.info(
+        f"[ECONOMIA] Usuario {user_id} recargó vidas por {REFILL_LIVES_COST} pts. "
+        f"Saldo restante: {nuevos_puntos} pts."
+    )
+
+    return RefillLivesResponse(
+        success=True,
+        puntos=nuevos_puntos,
+        message=f"Vidas recargadas por {REFILL_LIVES_COST} puntos.",
     )
 
 
@@ -338,34 +415,39 @@ async def adjust_user_economy(
     vidas_set: Optional[int] = None,
     puntos_set: Optional[int] = None,
     suscripcion_set: Optional[str] = None,
+    actor_id: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """Asigna o ajusta vidas y/o puntos a un usuario en MongoDB (para pruebas y administración)."""
+    """Asigna o ajusta vidas y/o puntos en un único update atómico (administración)."""
     user = await find_user_by_identifier(identificador)
     user_id = user["id"]
     db = get_database()
 
-    inc_ops: Dict[str, int] = {}
-    set_ops: Dict[str, Any] = {"updated_at": datetime.now(timezone.utc)}
+    set_stage: Dict[str, Any] = {"updated_at": datetime.now(timezone.utc)}
+    operations: Dict[str, Any] = {}
 
     if vidas_set is not None:
-        set_ops["vidas"] = max(0, int(vidas_set))
+        set_stage["vidas"] = max(0, int(vidas_set))
+        operations["vidas_set"] = int(vidas_set)
     elif vidas_sumar is not None and vidas_sumar != 0:
-        inc_ops["vidas"] = int(vidas_sumar)
+        set_stage["vidas"] = {
+            "$max": [0, {"$add": [{"$ifNull": ["$vidas", 0]}, int(vidas_sumar)]}]
+        }
+        operations["vidas_sumar"] = int(vidas_sumar)
 
     if puntos_set is not None:
-        set_ops["puntos"] = max(0, int(puntos_set))
+        set_stage["puntos"] = max(0, int(puntos_set))
+        operations["puntos_set"] = int(puntos_set)
     elif puntos_sumar is not None and puntos_sumar != 0:
-        inc_ops["puntos"] = int(puntos_sumar)
+        set_stage["puntos"] = {
+            "$max": [0, {"$add": [{"$ifNull": ["$puntos", 0]}, int(puntos_sumar)]}]
+        }
+        operations["puntos_sumar"] = int(puntos_sumar)
+
     if suscripcion_set:
-        set_ops["suscripcion"] = suscripcion_set.lower().strip()
+        set_stage["suscripcion"] = suscripcion_set.lower().strip()
+        operations["suscripcion_set"] = suscripcion_set.lower().strip()
 
-    update_query: Dict[str, Any] = {}
-    if inc_ops:
-        update_query["$inc"] = inc_ops
-    if set_ops:
-        update_query["$set"] = set_ops
-
-    if not inc_ops and len(set_ops) <= 1:
+    if not operations:
         return {
             "success": True,
             "user_id": user["id"],
@@ -379,25 +461,37 @@ async def adjust_user_economy(
 
     updated = await db["usuarios"].find_one_and_update(
         {"id": user_id},
-        update_query,
+        [{"$set": set_stage}],
         return_document=ReturnDocument.AFTER,
     )
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Usuario {user_id} no encontrado.",
+        )
 
     final_vidas = int(updated.get("vidas", 0))
     final_puntos = int(updated.get("puntos", 0))
-    corrections = {}
-    if final_vidas < 0:
-        corrections["vidas"] = 0
-        final_vidas = 0
-    if final_puntos < 0:
-        corrections["puntos"] = 0
-        final_puntos = 0
-    if corrections:
-        await db["usuarios"].update_one({"id": user_id}, {"$set": corrections})
+
+    try:
+        await get_points_ledger().record_event(
+            user_id=user_id,
+            motivo="admin_adjust",
+            puntos=int(puntos_sumar or 0),
+            idempotency_key=f"admin_adjust:{uuid.uuid4().hex}",
+            metadata={
+                "actor": actor_id,
+                "operations": operations,
+                "saldo_despues": final_puntos,
+            },
+            status="applied",
+        )
+    except Exception as e:
+        logger.warning(f"No se pudo auditar el ajuste admin de {user_id}: {e}")
 
     logger.info(
-        f"[ECONOMIA ADMIN] Ajuste realizado a usuario {user_id} ({user.get('name')}): "
-        f"{final_vidas} vidas, {final_puntos} pts."
+        f"[ECONOMIA ADMIN] Ajuste realizado a usuario {user_id} ({user.get('name')}) "
+        f"por actor {actor_id}: {final_vidas} vidas, {final_puntos} pts."
     )
 
     return {
@@ -526,106 +620,234 @@ async def change_user_subscription(usuario_id: int, nueva_suscripcion: str) -> D
         "message": f"Suscripción de {updated.get('name', 'usuario')} actualizada a '{sub}'.",
     }
 
-async def use_hint(user_id: int, req: Any) -> Any:
+async def _find_hint_challenge(db: Any, game_id: str, target_date: str, difficulty: str) -> Optional[dict]:
+    challenge = await db["daily_challenges"].find_one(
+        {"game_id": game_id, "date": target_date, "difficulty": difficulty}
+    )
+    if challenge:
+        return challenge
+    # Si el desafío no guarda dificultad, se acepta solo cuando es inequívoco.
+    candidates = await db["daily_challenges"].find(
+        {"game_id": game_id, "date": target_date}
+    ).limit(2).to_list(length=2)
+    if len(candidates) == 1:
+        return candidates[0]
+    return None
+
+
+def _resolve_hint(config: dict, game: str, req: Any) -> Tuple[Optional[str], Any, str]:
+    """Devuelve (texto, valor_revelado, hint_key) sin cobrar nada."""
+    pista_texto = None
+    valor_revelado = None
+    idx = req.hint_index or 0
+    hint_key = f"hint:{idx}"
+
+    if game == "wordle":
+        hints = config.get("hints") or []
+        if hints:
+            idx = idx if 0 <= idx < len(hints) else 0
+            pista_texto = hints[idx]
+            hint_key = f"hint:{idx}"
+        elif config.get("solution"):
+            pista_texto = f"Empieza con la letra '{config['solution'][0]}'"
+            hint_key = "letter:first"
+
+    elif game == "sudoku":
+        sol = config.get("solution")
+        if (
+            sol
+            and req.row is not None
+            and req.col is not None
+            and 0 <= req.row < 9
+            and 0 <= req.col < 9
+        ):
+            valor_revelado = sol[req.row][req.col]
+            pista_texto = (
+                f"El número en la fila {req.row + 1}, "
+                f"columna {req.col + 1} es {valor_revelado}"
+            )
+            hint_key = f"cell:{req.row}:{req.col}"
+
+    elif game == "sopa_letras":
+        hints = config.get("hints") or []
+        words = config.get("words") or []
+        if hints and 0 <= idx < len(hints):
+            pista_texto = hints[idx]
+        elif words and 0 <= idx < len(words):
+            pista_texto = f"Palabra a buscar: {words[idx]}"
+            hint_key = f"word:{idx}"
+
+    elif game == "crucigrama":
+        words = config.get("words") or []
+        if req.row is not None and req.col is not None:
+            hint_key = f"cell:{req.row}:{req.col}"
+            for w in words:
+                coords = w.get("coords") or []
+                word_str = w.get("word", "")
+                for i, coord in enumerate(coords):
+                    if len(coord) < 2:
+                        continue
+                    r, cl = coord[0], coord[1]
+                    if r == req.row and cl == req.col and i < len(word_str):
+                        valor_revelado = word_str[i]
+                        pista_texto = (
+                            f"La letra en ({req.row + 1}, {req.col + 1}) "
+                            f"es '{valor_revelado}'"
+                        )
+                        break
+                if valor_revelado is not None:
+                    break
+        elif words and 0 <= idx < len(words):
+            pista_texto = (
+                f"{words[idx].get('direction', 'Horiz.')} "
+                f"{words[idx].get('number', '')}: {words[idx].get('clue', '')}"
+            )
+            hint_key = f"word:{idx}"
+
+    return (pista_texto, valor_revelado, hint_key)
+
+
+async def _hint_response_from_record(record: dict, user: dict, costo: int, replayed: bool) -> UseHintResponse:
+    puntos_actuales = int(user.get("puntos", 0))
+    return UseHintResponse(
+        success=True,
+        puntos_restantes=puntos_actuales,
+        puntos_descontados=0,
+        vidas_restantes=int(user.get("vidas") or 5),
+        vidas_descontadas=0,
+        pista=record.get("pista"),
+        valor_revelado=record.get("valor_revelado"),
+        message=(
+            "Esta pista ya fue desbloqueada; no se descontaron puntos."
+            if replayed
+            else f"Pista desbloqueada exitosamente (-{costo} puntos)."
+        ),
+    )
+
+
+async def use_hint(user_id: int, req: Any) -> UseHintResponse:
     """
-    Descuenta puntos al usuario de forma atómica (costo_pista_puntos) y devuelve la pista o celda revelada.
+    Entrega una pista y descuenta puntos solo si hay contenido y no se entregó antes.
     """
-    from app.features.economy.schemas import UseHintResponse
     db = get_database()
     config = await get_economy_config()
     costo = int(config.costo_pista_puntos or 20)
 
-    # 1. Asegurar existencia de puntos
-    await db["usuarios"].update_one(
-        {"id": user_id, "puntos": {"$exists": False}},
-        {"$set": {"puntos": 0}},
-    )
+    game = req.game_id.lower().strip()
+    target_date = req.date or today_str()
+    difficulty = (req.difficulty or "").strip().lower() or None
+    if not difficulty:
+        attempt = await db["user_attempts"].find_one(
+            {"user_id": user_id, "game_id": game, "date": target_date}
+        )
+        difficulty = str((attempt or {}).get("difficulty") or "standard").lower()
+    difficulty = difficulty or "standard"
 
-    # 2. Descuento atómico de puntos (requiere saldo >= costo)
+    user = await db["usuarios"].find_one({"id": user_id})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Usuario {user_id} no encontrado.",
+        )
+
+    # 1. Resolver contenido ANTES de cobrar
+    challenge = await _find_hint_challenge(db, game, target_date, difficulty)
+    pista_texto = None
+    valor_revelado = None
+    hint_key = f"hint:{req.hint_index or 0}"
+    if challenge and "config" in challenge:
+        try:
+            pista_texto, valor_revelado, hint_key = _resolve_hint(
+                challenge["config"] or {}, game, req
+            )
+        except Exception as e:
+            logger.warning(f"[ECONOMIA] No se pudo resolver la pista de {game}: {e}")
+
+    if pista_texto is None and valor_revelado is None:
+        return UseHintResponse(
+            success=True,
+            puntos_restantes=int(user.get("puntos", 0)),
+            puntos_descontados=0,
+            vidas_restantes=int(user.get("vidas") or 5),
+            vidas_descontadas=0,
+            pista=None,
+            valor_revelado=None,
+            message="No hay pista disponible para este desafío; no se descontaron puntos.",
+        )
+
+    # 2. Idempotencia por (usuario, juego, fecha, dificultad, pista)
+    hint_filter = {
+        "user_id": user_id,
+        "game_id": game,
+        "date": target_date,
+        "difficulty": difficulty,
+        "hint_key": hint_key,
+    }
+    existing = await db[COLL_HINTS].find_one(hint_filter)
+    if existing:
+        return await _hint_response_from_record(existing, user, costo, replayed=True)
+
+    now = datetime.now(timezone.utc)
+    record = {
+        **hint_filter,
+        "pista": pista_texto,
+        "valor_revelado": valor_revelado,
+        "status": "pending",
+        "created_at": now,
+        "updated_at": now,
+    }
+    try:
+        await db[COLL_HINTS].insert_one(record)
+    except DuplicateKeyError:
+        existing = await db[COLL_HINTS].find_one(hint_filter)
+        if existing:
+            return await _hint_response_from_record(existing, user, costo, replayed=True)
+        raise
+
+    # 3. Descuento atómico con guarda de saldo
     result = await db["usuarios"].find_one_and_update(
         {"id": user_id, "puntos": {"$gte": costo}},
         {
             "$inc": {"puntos": -costo},
-            "$set": {"updated_at": datetime.now(timezone.utc)},
+            "$set": {"updated_at": now},
         },
         return_document=ReturnDocument.AFTER,
     )
 
     if not result:
+        await db[COLL_HINTS].delete_one({"_id": record["_id"]})
         user_actual = await db["usuarios"].find_one({"id": user_id})
         puntos_actuales = int(user_actual.get("puntos", 0)) if user_actual else 0
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Puntos insuficientes para pedir una pista. Cuesta {costo} pts y tenés {puntos_actuales} pts.",
+            detail=(
+                f"Puntos insuficientes para pedir una pista. Cuesta {costo} pts "
+                f"y tenés {puntos_actuales} pts."
+            ),
         )
 
     nuevos_puntos = int(result.get("puntos", 0))
-    logger.info(f"[ECONOMIA] Usuario {user_id} consumió {costo} pts por pista en {req.game_id}. Restan: {nuevos_puntos} pts")
-
-    # 3. Intentar resolver el contenido de la pista desde el backend
-    target_date = req.date or datetime.now().strftime("%Y-%m-%d")
-    pista_texto = None
-    valor_revelado = None
-
-    try:
-        challenge = await db["daily_challenges"].find_one({
-            "game_id": req.game_id.lower().strip(),
-            "date": target_date
-        })
-        if challenge and "config" in challenge:
-            c = challenge["config"]
-            game = req.game_id.lower().strip()
-
-            if game == "wordle":
-                hints = c.get("hints", [])
-                idx = req.hint_index or 0
-                if hints and 0 <= idx < len(hints):
-                    pista_texto = hints[idx]
-                elif hints:
-                    pista_texto = hints[0]
-                elif c.get("solution"):
-                    pista_texto = f"Empieza con la letra '{c['solution'][0]}'"
-
-            elif game == "sudoku":
-                sol = c.get("solution")
-                if sol and req.row is not None and req.col is not None:
-                    if 0 <= req.row < 9 and 0 <= req.col < 9:
-                        valor_revelado = sol[req.row][req.col]
-                        pista_texto = f"El número en la fila {req.row + 1}, columna {req.col + 1} es {valor_revelado}"
-
-            elif game == "sopa_letras":
-                hints = c.get("hints", [])
-                idx = req.hint_index or 0
-                if hints and 0 <= idx < len(hints):
-                    pista_texto = hints[idx]
-                elif c.get("words") and 0 <= idx < len(c["words"]):
-                    pista_texto = f"Palabra a buscar: {c['words'][idx]}"
-
-            elif game == "crucigrama":
-                words = c.get("words", [])
-                if req.row is not None and req.col is not None:
-                    for w in words:
-                        coords = w.get("coords", [])
-                        word_str = w.get("word", "")
-                        for i, (r, cl) in enumerate(coords):
-                            if r == req.row and cl == req.col and i < len(word_str):
-                                valor_revelado = word_str[i]
-                                pista_texto = f"La letra en ({req.row + 1}, {req.col + 1}) es '{valor_revelado}'"
-                                break
-                        if valor_revelado:
-                            break
-                elif words:
-                    idx = req.hint_index or 0
-                    if 0 <= idx < len(words):
-                        pista_texto = f"{words[idx].get('direction', 'Horiz.')} {words[idx].get('number', '')}: {words[idx].get('clue', '')}"
-    except Exception as e:
-        logger.warning(f"[ECONOMIA] No se pudo obtener contenido de pista para {req.game_id}: {e}")
+    await db[COLL_HINTS].update_one(
+        {"_id": record["_id"]},
+        {
+            "$set": {
+                "status": "applied",
+                "puntos_descontados": costo,
+                "saldo_despues": nuevos_puntos,
+                "updated_at": now,
+            }
+        },
+    )
+    logger.info(
+        f"[ECONOMIA] Usuario {user_id} consumió {costo} pts por pista en "
+        f"{game}/{difficulty}/{target_date}. Restan: {nuevos_puntos} pts"
+    )
 
     return UseHintResponse(
         success=True,
         puntos_restantes=nuevos_puntos,
         puntos_descontados=costo,
-        vidas_restantes=int(result.get("vidas", 5)),
+        vidas_restantes=int(result.get("vidas") or 5),
         vidas_descontadas=0,
         pista=pista_texto,
         valor_revelado=valor_revelado,

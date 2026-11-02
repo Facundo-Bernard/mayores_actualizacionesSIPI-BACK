@@ -119,8 +119,9 @@ async def _ejecutar_tests_v2():
         "date": today_str,
         "game_id": "narrativo",
         "universo_id": "corte_medieval",
+        "motor": "v2",
         "fase_actual": "TOMA_DECISION_EVENTO",
-        "status": "CONTINUA",
+        "status": "in_progress",
         "recursos": {"oro": 50, "pueblo": 50, "ejercito": 50, "fe": 50},
         "afinidad": {
             "pj_canciller_elena": 50,

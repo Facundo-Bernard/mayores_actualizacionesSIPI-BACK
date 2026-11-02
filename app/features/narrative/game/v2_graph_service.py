@@ -22,12 +22,53 @@ from app.features.narrative.engine.graph_engine import graph_engine
 
 logger = logging.getLogger(__name__)
 
+_FASES_EVENTO = {RunPhaseEnum.TOMA_DECISION_EVENTO.value}
+_FASES_CONVERSACION = {RunPhaseEnum.RESOLVER_CONVERSACION.value}
+
+
 async def _obtener_run_activo(user_id: int, date: str) -> Dict[str, Any]:
     db = get_database()
     run = await db[COLL_RUNS].find_one({"user_id": user_id, "date": date, "game_id": "narrativo"})
     if not run:
         raise HTTPException(status_code=404, detail="Partida no encontrada para la fecha especificada.")
     return run
+
+
+def _exigir_partida_v2_en_fase(
+    run: Dict[str, Any],
+    *,
+    fases_permitidas: set,
+    accion: str,
+    exigir_sin_grafo: bool = True
+) -> None:
+    """Rechaza con 409 cualquier intento de operar un grafo fuera del estado permitido."""
+    motor = run.get("motor", "v1")
+    if motor != "v2":
+        raise HTTPException(
+            status_code=409,
+            detail=f"'{accion}' requiere una partida con motor v2 (motor actual: '{motor}')."
+        )
+
+    status = run.get("status", "in_progress")
+    if status != "in_progress":
+        raise HTTPException(
+            status_code=409,
+            detail=f"'{accion}' no está disponible: la partida no está en curso (status: '{status}')."
+        )
+
+    fase = run.get("fase_actual")
+    if fase not in fases_permitidas:
+        fases = ", ".join(sorted(fases_permitidas))
+        raise HTTPException(
+            status_code=409,
+            detail=f"'{accion}' no está disponible en la fase '{fase}' (fases permitidas: {fases})."
+        )
+
+    if exigir_sin_grafo and run.get("grafo_activo"):
+        raise HTTPException(
+            status_code=409,
+            detail=f"'{accion}' no puede ejecutarse: ya hay un grafo activo en la partida."
+        )
 
 async def obtener_grafo_actual_v2(user_id: int, date: str) -> Optional[EstadoGrafoV2Response]:
     """
@@ -73,11 +114,23 @@ async def avanzar_nodo_v2(user_id: int, req: AvanzarNodoV2Request) -> EstadoGraf
     """
     run = await _obtener_run_activo(user_id, req.date)
 
-    if run.get("fase_actual") == RunPhaseEnum.FINALIZADA.value:
-        raise HTTPException(status_code=400, detail="La partida ya se encuentra finalizada.")
+    if run.get("motor", "v1") != "v2":
+        raise HTTPException(
+            status_code=409,
+            detail="'avanzar-nodo' requiere una partida con motor v2."
+        )
+
+    if run.get("status", "in_progress") != "in_progress" or run.get("fase_actual") == RunPhaseEnum.FINALIZADA.value:
+        raise HTTPException(
+            status_code=409,
+            detail="'avanzar-nodo' no está disponible: la partida ya se encuentra finalizada."
+        )
 
     if not run.get("grafo_activo"):
-        raise HTTPException(status_code=400, detail="No hay ningún evento o conversación activo para avanzar.")
+        raise HTTPException(
+            status_code=409,
+            detail="'avanzar-nodo' no está disponible: no hay ningún evento o conversación activo."
+        )
 
     return await graph_engine.avanzar_nodo(run, req.opcion_id)
 
@@ -86,6 +139,11 @@ async def iniciar_evento_mes_v2(user_id: int, date: str) -> EstadoGrafoV2Respons
     Inicia un evento V2 para el mes actual de la partida, sorteando de narrative_v2_events por universo.
     """
     run = await _obtener_run_activo(user_id, date)
+    _exigir_partida_v2_en_fase(
+        run,
+        fases_permitidas=_FASES_EVENTO,
+        accion="iniciar-evento-grafo"
+    )
 
     evento = await graph_engine.sortear_evento_v2(
         run=run,
@@ -111,6 +169,11 @@ async def iniciar_conversacion_mes_v2(user_id: int, date: str) -> Optional[Estad
     Inicia una conversación V2 si los requisitos de corte se cumplen.
     """
     run = await _obtener_run_activo(user_id, date)
+    _exigir_partida_v2_en_fase(
+        run,
+        fases_permitidas=_FASES_CONVERSACION,
+        accion="iniciar-conversacion-grafo"
+    )
 
     conv = await graph_engine.sortear_conversacion_v2(
         run=run,

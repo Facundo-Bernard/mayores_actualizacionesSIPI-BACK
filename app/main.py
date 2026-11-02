@@ -75,6 +75,18 @@ async def lifespan(app: FastAPI):
 
     asyncio.create_task(_background_seeds())
 
+    async def _ledger_reconciler():
+        from app.shared.ledger import reconcile_pending_ledger
+
+        while True:
+            try:
+                await reconcile_pending_ledger()
+            except Exception as e_ledger:
+                logger.warning(f"Error al reconciliar asientos del ledger: {e_ledger}")
+            await asyncio.sleep(300)
+
+    asyncio.create_task(_ledger_reconciler())
+
     logger.info(f"Servidor listo en el puerto {settings.PORT}.")
     yield
     # Shutdown: Cerrar conexiones limpiamente

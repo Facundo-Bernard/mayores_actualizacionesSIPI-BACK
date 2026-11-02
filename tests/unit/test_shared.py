@@ -47,4 +47,6 @@ def test_ledger_key_separates_difficulties():
 
     assert easy.business_key != hard.business_key
     assert easy.business_key == (1, "game_completion", "crucigrama", "2026-11-02", "facil")
+    assert easy.idempotency_key == "game_completion:1:crucigrama:2026-11-02:facil"
+    assert hard.idempotency_key == "game_completion:1:crucigrama:2026-11-02:dificil"
     assert LedgerResult(applied=True, puntos=100, saldo=250).applied is True

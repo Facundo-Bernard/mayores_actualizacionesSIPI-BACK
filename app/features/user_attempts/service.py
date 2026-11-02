@@ -1,9 +1,11 @@
 import calendar
 import logging
+import re
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any, Tuple
 from fastapi import HTTPException
 from pymongo import ASCENDING
+from pymongo.errors import DuplicateKeyError
 
 from app.core.database import get_database
 from app.features.user_attempts.schemas import (
@@ -11,8 +13,44 @@ from app.features.user_attempts.schemas import (
     UserAttemptResponse,
     UserAttemptsListResponse
 )
+from app.shared.ledger import LedgerKey, get_points_ledger
 
 logger = logging.getLogger(__name__)
+
+_DIFFICULTY_PATTERN = re.compile(r"^[a-z0-9_-]{1,32}$")
+_COMPLETED_STATUSES = ("completed", "won")
+
+
+def _tier_value(tier: Any, name: str, default: Any) -> Any:
+    if isinstance(tier, dict):
+        return tier.get(name, default)
+    return getattr(tier, name, default)
+
+
+def _parse_errors(game_data: Optional[Dict[str, Any]]) -> int:
+    data = game_data or {}
+    raw = data.get("errors", data.get("mistakes", data.get("fallos", 0)))
+    if raw is None or raw == "":
+        return 0
+    if isinstance(raw, bool):
+        raise HTTPException(
+            status_code=400,
+            detail="'game_data.errors' debe ser un número entero.",
+        )
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        raise HTTPException(
+            status_code=400,
+            detail="'game_data.errors' debe ser un número entero.",
+        )
+    if value < 0:
+        raise HTTPException(
+            status_code=400,
+            detail="'game_data.errors' no puede ser negativo.",
+        )
+    return value
+
 
 def calculate_grade_and_score(
     game_id: str,
@@ -53,21 +91,20 @@ def calculate_grade_and_score(
     if gid in ("sudoku", "crucigrama", "sopa_letras") and time_taken_seconds is not None and time_taken_seconds >= 0 and escalas_tiempo:
         escalas_ordenadas = sorted(
             escalas_tiempo,
-            key=lambda item: getattr(item, "tiempo_max_segundos", item.get("tiempo_max_segundos", 999999) if isinstance(item, dict) else 999999)
+            key=lambda item: _tier_value(item, "tiempo_max_segundos", 999999)
         )
         matched_tier = None
         for tier in escalas_ordenadas:
-            t_max = getattr(tier, "tiempo_max_segundos", tier.get("tiempo_max_segundos") if isinstance(tier, dict) else 999999)
-            if time_taken_seconds <= t_max:
+            if time_taken_seconds <= _tier_value(tier, "tiempo_max_segundos", 999999):
                 matched_tier = tier
                 break
         if not matched_tier and escalas_ordenadas:
             matched_tier = escalas_ordenadas[-1]
 
         if matched_tier:
-            grade = getattr(matched_tier, "grade", matched_tier.get("grade") if isinstance(tier, dict) else "C")
-            score = getattr(matched_tier, "puntos", matched_tier.get("puntos", 50) if isinstance(tier, dict) else 50)
-            stars = getattr(matched_tier, "estrellas", matched_tier.get("estrellas", 1) if isinstance(tier, dict) else 1)
+            grade = _tier_value(matched_tier, "grade", "C")
+            score = _tier_value(matched_tier, "puntos", 50)
+            stars = _tier_value(matched_tier, "estrellas", 1)
             return (grade, score, stars)
 
     # 2. Si el frontend envía una calificación por letra explícita
@@ -81,10 +118,8 @@ def calculate_grade_and_score(
             stars = 3 if grade in ("S", "A") else (2 if grade == "B" else 1)
         return (grade, score, stars)
 
-    # 2. Si no vino calificación explícita, evaluar por juego y vidas/errores
-    gid = (game_id or "").lower().strip()
-    data = game_data or {}
-    errors = int(data.get("errors") or data.get("mistakes") or data.get("fallos") or 0)
+    # 3. Si no vino calificación explícita, evaluar por juego y vidas/errores
+    errors = _parse_errors(game_data)
 
     if gid == "wordle":
         # Wordle tiene 6 intentos máximos
@@ -99,8 +134,8 @@ def calculate_grade_and_score(
             stars = 1
 
     elif gid == "sudoku":
-        # Sudoku: errores cometidos o vidas restantes (base 3)
-        if errors == 0 and (remaining_attempts >= 3 or remaining_attempts == 0):
+        # Sudoku: los errores mandan; 0 vidas restantes nunca es S
+        if errors == 0 and remaining_attempts >= 3:
             grade = "S"
             stars = 3
         elif errors <= 1 or remaining_attempts == 2:
@@ -153,6 +188,59 @@ def calculate_grade_and_score(
     return (grade, score, stars)
 
 
+def _normalize_difficulty(req: UserAttemptCreateRequest) -> str:
+    raw = req.difficulty or (req.game_data or {}).get("difficulty") or "standard"
+    difficulty = str(raw).strip().lower()
+    if not _DIFFICULTY_PATTERN.match(difficulty):
+        raise HTTPException(
+            status_code=400,
+            detail="La dificultad informada no es válida.",
+        )
+    return difficulty
+
+
+def _doc_difficulty(doc: dict) -> str:
+    return str(doc.get("difficulty") or "standard").strip().lower()
+
+
+def _difficulty_is_completed(doc: Optional[dict], difficulty: str) -> bool:
+    if not doc:
+        return False
+    by_difficulty = doc.get("by_difficulty") or {}
+    sub = by_difficulty.get(difficulty)
+    if sub and sub.get("status") in _COMPLETED_STATUSES:
+        return True
+    # Documentos históricos sin by_difficulty: se interpretan como su dificultad declarada.
+    if not sub and _doc_difficulty(doc) == difficulty:
+        return doc.get("status") in _COMPLETED_STATUSES
+    return False
+
+
+def _should_replace_top_level(existing: dict, final_status: str) -> bool:
+    """El nivel superior refleja la última partida, salvo que ya esté completada."""
+    if existing.get("status") in _COMPLETED_STATUSES:
+        return final_status == "completed"
+    return True
+
+
+def _attempt_snapshot(doc: dict) -> dict:
+    """Copia un intento para guardarlo dentro de by_difficulty (sin _id ni anidamientos)."""
+    return {
+        key: value
+        for key, value in doc.items()
+        if key not in ("_id", "created_at", "by_difficulty")
+    }
+
+
+def _preserve_existing_difficulty(existing: dict, difficulty: str, update_fields: dict) -> None:
+    """Materializa by_difficulty si el documento histórico no lo tenía."""
+    existing_difficulty = _doc_difficulty(existing)
+    if existing_difficulty == difficulty:
+        return
+    if existing_difficulty not in (existing.get("by_difficulty") or {}):
+        update_fields[f"by_difficulty.{existing_difficulty}"] = _attempt_snapshot(existing)
+
+
 def _serialize_attempt(
     doc: dict,
     puntos_ganados: int = 0,
@@ -185,23 +273,53 @@ def _serialize_attempt(
         updated_at=updated_at_str
     )
 
+
+async def _register_replay_rejection(
+    user_id: int, game_id: str, date: str, difficulty: str, status: str
+) -> None:
+    try:
+        await get_points_ledger().record_event(
+            user_id=user_id,
+            motivo="replay_rejected",
+            puntos=0,
+            idempotency_key=f"replay:{user_id}:{game_id}:{date}:{difficulty}:{status}",
+            metadata={
+                "game_id": game_id,
+                "date": date,
+                "difficulty": difficulty,
+                "status": status,
+                "actor": "system",
+            },
+            status="rejected",
+        )
+    except Exception as e:
+        logger.warning(f"No se pudo auditar el replay de {user_id}/{game_id}/{date}: {e}")
+
+
 async def save_user_attempt(
     req: UserAttemptCreateRequest,
     authenticated_user_id: Optional[int] = None
 ) -> UserAttemptResponse:
     """Guarda o actualiza un intento de partida de forma atómica e idempotente."""
-    db = get_database()
-    effective_user_id = authenticated_user_id or req.user_id or 1
-    now_utc = datetime.now(timezone.utc)
+    if authenticated_user_id is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Se requiere iniciar sesión para guardar progreso en la nube.",
+        )
 
-    filter_query = {
-        "user_id": effective_user_id,
-        "game_id": req.game_id.lower().strip(),
-        "date": req.date.strip()
-    }
+    db = get_database()
+    ledger = get_points_ledger()
+    user_id = int(authenticated_user_id)
+    game_id = req.game_id.lower().strip()
+    date = req.date.strip()
+    difficulty = _normalize_difficulty(req)
+    now = datetime.now(timezone.utc)
+
+    filter_query = {"user_id": user_id, "game_id": game_id, "date": date}
 
     # Obtener configuración de economía para puntos por calificación
     from app.features.economy.service import get_economy_config
+    econ_config = None
     try:
         econ_config = await get_economy_config()
         puntos_config = econ_config.puntos_por_calificacion
@@ -221,16 +339,18 @@ async def save_user_attempt(
     if time_taken is not None:
         try:
             time_taken = int(time_taken)
-        except Exception:
+        except (TypeError, ValueError):
+            time_taken = None
+        if time_taken is not None and time_taken < 0:
             time_taken = None
 
     escalas_juego = None
     if hasattr(econ_config, "escalas_tiempo_por_juego") and econ_config.escalas_tiempo_por_juego:
-        escalas_juego = econ_config.escalas_tiempo_por_juego.get(req.game_id.lower().strip())
+        escalas_juego = econ_config.escalas_tiempo_por_juego.get(game_id)
 
     # Calcular calificación, puntaje y estrellas según desempeño o datos provistos
     grade, score, stars = calculate_grade_and_score(
-        game_id=req.game_id,
+        game_id=game_id,
         status=req.status,
         attempts=req.attempts,
         remaining_attempts=req.remaining_attempts or 0,
@@ -252,9 +372,10 @@ async def save_user_attempt(
         final_status = "in_progress"
 
     doc = {
-        "user_id": effective_user_id,
-        "game_id": req.game_id.lower().strip(),
-        "date": req.date.strip(),
+        "user_id": user_id,
+        "game_id": game_id,
+        "date": date,
+        "difficulty": difficulty,
         "mode": req.mode.lower().strip(),
         "status": final_status,
         "word": req.word.strip() if req.word else None,
@@ -266,59 +387,110 @@ async def save_user_attempt(
         "game_data": req.game_data,
         "remaining_attempts": req.remaining_attempts or 0,
         "time_taken_seconds": time_taken,
-        "updated_at": now_utc
+        "updated_at": now,
     }
 
-    existing = await db["user_attempts"].find_one(filter_query)
-    was_already_completed = existing and existing.get("status") in ("completed", "won")
-    is_new_victory = final_status == "completed" and not was_already_completed
+    def _replay_response(existing: dict, saldo: Optional[int] = None) -> UserAttemptResponse:
+        return _serialize_attempt(
+            existing,
+            puntos_ganados=0,
+            puntos_totales_usuario=saldo,
+        )
 
-    result = await db["user_attempts"].find_one_and_update(
-        filter_query,
-        {
-            "$set": doc,
-            "$setOnInsert": {"created_at": now_utc}
-        },
-        upsert=True,
-        return_document=True
-    )
+    existing = await db["user_attempts"].find_one(filter_query)
+
+    # Replay: esa dificultad ya está completada; no se toca estado ni se recalcula grado.
+    if _difficulty_is_completed(existing, difficulty):
+        await _register_replay_rejection(user_id, game_id, date, difficulty, final_status)
+        return _replay_response(existing, await ledger.saldo(user_id))
+
+    if existing:
+        update_fields: Dict[str, Any] = {
+            f"by_difficulty.{difficulty}": doc,
+            "updated_at": now,
+        }
+        _preserve_existing_difficulty(existing, difficulty, update_fields)
+        if _should_replace_top_level(existing, final_status):
+            update_fields.update(doc)
+        result = await db["user_attempts"].find_one_and_update(
+            filter_query,
+            {"$set": update_fields},
+            return_document=True,
+        )
+        if result is None:
+            raise HTTPException(
+                status_code=409,
+                detail="No se pudo actualizar la partida por un conflicto concurrente.",
+            )
+    else:
+        initial = dict(doc)
+        initial["by_difficulty"] = {difficulty: dict(doc)}
+        try:
+            result = await db["user_attempts"].find_one_and_update(
+                filter_query,
+                {"$set": initial, "$setOnInsert": {"created_at": now}},
+                upsert=True,
+                return_document=True,
+            )
+        except DuplicateKeyError:
+            # Otra request insertó el mismo slot: se resuelve como replay o actualización.
+            existing = await db["user_attempts"].find_one(filter_query)
+            if _difficulty_is_completed(existing, difficulty):
+                await _register_replay_rejection(user_id, game_id, date, difficulty, final_status)
+                return _replay_response(existing, await ledger.saldo(user_id))
+            update_fields = {f"by_difficulty.{difficulty}": doc, "updated_at": now}
+            if existing:
+                _preserve_existing_difficulty(existing, difficulty, update_fields)
+                if _should_replace_top_level(existing, final_status):
+                    update_fields.update(doc)
+            result = await db["user_attempts"].find_one_and_update(
+                filter_query,
+                {"$set": update_fields},
+                return_document=True,
+            )
+            if result is None:
+                raise HTTPException(
+                    status_code=409,
+                    detail="No se pudo guardar la partida por un conflicto concurrente.",
+                )
 
     puntos_ganados = 0
-    puntos_totales_usuario = None
+    puntos_totales_usuario: Optional[int] = None
 
-    # Si es una victoria nueva y válida, sumar puntos al usuario
-    if is_new_victory:
-        puntos_ganados = score
-        try:
-            if puntos_ganados > 0:
-                user_updated = await db["usuarios"].find_one_and_update(
-                    {"id": effective_user_id},
-                    {
-                        "$inc": {"puntos": puntos_ganados},
-                        "$set": {"updated_at": now_utc}
-                    },
-                    return_document=True
-                )
-                if user_updated:
-                    puntos_totales_usuario = int(user_updated.get("puntos", 0))
-                logger.info(f"[PUNTOS] Usuario {effective_user_id} ganó {puntos_ganados} pts (calificación {grade}) en {req.game_id}. Saldo actual: {puntos_totales_usuario}")
-        except Exception as e:
-            logger.warning(f"No se pudieron actualizar los puntos del usuario {effective_user_id}: {e}")
+    if final_status == "completed":
+        ledger_result = await ledger.credit(
+            LedgerKey(
+                user_id=user_id,
+                motivo="attempt",
+                game_id=game_id,
+                date=date,
+                difficulty=difficulty,
+            ),
+            score,
+            metadata={"grade": grade, "difficulty": difficulty},
+        )
+        if ledger_result.applied:
+            puntos_ganados = score
+            logger.info(
+                f"[PUNTOS] Usuario {user_id} ganó {puntos_ganados} pts "
+                f"(calificación {grade}, dificultad {difficulty}) en {game_id}. "
+                f"Saldo: {ledger_result.saldo}"
+            )
+        else:
+            logger.info(
+                f"[PUNTOS] Acreditación ya aplicada para {user_id}/{game_id}/{date}/{difficulty}; no se suman puntos."
+            )
+        puntos_totales_usuario = ledger_result.saldo
 
-    # Si no hubo acreditación nueva (ej: partida ya completada o in_progress), consultar saldo
     if puntos_totales_usuario is None:
-        try:
-            user_doc = await db["usuarios"].find_one({"id": effective_user_id})
-            if user_doc:
-                puntos_totales_usuario = int(user_doc.get("puntos", 0))
-        except Exception:
-            pass
+        puntos_totales_usuario = await ledger.saldo(user_id)
 
     return _serialize_attempt(
         result,
         puntos_ganados=puntos_ganados,
         puntos_totales_usuario=puntos_totales_usuario
     )
+
 
 async def get_user_attempt_by_date(
     user_id: int,
@@ -335,6 +507,7 @@ async def get_user_attempt_by_date(
         "date": target_date
     })
     return _serialize_attempt(doc) if doc else None
+
 
 async def get_user_attempts_by_month(
     user_id: int,

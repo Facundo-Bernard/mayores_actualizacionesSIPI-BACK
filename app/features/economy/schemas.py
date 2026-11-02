@@ -151,6 +151,14 @@ class BuyLivesResponse(BaseModel):
     message: str
 
 
+class RefillLivesResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    success: bool
+    puntos: int = Field(..., description="Saldo de puntos restante tras la recarga")
+    message: str
+
+
 class UnlockDayRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -219,7 +227,12 @@ class UseHintRequest(BaseModel):
 
     game_id: str = Field(..., description="ID del juego: wordle, sudoku, sopa_letras, crucigrama")
     date: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD del desafío")
-    hint_index: Optional[int] = Field(0, description="Índice de la pista a consultar (para Wordle o Sopa de Letras)")
+    difficulty: Optional[str] = Field(
+        None,
+        pattern=r"^[A-Za-z0-9_-]{1,32}$",
+        description="Dificultad de la partida; si falta se infiere del intento del usuario",
+    )
+    hint_index: Optional[int] = Field(0, ge=0, le=1000, description="Índice de la pista a consultar (para Wordle o Sopa de Letras)")
     row: Optional[int] = Field(None, description="Fila de la casilla a revelar (Sudoku / Crucigrama)")
     col: Optional[int] = Field(None, description="Columna de la casilla a revelar (Sudoku / Crucigrama)")
 

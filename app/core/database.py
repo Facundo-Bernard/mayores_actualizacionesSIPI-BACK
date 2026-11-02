@@ -119,6 +119,21 @@ async def init_indexes():
         )
         await user_attempts.create_index([("user_id", ASCENDING), ("date", -1)])
 
+        # Ledger de puntos: una acreditación por clave de negocio
+        await db["economy_ledger"].create_index(
+            [("idempotency_key", ASCENDING)], unique=True
+        )
+        await db["economy_ledger"].create_index(
+            [("status", ASCENDING), ("created_at", ASCENDING)]
+        )
+
+        # Pistas entregadas: una sola entrega/cobro por usuario, juego, fecha, dificultad y pista
+        await db["user_hints"].create_index(
+            [("user_id", ASCENDING), ("game_id", ASCENDING), ("date", ASCENDING),
+             ("difficulty", ASCENDING), ("hint_key", ASCENDING)],
+            unique=True
+        )
+
         # Índices de Estados de Usuario (estados_usuario)
         estados_usuario = db["estados_usuario"]
         await estados_usuario.create_index([("id", ASCENDING)], unique=True)

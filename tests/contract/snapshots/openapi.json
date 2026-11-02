@@ -4420,6 +4420,30 @@
         "title": "RecursoDefinicionSchema",
         "type": "object"
       },
+      "RefillLivesResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "puntos": {
+            "description": "Saldo de puntos restante tras la recarga",
+            "title": "Puntos",
+            "type": "integer"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "puntos",
+          "message"
+        ],
+        "title": "RefillLivesResponse",
+        "type": "object"
+      },
       "RegisterRequest": {
         "properties": {
           "activo": {
@@ -5141,6 +5165,19 @@
             "description": "Fecha YYYY-MM-DD del desafío",
             "title": "Date"
           },
+          "difficulty": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9_-]{1,32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dificultad de la partida; si falta se infiere del intento del usuario",
+            "title": "Difficulty"
+          },
           "game_id": {
             "description": "ID del juego: wordle, sudoku, sopa_letras, crucigrama",
             "title": "Game Id",
@@ -5149,6 +5186,8 @@
           "hint_index": {
             "anyOf": [
               {
+                "maximum": 1000.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -5260,6 +5299,8 @@
           "attempts": {
             "default": 1,
             "description": "Número de intentos utilizados",
+            "maximum": 1000.0,
+            "minimum": 0.0,
             "title": "Attempts",
             "type": "integer"
           },
@@ -5268,6 +5309,19 @@
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "title": "Date",
             "type": "string"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9_-]{1,32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dificultad de la partida (ej: facil, dificil, standard)",
+            "title": "Difficulty"
           },
           "game_data": {
             "anyOf": [
@@ -5322,6 +5376,8 @@
           "remaining_attempts": {
             "anyOf": [
               {
+                "maximum": 1000.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -5335,6 +5391,8 @@
           "score": {
             "anyOf": [
               {
+                "maximum": 100000.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -5347,6 +5405,8 @@
           "stars": {
             "anyOf": [
               {
+                "maximum": 3.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -5365,6 +5425,8 @@
           "time_taken_seconds": {
             "anyOf": [
               {
+                "maximum": 604800.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -7682,6 +7744,32 @@
         ]
       }
     },
+    "/api/economy/refill-lives": {
+      "post": {
+        "operationId": "endpoint_refill_lives_api_economy_refill_lives_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefillLivesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recargar las vidas de la partida actual a cambio de puntos (precio fijo del servidor)",
+        "tags": [
+          "Economía, Vidas y Mini-Tienda"
+        ]
+      }
+    },
     "/api/economy/unlock-day": {
       "post": {
         "operationId": "endpoint_unlock_day_api_economy_unlock_day_post",
@@ -7779,7 +7867,7 @@
         "operationId": "endpoint_get_user_attempts_api_games_attempts_get",
         "parameters": [
           {
-            "description": "ID del usuario (opcional si se envía Bearer token)",
+            "description": "Deprecado: se ignora, gana el usuario del token",
             "in": "query",
             "name": "user_id",
             "required": false,
@@ -7792,7 +7880,7 @@
                   "type": "null"
                 }
               ],
-              "description": "ID del usuario (opcional si se envía Bearer token)",
+              "description": "Deprecado: se ignora, gana el usuario del token",
               "title": "User Id"
             }
           },
@@ -7833,22 +7921,6 @@
               "title": "Month",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "authorization",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Authorization"
-            }
           }
         ],
         "responses": {
@@ -7873,6 +7945,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Obtener intentos del usuario en un mes específico",
         "tags": [
           "Partidas e Intentos de Usuarios"
@@ -7880,24 +7957,6 @@
       },
       "post": {
         "operationId": "endpoint_save_attempt_api_games_attempts_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "authorization",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Authorization"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -7930,6 +7989,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Guardar o actualizar el progreso de una partida",
         "tags": [
           "Partidas e Intentos de Usuarios"
@@ -7962,7 +8026,7 @@
             }
           },
           {
-            "description": "ID del usuario (opcional si se envía Bearer token)",
+            "description": "Deprecado: se ignora, gana el usuario del token",
             "in": "query",
             "name": "user_id",
             "required": false,
@@ -7975,24 +8039,8 @@
                   "type": "null"
                 }
               ],
-              "description": "ID del usuario (opcional si se envía Bearer token)",
+              "description": "Deprecado: se ignora, gana el usuario del token",
               "title": "User Id"
-            }
-          },
-          {
-            "in": "header",
-            "name": "authorization",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Authorization"
             }
           }
         ],
@@ -8026,6 +8074,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Obtener intento de un usuario para una fecha específica",
         "tags": [
           "Partidas e Intentos de Usuarios"

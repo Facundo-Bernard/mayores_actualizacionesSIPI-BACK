@@ -12,14 +12,19 @@ class UserAttemptCreateRequest(BaseModel):
     mode: str = Field("daily", description="Modo: 'daily' o 'campaign'")
     status: str = Field("completed", description="'in_progress', 'completed' o 'failed'")
     word: Optional[str] = Field(None, description="Palabra de la partida")
-    attempts: int = Field(1, description="Número de intentos utilizados")
-    stars: Optional[int] = Field(None, description="Estrellas obtenidas (1 a 3). Si se omite se calcula automáticamente")
-    score: Optional[int] = Field(None, description="Puntaje obtenido. Si se omite se calcula según calificación")
+    difficulty: Optional[str] = Field(
+        None,
+        pattern=r"^[A-Za-z0-9_-]{1,32}$",
+        description="Dificultad de la partida (ej: facil, dificil, standard)",
+    )
+    attempts: int = Field(1, ge=0, le=1000, description="Número de intentos utilizados")
+    stars: Optional[int] = Field(None, ge=0, le=3, description="Estrellas obtenidas (1 a 3). Si se omite se calcula automáticamente")
+    score: Optional[int] = Field(None, ge=0, le=100000, description="Puntaje obtenido. Si se omite se calcula según calificación")
     grade: Optional[str] = Field(None, description="Calificación obtenida por desempeño: 'S', 'A', 'B', 'C', 'F'")
     guesses: Optional[List[Any]] = Field(default_factory=list, description="Lista de intentos realizados (palabras, objetos o números)")
     game_data: Optional[Dict[str, Any]] = Field(None, description="Datos adicionales específicos del juego")
-    remaining_attempts: Optional[int] = Field(0, description="Vidas/intentos restantes del juego")
-    time_taken_seconds: Optional[int] = Field(None, description="Tiempo en segundos que tardó en completar la partida")
+    remaining_attempts: Optional[int] = Field(0, ge=0, le=1000, description="Vidas/intentos restantes del juego")
+    time_taken_seconds: Optional[int] = Field(None, ge=0, le=604800, description="Tiempo en segundos que tardó en completar la partida")
 
 class UserAttemptResponse(BaseModel):
     id: str

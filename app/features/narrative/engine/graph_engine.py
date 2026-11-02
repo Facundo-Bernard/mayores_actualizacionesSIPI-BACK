@@ -316,7 +316,7 @@ class GraphTraversalEngine:
         grafo_activo = run.get("grafo_activo")
         if not grafo_activo:
             raise HTTPException(
-                status_code=400,
+                status_code=409,
                 detail="No hay ningún grafo (evento o conversación) activo en la partida para avanzar."
             )
 
@@ -327,15 +327,15 @@ class GraphTraversalEngine:
         grafo = await self.obtener_grafo(tipo, grafo_id)
         if not grafo:
             raise HTTPException(
-                status_code=404,
-                detail=f"Grafo '{grafo_id}' de tipo '{tipo}' no encontrado en la base de datos."
+                status_code=409,
+                detail=f"El grafo activo '{grafo_id}' de tipo '{tipo}' ya no existe en la base de datos."
             )
 
         nodos_dict = grafo.get("nodos", {})
         nodo_actual_data = nodos_dict.get(nodo_actual_id)
         if not nodo_actual_data:
             raise HTTPException(
-                status_code=500,
+                status_code=409,
                 detail=f"El nodo actual '{nodo_actual_id}' no existe en el grafo '{grafo_id}'."
             )
 
@@ -391,9 +391,11 @@ class GraphTraversalEngine:
         # ====================================================================
         if not siguiente_nodo.es_final:
             grafo_activo["nodo_actual_id"] = siguiente_nodo_id
+            turno = run.setdefault("turno_actual", {})
+            turno["opcion_elegida_id"] = opcion_id
             await db[COLL_RUNS].update_one(
                 {"_id": run["_id"]},
-                {"$set": {"grafo_activo": grafo_activo}}
+                {"$set": {"grafo_activo": grafo_activo, "turno_actual": turno}}
             )
 
             return EstadoGrafoV2Response(
@@ -452,7 +454,10 @@ class GraphTraversalEngine:
         elif tipo == "evento_especial":
             run.setdefault("eventos_especiales_jugados", []).append(grafo_id)
 
-        # 4. Limpiar grafo activo
+        # 4. Persistir la última decisión y limpiar el grafo activo
+        turno = run.setdefault("turno_actual", {})
+        turno["opcion_elegida_id"] = opcion_id
+        turno["resultado_obtenido_id"] = siguiente_nodo_id
         run["grafo_activo"] = None
 
         # 5. Comprobar Derrota por colapso de recursos (epílogo + sincronización de intento)

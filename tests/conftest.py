@@ -129,6 +129,8 @@ async def seeded_user(test_db, cleanup):
         await test_db["usuarios"].insert_one(doc)
         cleanup.add("usuarios", {"id": user_id})
         cleanup.add("user_attempts", {"user_id": user_id})
+        cleanup.add("economy_ledger", {"user_id": user_id})
+        cleanup.add("user_hints", {"user_id": user_id})
         return doc
 
     return _seed

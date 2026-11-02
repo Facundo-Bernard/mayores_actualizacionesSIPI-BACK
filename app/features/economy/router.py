@@ -10,6 +10,7 @@ from app.features.economy.schemas import (
     ConsumeLifeResponse,
     BuyLivesRequest,
     BuyLivesResponse,
+    RefillLivesResponse,
     SearchUserEconomyResponse,
     AdjustUserEconomyRequest,
     AdjustUserEconomyResponse,
@@ -25,6 +26,7 @@ from app.features.economy.service import (
     get_user_economy,
     consume_life,
     buy_lives,
+    refill_lives,
     find_user_by_identifier,
     adjust_user_economy,
     unlock_historical_day,
@@ -83,6 +85,18 @@ async def endpoint_buy_lives(
 ):
     user_id = int(current_user["id"])
     return await buy_lives(user_id=user_id, req=req)
+
+
+@router.post(
+    "/api/economy/refill-lives",
+    response_model=RefillLivesResponse,
+    summary="Recargar las vidas de la partida actual a cambio de puntos (precio fijo del servidor)",
+)
+async def endpoint_refill_lives(
+    current_user: Dict[str, Any] = Depends(get_current_user),
+):
+    user_id = int(current_user["id"])
+    return await refill_lives(user_id=user_id)
 
 
 @router.post(
@@ -174,6 +188,7 @@ async def endpoint_admin_adjust_user_economy(
         vidas_set=req.vidas_set,
         puntos_set=req.puntos_set,
         suscripcion_set=req.suscripcion_set,
+        actor_id=admin.get("id"),
     )
 
 
