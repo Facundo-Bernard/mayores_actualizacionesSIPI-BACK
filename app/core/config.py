@@ -78,6 +78,12 @@ class Settings(BaseSettings):
                 origins.append(auth_url)
         return origins
 
+    # Validación server-side de resultados por juego (Fase 2). Off hasta observar.
+    GRADING_ENFORCE_WORDLE: bool = False
+    GRADING_ENFORCE_SOPA: bool = False
+    GRADING_ENFORCE_SUDOKU: bool = False
+    GRADING_ENFORCE_CRUCIGRAMA: bool = False
+
     # RAE API (Wordle / Desafíos)
     RAE_API_KEY: Optional[str] = None
 

@@ -358,6 +358,8 @@ Objetivo: que el servidor recalcule grado/score a partir de la submission, sin e
 
 **Criterio de aceptación:** un cliente que manda `grade: "S"` sin submission válida recibe 0 puntos con el flag activo; un cliente legítimo sigue jugando igual; el OpenAPI solo cambia por campos opcionales y rutas nuevas.
 
+**Estado al 2/11/2026:** Fase 2 completa en su núcleo. Validadores por juego en `app/features/user_attempts/validation/` (Wordle, Sopa, Sudoku y Crucigrama), con lookup de desafío exacto por dificultad para Crucigrama y fallback histórico para el resto; un desafío inexistente se rechaza con flag activo (`desafio_no_encontrado`) para no abrir una vía de forgery. Flags `GRADING_ENFORCE_*` en `app/core/config.py`, default `false`. `save_user_attempt` valida solo finales completados con flag activo: el rechazo se persiste como `validation_status: "rejected"` con F/0/0, HTTP 200 y `puntos_ganados: 0`, sin asiento en el ledger y habilitando un reintento legítimo; una submission válida deja grade/score/stars/attempts en manos del servidor. D10: `started_at` en el primer `in_progress`, `server_elapsed_seconds` y `time_suspect` en el final; el grado usa el tiempo del servidor solo con flag activo. Sin cambios de schema ni de OpenAPI (snapshot intacto). Pendiente explícito para una pasada posterior: ruta opcional de feedback (`POST /api/games/validate`) y desafío sanitizado (ítems 4 y 5). Suite: 101 passed, 18 integration/live deseleccionados.
+
 ### Fase 3 — Narrativo operativo y readiness V2 (2-3 semanas)
 
 Objetivo: que V1 sea seguro y que V2 tenga una prueba objetiva de que puede ser oficial.

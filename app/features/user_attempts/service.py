@@ -13,12 +13,19 @@ from app.features.user_attempts.schemas import (
     UserAttemptResponse,
     UserAttemptsListResponse
 )
+from app.features.user_attempts.validation import (
+    Submission,
+    is_enforcement_enabled,
+    validate_submission,
+)
 from app.shared.ledger import LedgerKey, get_points_ledger
 
 logger = logging.getLogger(__name__)
 
 _DIFFICULTY_PATTERN = re.compile(r"^[a-z0-9_-]{1,32}$")
 _COMPLETED_STATUSES = ("completed", "won")
+_TIME_SUSPECT_MIN_SERVER_SECONDS = 30
+_TIME_SUSPECT_MIN_DIFF_SECONDS = 10
 
 
 def _tier_value(tier: Any, name: str, default: Any) -> Any:
@@ -203,21 +210,67 @@ def _doc_difficulty(doc: dict) -> str:
     return str(doc.get("difficulty") or "standard").strip().lower()
 
 
+def _is_completed_attempt(doc: Optional[dict]) -> bool:
+    if not doc:
+        return False
+    return (
+        doc.get("status") in _COMPLETED_STATUSES
+        and doc.get("validation_status") != "rejected"
+    )
+
+
 def _difficulty_is_completed(doc: Optional[dict], difficulty: str) -> bool:
     if not doc:
         return False
     by_difficulty = doc.get("by_difficulty") or {}
     sub = by_difficulty.get(difficulty)
-    if sub and sub.get("status") in _COMPLETED_STATUSES:
-        return True
+    if sub:
+        return _is_completed_attempt(sub)
     # Documentos históricos sin by_difficulty: se interpretan como su dificultad declarada.
-    if not sub and _doc_difficulty(doc) == difficulty:
-        return doc.get("status") in _COMPLETED_STATUSES
+    if _doc_difficulty(doc) == difficulty:
+        return _is_completed_attempt(doc)
     return False
+
+
+def _as_utc(value: datetime) -> datetime:
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+
+def _attempt_started_at(doc: Optional[dict], difficulty: str) -> Optional[datetime]:
+    if not doc:
+        return None
+    sub = (doc.get("by_difficulty") or {}).get(difficulty)
+    if sub and isinstance(sub.get("started_at"), datetime):
+        return _as_utc(sub["started_at"])
+    if _doc_difficulty(doc) == difficulty and isinstance(doc.get("started_at"), datetime):
+        return _as_utc(doc["started_at"])
+    return None
+
+
+def _server_elapsed_seconds(
+    started_at: Optional[datetime],
+    now: datetime,
+    client_seconds: Optional[int],
+) -> Tuple[Optional[int], bool]:
+    """Tiempo medido por el servidor y sospecha de tiempo cliente subdeclarado."""
+    if started_at is None:
+        return None, False
+    elapsed = int((now - started_at).total_seconds())
+    if elapsed < 0:
+        return None, False
+    suspect = (
+        client_seconds is not None
+        and elapsed >= _TIME_SUSPECT_MIN_SERVER_SECONDS
+        and elapsed - client_seconds >= _TIME_SUSPECT_MIN_DIFF_SECONDS
+        and client_seconds < elapsed * 0.5
+    )
+    return elapsed, suspect
 
 
 def _should_replace_top_level(existing: dict, final_status: str) -> bool:
     """El nivel superior refleja la última partida, salvo que ya esté completada."""
+    if existing.get("validation_status") == "rejected":
+        return True
     if existing.get("status") in _COMPLETED_STATUSES:
         return final_status == "completed"
     return True
@@ -348,21 +401,6 @@ async def save_user_attempt(
     if hasattr(econ_config, "escalas_tiempo_por_juego") and econ_config.escalas_tiempo_por_juego:
         escalas_juego = econ_config.escalas_tiempo_por_juego.get(game_id)
 
-    # Calcular calificación, puntaje y estrellas según desempeño o datos provistos
-    grade, score, stars = calculate_grade_and_score(
-        game_id=game_id,
-        status=req.status,
-        attempts=req.attempts,
-        remaining_attempts=req.remaining_attempts or 0,
-        provided_grade=req.grade,
-        provided_score=req.score,
-        provided_stars=req.stars,
-        puntos_por_calificacion=puntos_config,
-        game_data=req.game_data,
-        time_taken_seconds=time_taken,
-        escalas_tiempo=escalas_juego
-    )
-
     status_normalized = req.status.lower().strip()
     if status_normalized in ("completed", "won"):
         final_status = "completed"
@@ -370,25 +408,6 @@ async def save_user_attempt(
         final_status = "failed"
     else:
         final_status = "in_progress"
-
-    doc = {
-        "user_id": user_id,
-        "game_id": game_id,
-        "date": date,
-        "difficulty": difficulty,
-        "mode": req.mode.lower().strip(),
-        "status": final_status,
-        "word": req.word.strip() if req.word else None,
-        "attempts": req.attempts,
-        "stars": stars,
-        "score": score,
-        "grade": grade,
-        "guesses": req.guesses or [],
-        "game_data": req.game_data,
-        "remaining_attempts": req.remaining_attempts or 0,
-        "time_taken_seconds": time_taken,
-        "updated_at": now,
-    }
 
     def _replay_response(existing: dict, saldo: Optional[int] = None) -> UserAttemptResponse:
         return _serialize_attempt(
@@ -403,6 +422,101 @@ async def save_user_attempt(
     if _difficulty_is_completed(existing, difficulty):
         await _register_replay_rejection(user_id, game_id, date, difficulty, final_status)
         return _replay_response(existing, await ledger.saldo(user_id))
+
+    # Tiempo autoritativo del servidor: arranca en el primer guardado en curso.
+    started_at = _attempt_started_at(existing, difficulty)
+    if final_status == "in_progress" and started_at is None:
+        started_at = now
+    server_elapsed, time_suspect = _server_elapsed_seconds(started_at, now, time_taken)
+
+    validation_status: Optional[str] = None
+    validation_reason: Optional[str] = None
+    attempts_value = req.attempts
+    enforce = final_status == "completed" and is_enforcement_enabled(game_id)
+
+    if enforce:
+        errors = _parse_errors(req.game_data)
+        submission = Submission(
+            word=req.word,
+            guesses=req.guesses or [],
+            attempts=req.attempts,
+            errors=errors,
+            game_data=req.game_data or {},
+        )
+        validation = await validate_submission(game_id, date, difficulty, submission)
+        if not validation.valid:
+            # Se persiste como intento rechazado: no acredita y habilita un reintento legítimo.
+            validation_status = "rejected"
+            validation_reason = validation.reason
+            grade, score, stars = "F", 0, 0
+            logger.info(
+                f"[VALIDACION] Intento rechazado {user_id}/{game_id}/{date}/{difficulty}: "
+                f"{validation.reason}"
+            )
+        else:
+            validation_status = "validated"
+            attempts_value = validation.attempts if validation.attempts is not None else req.attempts
+            effective_errors = validation.errors if validation.errors is not None else errors
+            effective_time = time_taken
+            if time_suspect or effective_time is None:
+                effective_time = server_elapsed if server_elapsed is not None else effective_time
+            grade, score, stars = calculate_grade_and_score(
+                game_id=game_id,
+                status=req.status,
+                attempts=attempts_value,
+                remaining_attempts=req.remaining_attempts or 0,
+                provided_grade=None,
+                provided_score=None,
+                provided_stars=None,
+                puntos_por_calificacion=puntos_config,
+                game_data={**(req.game_data or {}), "errors": effective_errors},
+                time_taken_seconds=effective_time,
+                escalas_tiempo=escalas_juego,
+            )
+    else:
+        # Flags apagados: se conserva el contrato histórico (cliente y tiempo enviados).
+        grade, score, stars = calculate_grade_and_score(
+            game_id=game_id,
+            status=req.status,
+            attempts=req.attempts,
+            remaining_attempts=req.remaining_attempts or 0,
+            provided_grade=req.grade,
+            provided_score=req.score,
+            provided_stars=req.stars,
+            puntos_por_calificacion=puntos_config,
+            game_data=req.game_data,
+            time_taken_seconds=time_taken,
+            escalas_tiempo=escalas_juego
+        )
+
+    doc = {
+        "user_id": user_id,
+        "game_id": game_id,
+        "date": date,
+        "difficulty": difficulty,
+        "mode": req.mode.lower().strip(),
+        "status": final_status,
+        "word": req.word.strip() if req.word else None,
+        "attempts": attempts_value,
+        "stars": stars,
+        "score": score,
+        "grade": grade,
+        "guesses": req.guesses or [],
+        "game_data": req.game_data,
+        "remaining_attempts": req.remaining_attempts or 0,
+        "time_taken_seconds": time_taken,
+        "updated_at": now,
+    }
+    if started_at is not None:
+        doc["started_at"] = started_at
+    if server_elapsed is not None:
+        doc["server_elapsed_seconds"] = server_elapsed
+    if time_suspect:
+        doc["time_suspect"] = True
+    if validation_status:
+        doc["validation_status"] = validation_status
+        if validation_reason:
+            doc["validation_reason"] = validation_reason
 
     if existing:
         update_fields: Dict[str, Any] = {
@@ -457,7 +571,7 @@ async def save_user_attempt(
     puntos_ganados = 0
     puntos_totales_usuario: Optional[int] = None
 
-    if final_status == "completed":
+    if final_status == "completed" and validation_status != "rejected":
         ledger_result = await ledger.credit(
             LedgerKey(
                 user_id=user_id,
