@@ -181,11 +181,42 @@ async def root():
 async def health_check():
     return {"status": "UP"}
 
-# Redirección de administración hacia el Autenticador Central (Única fuente de verdad de usuarios)
+# Panel de administración: SPA compilada desde frontend/admin_src con base /admin/.
+static_admin_dir = os.path.join(os.path.dirname(__file__), "static", "admin")
+os.makedirs(static_admin_dir, exist_ok=True)
+
+
+class SPAStaticFiles(StaticFiles):
+    """Sirve el build del panel y delega las rutas del cliente a index.html."""
+
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            # Un asset faltante es un 404 real; solo las rutas del cliente caen al index.
+            if exc.status_code != 404 or os.path.splitext(path)[1]:
+                raise
+            return await self._index(scope)
+
+    async def _index(self, scope):
+        try:
+            return await super().get_response("index.html", scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != 404:
+                raise
+            # Sin build disponible se conserva el comportamiento previo: derivar al Autenticador.
+            return RedirectResponse(url=f"{settings.AUTH_SERVICE_URL.rstrip('/')}/")
+
+
 @app.get("/admin", include_in_schema=False)
-@app.get("/admin/{path:path}", include_in_schema=False)
-async def admin_redirect(path: str = ""):
-    return RedirectResponse(url=f"{settings.AUTH_SERVICE_URL.rstrip('/')}/")
+async def admin_panel():
+    index_path = os.path.join(static_admin_dir, "index.html")
+    if not os.path.exists(index_path):
+        return RedirectResponse(url=f"{settings.AUTH_SERVICE_URL.rstrip('/')}/")
+    return FileResponse(index_path)
+
+
+app.mount("/admin", SPAStaticFiles(directory=static_admin_dir, html=True), name="admin")
 
 # Montar carpeta de assets estáticos de narrativa (universos, personajes, cartas, eventos, etc.)
 static_narrative_dir = os.path.join(os.path.dirname(__file__), "static", "narrative")
