@@ -1,7 +1,8 @@
 """
 endings_service.py
-Gestión de desenlaces de partida (victoria en Mes 12 o derrota por colapso de recursos)
+Gestión común de desenlaces de partida (victoria en Mes 12 o derrota por colapso de recursos)
 y sincronización del intento del alumno con la colección user_attempts para progreso y rachas.
+Compartido por los motores V1 y V2.
 """
 
 import logging

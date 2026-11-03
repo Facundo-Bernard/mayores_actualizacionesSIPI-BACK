@@ -1,4 +1,4 @@
-"""Consultas reactivas del ciclo V2: estado completo del turno para recargas/F5."""
+"""Estado común del turno para recargas/F5: expone el motor activo y el grafo V2 si lo hubiera."""
 
 from fastapi import HTTPException
 
@@ -70,4 +70,5 @@ async def obtener_turno_actual(user_id: int, date: str) -> EstadoTurnoResponse:
         conversacion_actual=ConversacionResponse(**conv_doc) if conv_doc else None,
         finalizacion=FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None,
         grafo_actual=await obtener_grafo_actual_v2(user_id, date),
+        motor=run.get("motor", "v1"),
     )

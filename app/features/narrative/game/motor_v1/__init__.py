@@ -1,1 +1,1 @@
-"""Motor narrativo V1: setup diario y consultas de modales de la partida legacy."""
+"""Motor narrativo V1: resolución plana legacy (evento, diálogo) y consultas atómicas deprecadas."""

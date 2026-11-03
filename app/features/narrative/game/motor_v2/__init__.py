@@ -1,1 +1,1 @@
-"""Motor narrativo V2: ciclo mensual nativo, grafos, desenlaces y estado reactivo."""
+"""Motor narrativo V2: grafos de evento y conversación, sorteo de eventos y avance de nodos."""

@@ -1,6 +1,6 @@
 """
 transition_service.py
-Gestión de la Fase 4 (Balance y Transición Mensual):
+Gestión común de la Fase 4 (Balance y Transición Mensual), compartida por V1 y V2:
 - Registro del resumen del mes en la bitácora acumulada (historial).
 - Evaluación de fin de año (Mes 12: Victoria y cálculo de rango S/A/B/C).
 - Avance al siguiente mes (Mes + 1).
@@ -37,7 +37,7 @@ from app.features.narrative.schemas.game_schemas import (
 )
 from app.features.narrative.schemas.rules_schemas import EfectoSchema
 from app.features.narrative.engine.rule_engine import despachar_efectos
-from app.features.narrative.game.motor_v2.endings_service import (
+from app.features.narrative.game.endings_service import (
     verificar_colapso_recursos,
     calcular_finalizacion_victoria,
     sincronizar_intento_usuario
@@ -48,9 +48,9 @@ from app.features.narrative.game.identity import filtro_run
 
 logger = logging.getLogger(__name__)
 
-async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Response:
+async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Response:
     """
-    [V2 Nativo] Fase 4: Aplica efectos pasivos 'cada_mes' y avanza al siguiente mes.
+    [Común V1/V2] Fase 4: Aplica efectos pasivos 'cada_mes' y avanza al siguiente mes.
     Retorna los recursos post-pasivos y únicamente las 3 nuevas cartas de draft (o epílogo si terminó).
     """
     db = get_database()

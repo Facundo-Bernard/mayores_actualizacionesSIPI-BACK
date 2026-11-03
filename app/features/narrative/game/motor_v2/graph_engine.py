@@ -419,7 +419,7 @@ class GraphTraversalEngine:
         # ====================================================================
         # CASO 2: NODO TERMINAL (es_final == True)
         # ====================================================================
-        from app.features.narrative.game.motor_v2.endings_service import (
+        from app.features.narrative.game.endings_service import (
             verificar_colapso_recursos,
             sincronizar_intento_usuario
         )

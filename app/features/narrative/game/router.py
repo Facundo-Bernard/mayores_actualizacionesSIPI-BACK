@@ -45,28 +45,30 @@ from app.features.narrative.game.motor_v2.v2_graph_service import (
     iniciar_evento_mes_v2,
     iniciar_conversacion_mes_v2
 )
-from app.features.narrative.game.motor_v1.setup_service import (
+from app.features.narrative.game.setup_service import (
     obtener_setup_desafio,
+    iniciar_partida,
     reiniciar_partida
 )
-from app.features.narrative.game.motor_v2.setup_service import iniciar_partida_v2
-from app.features.narrative.game.motor_v2.turn_service import (
-    elegir_carta_mes_v2,
-    decidir_evento_v2,
-    responder_conversacion_v2
+from app.features.narrative.game.turn_service import elegir_carta_mes
+from app.features.narrative.game.motor_v1.turn_service import (
+    decidir_evento,
+    responder_conversacion
 )
-from app.features.narrative.game.motor_v2.transition_service import avanzar_mes_v2
-from app.features.narrative.game.motor_v1.modals_service import (
+from app.features.narrative.game.transition_service import avanzar_mes
+from app.features.narrative.game.modals_service import (
     obtener_historial_partida,
     obtener_inventario_partida,
     obtener_corte_partida,
-    obtener_finalizacion_partida,
+    obtener_finalizacion_partida
+)
+from app.features.narrative.game.motor_v1.modals import (
     obtener_evento_actual_partida,
     obtener_conversacion_actual_partida,
     obtener_resultado_actual_partida,
     obtener_draft_actual_partida
 )
-from app.features.narrative.game.motor_v2.modals import obtener_turno_actual
+from app.features.narrative.game.turn_state import obtener_turno_actual
 from app.features.narrative.game.identity import cargar_guest_id
 from app.features.narrative.admin.crud_service import (
     obtener_conversaciones_posibles_por_personajes
@@ -106,7 +108,7 @@ async def endpoint_v2_iniciar_partida(
     user_id: int = Depends(_get_current_user_id)
 ):
     """Inicia la partida para la fecha actual devolviendo recursos y mazo de draft inicial."""
-    return await iniciar_partida_v2(user_id=user_id, req=req)
+    return await iniciar_partida(user_id=user_id, req=req)
 
 @router_v2.post(
     "/elegir-carta-mes",
@@ -118,31 +120,33 @@ async def endpoint_v2_elegir_carta_mes(
     user_id: int = Depends(_get_current_user_id)
 ):
     """Aplica la carta seleccionada y retorna el evento sorteado del mes (o finalización si colapsó)."""
-    return await elegir_carta_mes_v2(user_id=user_id, req=req)
+    return await elegir_carta_mes(user_id=user_id, req=req)
 
 @router_v2.post(
     "/decidir-evento",
     response_model=DecidirEventoV2Response,
-    summary="[V2] Fase 2: Decidir opción en evento devolviendo solo el resultado y el diálogo si hubo"
+    summary="[V1 Plano, deprecado] Fase 2: Decidir opción en evento (usar /avanzar-nodo en motor V2)",
+    deprecated=True
 )
 async def endpoint_v2_decidir_evento(
     req: DecidirEventoRequest,
     user_id: int = Depends(_get_current_user_id)
 ):
-    """Resuelve la tirada de la opción elegida y retorna el desenlace y diálogo incidental si se disparó."""
-    return await decidir_evento_v2(user_id=user_id, req=req)
+    """Resuelve la tirada plana V1. En partidas V2 responde 409 y se debe usar /avanzar-nodo."""
+    return await decidir_evento(user_id=user_id, req=req)
 
 @router_v2.post(
     "/responder-conversacion",
     response_model=ResponderConversacionV2Response,
-    summary="[V2] Fase 3: Responder diálogo de corte devolviendo afinidad actualizada y consecuencia"
+    summary="[V1 Plano, deprecado] Fase 3: Responder diálogo de corte (usar /avanzar-nodo en motor V2)",
+    deprecated=True
 )
 async def endpoint_v2_responder_conversacion(
     req: ResponderConversacionRequest,
     user_id: int = Depends(_get_current_user_id)
 ):
-    """Interviene en la conversación entre consejeros y retorna afinidades actualizadas."""
-    return await responder_conversacion_v2(user_id=user_id, req=req)
+    """Resuelve el diálogo plano V1. En partidas V2 responde 409 y se debe usar /avanzar-nodo."""
+    return await responder_conversacion(user_id=user_id, req=req)
 
 @router_v2.post(
     "/avanzar-mes",
@@ -154,7 +158,7 @@ async def endpoint_v2_avanzar_mes(
     user_id: int = Depends(_get_current_user_id)
 ):
     """Aplica pasivos mensuales, guarda el historial y avanza al siguiente mes (o decreta fin de año)."""
-    return await avanzar_mes_v2(user_id=user_id, req=req)
+    return await avanzar_mes(user_id=user_id, req=req)
 
 @router_v2.get(
     "/estado",
@@ -332,7 +336,8 @@ async def endpoint_obtener_finalizacion_partida(
 @router.get(
     "/evento-actual",
     response_model=Optional[EventoTurnoResponse],
-    summary="Consultar únicamente el evento activo del mes (con opciones y probabilidades)"
+    summary="[V1 Plano, deprecado] Consultar únicamente el evento activo del mes (usar /estado)",
+    deprecated=True
 )
 async def endpoint_obtener_evento_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
@@ -344,7 +349,8 @@ async def endpoint_obtener_evento_actual(
 @router.get(
     "/conversacion-actual",
     response_model=Optional[ConversacionResponse],
-    summary="Consultar únicamente la conversación activa del mes (o null si no hubo)"
+    summary="[V1 Plano, deprecado] Consultar únicamente la conversación activa del mes (usar /estado)",
+    deprecated=True
 )
 async def endpoint_obtener_conversacion_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
@@ -356,7 +362,8 @@ async def endpoint_obtener_conversacion_actual(
 @router.get(
     "/resultado-actual",
     response_model=Optional[ResultadoResponse],
-    summary="Consultar únicamente el resultado del evento recién resuelto"
+    summary="[V1 Plano, deprecado] Consultar únicamente el resultado del evento recién resuelto (usar /estado)",
+    deprecated=True
 )
 async def endpoint_obtener_resultado_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
@@ -368,7 +375,8 @@ async def endpoint_obtener_resultado_actual(
 @router.get(
     "/draft-actual",
     response_model=List[CartaResponse],
-    summary="Consultar únicamente las cartas ofrecidas en el draft del mes actual"
+    summary="[V1 Plano, deprecado] Consultar únicamente las cartas ofrecidas en el draft del mes actual (usar /estado)",
+    deprecated=True
 )
 async def endpoint_obtener_draft_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),

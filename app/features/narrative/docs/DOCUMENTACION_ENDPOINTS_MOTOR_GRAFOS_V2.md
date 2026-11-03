@@ -302,13 +302,13 @@ sequenceDiagram
 
     Note over Player, DB: Fase 0: Setup Inicial
     Player->>API: POST /api/narrative/v2/partida/iniciar
-    API->>Svc: iniciar_partida_v2(corte[3], cartas[3])
+    API->>Svc: iniciar_partida(corte[3], cartas[3])
     Svc->>DB: Crea run con motor="v2" y sortea draft Mes 1
     API-->>Player: IniciarPartidaV2Response
 
     Note over Player, DB: Fase 1: Draft y Bifurcación V1/V2
     Player->>API: POST /api/narrative/v2/partida/elegir-carta-mes
-    API->>Svc: elegir_carta_mes_v2(carta_id)
+    API->>Svc: elegir_carta_mes(carta_id)
     alt Si run.motor == "v2"
         Svc->>DB: Sortea evento V2 y fija nodo_raiz
         API-->>Player: ElegirCartaMesV2Response (grafo_actual activo)

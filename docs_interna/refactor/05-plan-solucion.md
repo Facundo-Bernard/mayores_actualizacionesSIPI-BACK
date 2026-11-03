@@ -1,6 +1,6 @@
 # Plan de solución — backend de juegos
 
-> **Estado:** Fases 0, 0.5, 1, 2, 3 y 4 implementadas en `feature/refactor-backend` (3/11/2026). Pendiente: Fase 5 (V2 oficial, gated).
+> **Estado:** Fases 0, 0.5, 1, 2, 3 y 4 implementadas, y Fase 5 en su parte de separación/truncado (Opción A), en `feature/refactor-backend` (3/11/2026). V2 sigue sin declararse oficial: falta contenido/readiness y la migración del frontend por universo.
 > **Base:** commit `d2a117b` + relevamiento de solo lectura del frontend (`Desktop/proyectos/frontend`, 2/11/2026).
 > **Restricciones acordadas:**
 > - Los routers son contrato sagrado: no se cambian paths, métodos, campos ni códigos del camino feliz.
@@ -426,6 +426,8 @@ Solo después de Fase 3 y con el dry-run verde:
 2. Mantener V1 disponible para rollback.
 3. Monitorear: errores 500, soft-locks, runs atascadas, eventos agotados.
 4. Recién entonces actualizar la documentación que declara V2 oficial.
+
+**Estado al 3/11/2026 (preparación de truncado, Opción A).** Se separaron los motores sin mover URLs ni cambiar el contrato del camino feliz. El ciclo común (`iniciar`, `elegir-carta-mes`, `avanzar-mes`, `estado`) y las lecturas compartidas (`setup`, `historial`, `inventario`, `corte`, `finalizacion`) viven en `game/` (`setup_service`, `turn_service`, `transition_service`, `modals_service`, `turn_state`, `endings_service`); los grafos quedan en `game/motor_v2/` (`graph_engine`, `v2_graph_service`, rama V2 de `elegir-carta-mes`) y la resolución plana en `game/motor_v1/turn_service.py`, con sus consultas atómicas en `game/motor_v1/modals.py`. Se agregó el discriminador aditivo `motor` a `elegir-carta-mes` y `estado` (además del ya existente en `iniciar`), y se marcaron `deprecated` en OpenAPI `decidir-evento`, `responder-conversacion`, `evento-actual`, `conversacion-actual`, `resultado-actual` y `draft-actual`, con aviso de log en runtime. La matriz motor×endpoint queda cubierta por `tests/contract/test_narrative_motor_matrix.py`: V1 resuelve todo el ciclo plano; V2 arranca grafos, resuelve con `avanzar-nodo` y recibe 409 en las rutas planas. **El frontend no necesita cambiar URLs**: migra por universo cuando el autor decida `motor="v2"`; recién entonces se pueden retirar los endpoints planos y el código de `motor_v1`. Snapshot OpenAPI regenerado (campo `motor` + `deprecated`). Suite: 172 passed, 18 integration/live deseleccionados.
 
 ---
 

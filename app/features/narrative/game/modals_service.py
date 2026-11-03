@@ -1,42 +1,34 @@
 """
-modals_service.py (Motor V1)
-Consultas bajo demanda para la interfaz de usuario:
-- Modales de la bitácora mensual (historial).
+modals_service.py
+Consultas de lectura comunes a ambos motores:
+- Modal de la bitácora mensual (historial).
 - Modal de inventario (cartas en mano y tags activos).
 - Modal de corte activa (personajes asignados y afinidad).
 - Modal de epílogo / finalización detallada.
-- Consultas atómicas de evento, diálogo, resultado y draft activo.
 """
 
 import logging
-from typing import Optional, List, Dict, Any
+
 from fastapi import HTTPException
 
 from app.core.database import get_database
 from app.features.narrative.constants import (
     COLL_CHARACTERS,
     COLL_CARDS,
-    COLL_RESULTS,
-    COLL_EVENTS,
-    COLL_CONVERSATIONS,
     COLL_RUNS
 )
 from app.features.narrative.schemas.catalog_schemas import (
     PersonajeResponse,
     CartaResponse,
-    ResultadoResponse,
-    ConversacionResponse,
     FinalizacionResponse
 )
 from app.features.narrative.schemas.game_schemas import (
-    EventoTurnoResponse,
     HistorialPartidaResponse,
     InventarioPartidaResponse,
     PersonajeCorteDetalle,
     CortePartidaResponse,
     FinalizacionPartidaResponse,
 )
-from app.features.narrative.engine.event_director import calcular_opciones_evento
 from app.features.narrative.game.identity import filtro_run
 
 logger = logging.getLogger(__name__)
@@ -106,63 +98,3 @@ async def obtener_finalizacion_partida(user_id: int, date: str) -> FinalizacionP
         finalizacion=fin_resp,
         epilogo_final=fin_doc
     )
-
-async def obtener_evento_actual_partida(user_id: int, date: str) -> Optional[EventoTurnoResponse]:
-    """Retorna únicamente el evento activo del mes con sus opciones y probabilidades calculadas."""
-    db = get_database()
-    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
-    if not run:
-        raise HTTPException(status_code=404, detail="Partida no encontrada.")
-    evento_id = run.get("turno_actual", {}).get("evento_actual_id")
-    if not evento_id:
-        return None
-    evento_doc = await db[COLL_EVENTS].find_one({"_id": evento_id})
-    if not evento_doc:
-        return None
-    res_ids = {rp.get("resultado_id") for op in evento_doc.get("opciones", []) for rp in op.get("resultados_posibles", [])}
-    res_docs = await db[COLL_RESULTS].find({"_id": {"$in": list(res_ids)}}).to_list(None) if res_ids else []
-    res_dict = {r["_id"]: r for r in res_docs}
-    opciones_calc = calcular_opciones_evento(evento_doc, run, res_dict)
-    return EventoTurnoResponse(
-        id=evento_doc["_id"],
-        titulo=evento_doc.get("titulo", ""),
-        descripcion=evento_doc.get("descripcion", ""),
-        imagen=evento_doc.get("imagen", ""),
-        opciones=opciones_calc
-    )
-
-async def obtener_conversacion_actual_partida(user_id: int, date: str) -> Optional[ConversacionResponse]:
-    """Retorna únicamente el diálogo de corte sorteado para el mes activo (o None si no hubo)."""
-    db = get_database()
-    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
-    if not run:
-        raise HTTPException(status_code=404, detail="Partida no encontrada.")
-    conv_id = run.get("turno_actual", {}).get("conversacion_actual_id")
-    if not conv_id:
-        return None
-    conv_doc = await db[COLL_CONVERSATIONS].find_one({"_id": conv_id})
-    return ConversacionResponse(**conv_doc) if conv_doc else None
-
-async def obtener_resultado_actual_partida(user_id: int, date: str) -> Optional[ResultadoResponse]:
-    """Retorna únicamente el resultado del desenlace recién resuelto."""
-    db = get_database()
-    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
-    if not run:
-        raise HTTPException(status_code=404, detail="Partida no encontrada.")
-    res_id = run.get("turno_actual", {}).get("resultado_obtenido_id")
-    if not res_id:
-        return None
-    res_doc = await db[COLL_RESULTS].find_one({"_id": res_id})
-    return ResultadoResponse(**res_doc) if res_doc else None
-
-async def obtener_draft_actual_partida(user_id: int, date: str) -> List[CartaResponse]:
-    """Retorna las 3 cartas ofrecidas en el draft del mes activo."""
-    db = get_database()
-    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
-    if not run:
-        raise HTTPException(status_code=404, detail="Partida no encontrada.")
-    draft_ids = run.get("turno_actual", {}).get("cartas_ofrecidas_ids", [])
-    if not draft_ids:
-        return []
-    docs = await db[COLL_CARDS].find({"_id": {"$in": draft_ids}}).to_list(None)
-    return [CartaResponse(**d) for d in docs]

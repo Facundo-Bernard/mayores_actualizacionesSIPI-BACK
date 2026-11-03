@@ -30,9 +30,9 @@ Documentos hermanos:
 
 ## 1. Resumen ejecutivo
 
-- **No existen dos routers separados.** El router `/api/narrative/v2/partida` sirve tanto al motor V1 como al motor de grafos V2. La elección se hace por `run.motor` dentro de `elegir_carta_mes_v2` (`app/features/narrative/game/turn_service.py:112-138`).
+- **No existen dos routers separados.** El router `/api/narrative/v2/partida` sirve tanto al motor V1 como al motor de grafos V2. La elección se hace por `run.motor` dentro de `elegir_carta_mes` (`app/features/narrative/game/turn_service.py:90-93`), que deriva a `motor_v1` o `motor_v2`.
 - “V2” designa tres cosas distintas: el **contrato HTTP liviano** (`*V2Response`), el **router** `/api/narrative/v2/partida` y el **motor de grafos**. Esto explica gran parte de la confusión documental.
-- El motor se elige **por universo**, no por desafío: se lee `narrative_settings.motor` al crear la run y se guarda en `run.motor` (`setup_service.py:149-150,189`). El default es `"v1"` (`schemas/catalog_schemas.py:32`).
+- El motor se elige **por universo**, no por desafío: se lee `narrative_settings.motor` al crear la run y se guarda en `run.motor` (`game/setup_service.py:103,140`). El default es `"v1"` (`schemas/catalog_schemas.py:32`).
 - **V2 no está sembrado ni habilitado por defecto.** `main.py` siembra V1 y finalizaciones, pero nunca `seed_narrative_v2_graphs.py` (`app/main.py:49-67`). El seed V1 se ejecuta en cada arranque y reescribe el universo con `motor="v1"` (`seed_narrative.py:60-72`).
 - **V2 no puede completar 12 meses con el contenido sembrado:** hay 7 eventos V2 y el sorteo no recicla eventos jugados (`graph_engine.py:105-147`). Al agotarse, `elegir-carta-mes` responde 500.
 - Los endpoints manuales `iniciar-evento-grafo` e `iniciar-conversacion-grafo` **no validan fase, estado ni `grafo_activo`** (`v2_graph_service.py:84-129`). Permiten saltar meses, repetir eventos, farmear recursos y revivir partidas finalizadas.
@@ -48,14 +48,14 @@ Documentos hermanos:
 
 | Término | Qué es | Dónde vive |
 |---|---|---|
-| **V1** | Motor de eventos planos: evento → opciones → resultado externo; conversaciones planas con frases y decisiones. | `engine/event_director.py`, `engine/rule_engine.py`, `motor_v2/turn_service.py`, `motor_v2/transition_service.py` |
+| **V1** | Motor de eventos planos: evento → opciones → resultado externo; conversaciones planas con frases y decisiones. | `engine/event_director.py`, `engine/rule_engine.py`, `motor_v1/turn_service.py` |
 | **V2 (motor)** | Motor de grafos: evento/conversación autocontenido con `nodo_raiz` y `nodos{}`; aristas implícitas; impactos inline. | `motor_v2/graph_engine.py`, `motor_v2/v2_graph_service.py` |
 | **V2 ligero (contrato)** | DTOs de respuesta con deltas (`IniciarPartidaV2Response`, `ElegirCartaMesV2Response`, etc.). Lo usan **ambos** motores. | `schemas/game_schemas.py` |
 | **Router V2** | Prefijo `/api/narrative/v2/partida` para el loop de juego. No implica motor V2. | `game/router.py` |
-| **Run** | Documento de partida en `narrative_runs`; guarda recursos, afinidad, cartas, fase, turno, historial y motor. | `motor_v2/setup_service.py` |
+| **Run** | Documento de partida en `narrative_runs`; guarda recursos, afinidad, cartas, fase, turno, historial y motor. | `game/setup_service.py` |
 | **Universo** | Configuración del mundo en `narrative_settings`: recursos, imágenes y `motor`. | `schemas/catalog_schemas.py:18-46` |
-| **Corte** | Los 3 personajes elegidos al iniciar. Se infiere de las claves de `afinidad`. | `motor_v2/setup_service.py` |
-| **Draft** | Oferta mensual de 3 cartas; el jugador elige 1. | `motor_v2/setup_service.py` |
+| **Corte** | Los 3 personajes elegidos al iniciar. Se infiere de las claves de `afinidad`. | `game/setup_service.py` |
+| **Draft** | Oferta mensual de 3 cartas; el jugador elige 1. | `game/turn_service.py` |
 | **Fase** | Estado de la máquina: `DRAFT_MENSUAL`, `TOMA_DECISION_EVENTO`, `RESOLVER_CONVERSACION`, `BALANCE_MES`, `FINALIZADA`. | `enums.py:35-42` |
 | **Nodo** | Unidad de un grafo V2: texto, hablante, opciones y/o impactos terminales. | `schemas/v2_graph_schemas.py:46-56` |
 | **Opción** | Elección dentro de un nodo; puede tener `siguiente_nodo`, `desenlaces` ponderados y condiciones. | `v2_graph_schemas.py:20-38` |
@@ -68,7 +68,7 @@ Documentos hermanos:
 
 ### Aclaración crucial
 
-Un desafío con `motor="v1"` también responde `IniciarPartidaV2Response`, `ElegirCartaMesV2Response` y `AvanzarMesV2Response`. **“V2” en el nombre del DTO no significa motor de grafos.** El único discriminador real es `run.motor == "v2"`.
+Un desafío con `motor="v1"` también responde `IniciarPartidaV2Response`, `ElegirCartaMesV2Response` y `AvanzarMesV2Response`. **“V2” en el nombre del DTO no significa motor de grafos.** El único discriminador real es `run.motor == "v2"`, y desde Fase 5 se expone también como campo `motor` en `iniciar`, `elegir-carta-mes` y `estado` para que el frontend no dependa de inferencias (`nodo_id`, presencia de `grafo_actual`).
 
 ---
 
@@ -81,14 +81,16 @@ Un desafío con `motor="v1"` también responde `IniciarPartidaV2Response`, `Eleg
 | `engine/rule_engine.py` | ECA puro: evalúa condiciones, ejecuta acciones y despacha efectos. |
 | `engine/event_director.py` | Selección ponderada de eventos V1, cálculo de opciones/probabilidades y sorteo de resultados. |
 | `game/motor_v2/graph_engine.py` | Motor V2: sorteo de eventos/conversaciones, inicio, avance, impactos, especiales y conversación incidental. |
-| `game/router.py` | Routers de jugador: loop V2 ligero, grafos, setup, reinicio y modales. |
-| `game/motor_v1/setup_service.py` | Setup del día y reset de la partida legacy. |
-| `game/motor_v2/setup_service.py` | Fase 0 V2: creación de run, corte y cartas iniciales, draft del Mes 1. |
-| `game/motor_v2/turn_service.py` | Fases 1-3 V2: draft/evento, decisión y conversación. |
-| `game/motor_v2/transition_service.py` | Fase 4: historial, pasivos `cada_mes`, victoria/derrota y nuevo draft. |
-| `game/motor_v1/modals_service.py` | Historial, inventario, corte, finalización, evento, diálogo, resultado y draft. |
-| `game/motor_v2/modals.py` | Estado reactivo del turno (incluye grafo activo) para recargas F5. |
-| `game/motor_v2/endings_service.py` | Colapso por recurso, victoria y sincronización con `user_attempts`. |
+| `game/router.py` | Routers de jugador: ciclo mensual, grafos, setup, reinicio y modales. |
+| `game/setup_service.py` | Fase 0 común: oferta diaria, creación de run (toma `motor` del universo) y reinicio. |
+| `game/turn_service.py` | Fase 1 común: valida el draft, aplica la carta y deriva al motor de la run. |
+| `game/motor_v1/turn_service.py` | Fases 1-3 del motor plano: sorteo de evento, decisión y diálogo (rutas deprecadas). |
+| `game/motor_v2/turn_service.py` | Rama V2 de la Fase 1: sortea e inicia un grafo de evento. |
+| `game/transition_service.py` | Fase 4 común: historial, pasivos `cada_mes`, victoria/derrota y nuevo draft. |
+| `game/modals_service.py` | Lecturas comunes: historial, inventario, corte y finalización. |
+| `game/motor_v1/modals.py` | Consultas atómicas deprecadas del motor plano: evento, diálogo, resultado y draft. |
+| `game/turn_state.py` | Estado reactivo del turno (incluye `motor` y grafo activo) para recargas F5. |
+| `game/endings_service.py` | Colapso por recurso, victoria y sincronización con `user_attempts` (común). |
 | `game/motor_v2/v2_graph_service.py` | Orquestación delgada V2: estado del grafo, avance y arranques manuales. |
 | `game/universe_resources.py` | Caché de límites min/max de recursos por universo (compartida por ambos motores). |
 | `schemas/rules_schemas.py` | `CondicionSchema`, `AccionSchema`, `EfectoSchema`. |

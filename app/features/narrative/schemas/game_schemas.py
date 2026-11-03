@@ -193,6 +193,7 @@ class EstadoTurnoResponse(BaseModel):
     conversacion_actual: Optional[ConversacionResponse] = None
     finalizacion: Optional[FinalizacionResponse] = None
     grafo_actual: Optional[EstadoGrafoV2Response] = None
+    motor: Optional[str] = "v1"
 
 # ============================================================================
 # 7. DTOs DEL MOTOR V2 LIGERO (DELTAS POR FASE)
@@ -215,6 +216,7 @@ class ElegirCartaMesV2Response(BaseModel):
     finalizacion: Optional[FinalizacionResponse] = None
     grafo_actual: Optional[EstadoGrafoV2Response] = None
     puntos_ganados: Optional[int] = None
+    motor: Optional[str] = "v1"
 
 class DecidirEventoV2Response(BaseModel):
     fase_actual: str
