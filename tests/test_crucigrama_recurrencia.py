@@ -14,6 +14,7 @@ from httpx import ASGITransport, AsyncClient
 from app.core.database import connect_to_mongo, db_instance, get_database
 from app.core.dependencies import get_current_admin
 from app.features.daily_challenges import service as daily_service
+from app.features.daily_challenges.games import crucigrama as crucigrama_game
 from app.features.daily_challenges.crucigrama.bans import (
     get_global_banned_words,
     set_global_banned_words,
@@ -165,34 +166,34 @@ async def _ejecutar_flujo():
             assert pub_exacta.status_code == 200, pub_exacta.text
 
             fechas_generador = []
-            generador_original = daily_service.generate_crucigrama_challenge_for_date
+            generador_original = crucigrama_game.generate_crucigrama_challenge_for_date
 
             def _espia_generador(fecha, dificultad, **kwargs):
                 fechas_generador.append(fecha)
                 return generador_original(fecha, dificultad, **kwargs)
 
             fechas_recurrente = []
-            recurrente_original = daily_service.get_recurring_published_config
+            recurrente_original = crucigrama_game.get_recurring_published_config
 
             async def _espia_recurrente(fecha, dificultad, *args, **kwargs):
                 fechas_recurrente.append(fecha)
                 return await recurrente_original(fecha, dificultad, *args, **kwargs)
 
-            monthrange_original = daily_service.calendar.monthrange
-            dificultades_original = daily_service.CRUCIGRAMA_DIFFICULTIES
-            daily_service.generate_crucigrama_challenge_for_date = _espia_generador
-            daily_service.get_recurring_published_config = _espia_recurrente
-            daily_service.calendar.monthrange = lambda year, month: (0, 5)
-            daily_service.CRUCIGRAMA_DIFFICULTIES = ["facil"]
+            monthrange_original = crucigrama_game.calendar.monthrange
+            dificultades_original = crucigrama_game.CRUCIGRAMA_DIFFICULTIES
+            crucigrama_game.generate_crucigrama_challenge_for_date = _espia_generador
+            crucigrama_game.get_recurring_published_config = _espia_recurrente
+            crucigrama_game.calendar.monthrange = lambda year, month: (0, 5)
+            crucigrama_game.CRUCIGRAMA_DIFFICULTIES = ["facil"]
             try:
                 resultado = await daily_service.generate_and_save_crucigrama_month(
                     2031, 1, force=True
                 )
             finally:
-                daily_service.generate_crucigrama_challenge_for_date = generador_original
-                daily_service.get_recurring_published_config = recurrente_original
-                daily_service.calendar.monthrange = monthrange_original
-                daily_service.CRUCIGRAMA_DIFFICULTIES = dificultades_original
+                crucigrama_game.generate_crucigrama_challenge_for_date = generador_original
+                crucigrama_game.get_recurring_published_config = recurrente_original
+                crucigrama_game.calendar.monthrange = monthrange_original
+                crucigrama_game.CRUCIGRAMA_DIFFICULTIES = dificultades_original
 
             assert resultado["success"]
             assert fechas_recurrente == [

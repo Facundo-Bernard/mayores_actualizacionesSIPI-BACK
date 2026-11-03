@@ -39,34 +39,34 @@ from app.features.narrative.schemas.v2_graph_schemas import (
     AvanzarNodoV2Request,
     EstadoGrafoV2Response
 )
-from app.features.narrative.game.v2_graph_service import (
+from app.features.narrative.game.motor_v2.v2_graph_service import (
     avanzar_nodo_v2,
     obtener_grafo_actual_v2,
     iniciar_evento_mes_v2,
     iniciar_conversacion_mes_v2
 )
-from app.features.narrative.game.setup_service import (
+from app.features.narrative.game.motor_v1.setup_service import (
     obtener_setup_desafio,
-    reiniciar_partida,
-    iniciar_partida_v2
+    reiniciar_partida
 )
-from app.features.narrative.game.turn_service import (
+from app.features.narrative.game.motor_v2.setup_service import iniciar_partida_v2
+from app.features.narrative.game.motor_v2.turn_service import (
     elegir_carta_mes_v2,
     decidir_evento_v2,
     responder_conversacion_v2
 )
-from app.features.narrative.game.transition_service import avanzar_mes_v2
-from app.features.narrative.game.modals_service import (
+from app.features.narrative.game.motor_v2.transition_service import avanzar_mes_v2
+from app.features.narrative.game.motor_v1.modals_service import (
     obtener_historial_partida,
     obtener_inventario_partida,
     obtener_corte_partida,
     obtener_finalizacion_partida,
-    obtener_turno_actual,
     obtener_evento_actual_partida,
     obtener_conversacion_actual_partida,
     obtener_resultado_actual_partida,
     obtener_draft_actual_partida
 )
+from app.features.narrative.game.motor_v2.modals import obtener_turno_actual
 from app.features.narrative.game.identity import cargar_guest_id
 from app.features.narrative.admin.crud_service import (
     obtener_conversaciones_posibles_por_personajes

@@ -7501,13 +7501,13 @@
             }
           },
           {
-            "description": "Forzar regeneración si ya existe",
+            "description": "Forzar regeneración si ya existe (bloqueado si el mes tiene intentos)",
             "in": "query",
             "name": "force",
             "required": false,
             "schema": {
-              "default": true,
-              "description": "Forzar regeneración si ya existe",
+              "default": false,
+              "description": "Forzar regeneración si ya existe (bloqueado si el mes tiene intentos)",
               "title": "Force",
               "type": "boolean"
             }

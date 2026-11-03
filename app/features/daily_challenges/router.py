@@ -17,7 +17,8 @@ from app.features.daily_challenges.service import (
     generate_and_save_wordle_month,
     generate_and_save_sopa_month,
     generate_and_save_crucigrama_month,
-    get_challenges_monthly_status
+    get_challenges_monthly_status,
+    assert_month_regenerable,
 )
 
 router = APIRouter(prefix="/api/challenges", tags=["Desafíos Diarios"])
@@ -106,9 +107,11 @@ async def endpoint_admin_generate_month(
     year: int = Query(..., ge=2020, le=2050, description="Año a generar"),
     month: int = Query(..., ge=1, le=12, description="Mes a generar (1-12)"),
     game_id: str = Query("sudoku", description="Juego a generar (sudoku, wordle, sopa_letras, crucigrama)"),
-    force: bool = Query(True, description="Forzar regeneración si ya existe"),
+    force: bool = Query(False, description="Forzar regeneración si ya existe (bloqueado si el mes tiene intentos)"),
     admin: dict = Depends(get_current_admin)
 ):
+    if force:
+        await assert_month_regenerable(game_id, year, month)
     if game_id == "sudoku":
         return await generate_and_save_sudoku_month(year=year, month=month, force=force)
     elif game_id == "wordle":

@@ -30,7 +30,7 @@ from app.features.narrative.schemas.v2_graph_schemas import (
     ImpactoRecursoSchema,
     ImpactoAfinidadSchema
 )
-from app.features.narrative.engine.graph_engine import graph_engine
+from app.features.narrative.game.motor_v2.graph_engine import graph_engine
 from app.scripts.seed_narrative_v2_graphs import seed_v2_graphs
 
 def test_v2_graph_full_suite():
@@ -162,7 +162,7 @@ async def _ejecutar_tests_v2():
 
     # 3.3 Avanzar a la opción final (Mano dura -> desenlace)
     # Se fuerza que NO se dispare la conversación incidental (40%) para un test determinista.
-    with patch("app.features.narrative.engine.graph_engine.random.random", return_value=0.99):
+    with patch("app.features.narrative.game.motor_v2.graph_engine.random.random", return_value=0.99):
         estado_paso_final = await graph_engine.avanzar_nodo(
             run=run_db,
             opcion_id="opt_mano_dura"

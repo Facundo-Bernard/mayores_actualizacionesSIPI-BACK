@@ -136,11 +136,10 @@ async def seed_wordle_challenges():
                 "difficulty": "standard"
             },
             {
-                "$set": doc,
-                "$setOnInsert": {"created_at": now_utc}
+                "$setOnInsert": {**doc, "created_at": now_utc}
             },
             upsert=True
         )
         inserted_or_updated += 1
 
-    logger.info(f"[DESAFÍOS] {inserted_or_updated} desafíos de Wordle sincronizados (Agosto, Septiembre y Octubre 2026).")
+    logger.info(f"[DESAFÍOS] {inserted_or_updated} desafíos de Wordle verificados (Agosto, Septiembre y Octubre 2026).")

@@ -419,17 +419,17 @@ class GraphTraversalEngine:
         # ====================================================================
         # CASO 2: NODO TERMINAL (es_final == True)
         # ====================================================================
-        from app.features.narrative.game.endings_service import (
+        from app.features.narrative.game.motor_v2.endings_service import (
             verificar_colapso_recursos,
             sincronizar_intento_usuario
         )
-        from app.features.narrative.game.setup_service import _obtener_mapa_recursos_universo
+        from app.features.narrative.game.universe_resources import obtener_mapa_recursos_universo
 
         recursos = run.get("recursos", {"oro": 50, "pueblo": 50, "ejercito": 50, "fe": 50})
         afinidad = run.get("afinidad", {})
 
         # Límites min/max de recursos configurados para el universo
-        recursos_mapa = await _obtener_mapa_recursos_universo(run.get("universo_id", "corte_medieval"))
+        recursos_mapa = await obtener_mapa_recursos_universo(run.get("universo_id", "corte_medieval"))
 
         # 1. Aplicar Impactos de Recursos
         for imp_rec in siguiente_nodo.impactos_recursos:

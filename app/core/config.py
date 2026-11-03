@@ -87,6 +87,16 @@ class Settings(BaseSettings):
     # Siembra del contenido V2 al arrancar. Opt-in hasta completar el dry-run de readiness.
     SEED_NARRATIVE_V2: bool = False
 
+    # Seeds estáticos de desafíos (Wordle/Sopa/Sudoku de calendario fijo). Opt-in y nunca pisan datos.
+    SEED_STATIC_CHALLENGES: bool = False
+
+    # Rate limiting en memoria por proceso. Se desactiva en tests si hiciera falta.
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_ECONOMY_PER_MINUTE: int = 120
+    RATE_LIMIT_ATTEMPTS_PER_MINUTE: int = 120
+    RATE_LIMIT_NARRATIVE_PER_MINUTE: int = 180
+
     # RAE API (Wordle / Desafíos)
     RAE_API_KEY: Optional[str] = None
 

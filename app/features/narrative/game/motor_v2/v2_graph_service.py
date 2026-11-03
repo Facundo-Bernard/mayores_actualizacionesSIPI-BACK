@@ -18,7 +18,7 @@ from app.features.narrative.schemas.v2_graph_schemas import (
     EstadoGrafoV2Response,
     NodoNarrativoSchema
 )
-from app.features.narrative.engine.graph_engine import graph_engine
+from app.features.narrative.game.motor_v2.graph_engine import graph_engine
 from app.features.narrative.game.identity import filtro_run
 
 logger = logging.getLogger(__name__)

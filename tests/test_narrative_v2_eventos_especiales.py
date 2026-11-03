@@ -18,7 +18,7 @@ from app.features.narrative.constants import (
     COLL_V2_EVENTOS_ESPECIALES,
     COLL_RUNS
 )
-from app.features.narrative.engine.graph_engine import graph_engine
+from app.features.narrative.game.motor_v2.graph_engine import graph_engine
 from app.scripts.seed_narrative_v2_graphs import seed_v2_graphs
 
 
@@ -138,7 +138,7 @@ async def _ejecutar_tests():
     run_sin_cruce = _run_base(f"run_esp_sincruce_{test_user_id}", "2026-12-29", 90)
     await db[COLL_RUNS].replace_one({"_id": run_sin_cruce["_id"]}, run_sin_cruce, upsert=True)
 
-    with patch("app.features.narrative.engine.graph_engine.random.random", return_value=0.99):
+    with patch("app.features.narrative.game.motor_v2.graph_engine.random.random", return_value=0.99):
         estado_sin_cruce = await graph_engine.avanzar_nodo(run_sin_cruce, "opt_traicion")
 
     assert estado_sin_cruce.tipo == "evento", f"Se esperaba 'evento', se obtuvo {estado_sin_cruce.tipo}"

@@ -249,9 +249,9 @@ def _puede_elegir(opcion: dict[str, Any], run: dict[str, Any]) -> bool:
 
 async def _estado_sintetico(db, universo_id: str) -> dict[str, Any]:
     from app.features.narrative.constants import COLL_CARDS, COLL_CHARACTERS
-    from app.features.narrative.game.setup_service import _obtener_mapa_recursos_universo
+    from app.features.narrative.game.universe_resources import obtener_mapa_recursos_universo
 
-    mapa = await _obtener_mapa_recursos_universo(universo_id)
+    mapa = await obtener_mapa_recursos_universo(universo_id)
     claves = list(mapa.keys()) or ["oro", "pueblo", "ejercito", "fe"]
     personajes = await db[COLL_CHARACTERS].find({"universo_id": universo_id}).to_list(None)
     cartas = await db[COLL_CARDS].find({"universo_id": universo_id}).to_list(None)
@@ -280,7 +280,7 @@ async def simular_universo(
     reciclar: bool = False,
 ) -> ReporteUniverso:
     from app.features.narrative.constants import COLL_V2_EVENTS
-    from app.features.narrative.engine.graph_engine import graph_engine
+    from app.features.narrative.game.motor_v2.graph_engine import graph_engine
 
     eventos_disponibles = await db[COLL_V2_EVENTS].count_documents({"universo_id": universo_id})
     reporte = ReporteUniverso(

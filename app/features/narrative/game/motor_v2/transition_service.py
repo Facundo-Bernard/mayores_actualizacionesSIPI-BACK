@@ -37,12 +37,12 @@ from app.features.narrative.schemas.game_schemas import (
 )
 from app.features.narrative.schemas.rules_schemas import EfectoSchema
 from app.features.narrative.engine.rule_engine import despachar_efectos
-from app.features.narrative.game.endings_service import (
+from app.features.narrative.game.motor_v2.endings_service import (
     verificar_colapso_recursos,
     calcular_finalizacion_victoria,
     sincronizar_intento_usuario
 )
-from app.features.narrative.game.setup_service import _obtener_mapa_recursos_universo
+from app.features.narrative.game.universe_resources import obtener_mapa_recursos_universo
 from app.features.narrative.game.run_repository import persistir_run
 from app.features.narrative.game.identity import filtro_run
 
@@ -113,7 +113,7 @@ async def avanzar_mes_v2(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Re
     run["fase_actual"] = RunPhaseEnum.DRAFT_MENSUAL.value
 
     # Aplicar efectos pasivos "cada_mes"
-    recursos_mapa = await _obtener_mapa_recursos_universo(run["universo_id"])
+    recursos_mapa = await obtener_mapa_recursos_universo(run["universo_id"])
     corte_ids = list(run.get("afinidad", {}).keys()) or run.get("corte_activa", [])
     personajes_docs = await db[COLL_CHARACTERS].find({"_id": {"$in": corte_ids}}).to_list(None)
     cartas_docs = await db[COLL_CARDS].find({"_id": {"$in": run["cartas_en_mano"]}}).to_list(None)

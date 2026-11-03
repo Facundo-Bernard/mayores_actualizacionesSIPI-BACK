@@ -3,7 +3,7 @@
 import pytest
 
 from app.features.narrative.constants import COLL_RUNS, COLL_USER_ATTEMPTS
-from app.features.narrative.game.endings_service import sincronizar_intento_usuario
+from app.features.narrative.game.motor_v2.endings_service import sincronizar_intento_usuario
 from app.shared.economy_points import obtener_puntos_por_calificacion
 
 pytestmark = pytest.mark.contract

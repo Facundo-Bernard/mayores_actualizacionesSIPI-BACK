@@ -10,6 +10,7 @@ import logging
 from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.core.security_middleware import AbsoluteSecurityMiddleware
+from app.core.rate_limit import RateLimitMiddleware
 from app.scripts.init_db import seed_estados_usuario
 from app.features.auth.router import router as auth_router
 from app.features.usuario.router import router as usuario_router
@@ -49,9 +50,13 @@ async def lifespan(app: FastAPI):
     import asyncio
     async def _background_seeds():
         try:
-            await seed_wordle_challenges()
-            await seed_sopa_letras_challenges()
-            await seed_sudoku_challenges()
+            if settings.SEED_STATIC_CHALLENGES:
+                try:
+                    await seed_wordle_challenges()
+                    await seed_sopa_letras_challenges()
+                    await seed_sudoku_challenges()
+                except Exception as e_static:
+                    logger.warning(f"Aviso durante la siembra estática de desafíos: {e_static}")
             await ensure_current_and_next_month_generated()
             try:
                 from app.scripts.seed_narrative import seed_narrative_game
@@ -111,6 +116,9 @@ app = FastAPI(
 
 # DIRECTIVA DE SEGURIDAD ABSOLUTA — REGLA SUPREMA INQUEBRANTABLE (Middleware perimetral y fail-closed)
 app.add_middleware(AbsoluteSecurityMiddleware)
+
+# Límite de solicitudes por identidad en economía, intentos y narrativo
+app.add_middleware(RateLimitMiddleware)
 
 # Configuración de CORS estricta (Solo orígenes autorizados)
 app.add_middleware(

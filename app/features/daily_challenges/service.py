@@ -1,39 +1,43 @@
+"""Fachada de desafíos diarios: lectura, upsert y orquestación de generación.
+
+La generación por juego vive en ``app.features.daily_challenges.games``.
+Se reexportan los generadores para conservar los imports existentes (router,
+``main`` y seeds).
+"""
+
 import calendar
-import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import Optional
+
 from fastapi import HTTPException
 from pymongo import ASCENDING
 
 from app.core.database import get_database
+from app.features.daily_challenges.games.common import (  # noqa: F401
+    CRUCIGRAMA_DIFFICULTIES,
+    MONTH_NAMES_ES,
+    assert_month_regenerable,
+)
+from app.features.daily_challenges.games.coverage import get_challenges_monthly_status  # noqa: F401
+from app.features.daily_challenges.games.crucigrama import generate_and_save_crucigrama_month  # noqa: F401
+from app.features.daily_challenges.games.sopa import generate_and_save_sopa_month  # noqa: F401
+from app.features.daily_challenges.games.sudoku import generate_and_save_sudoku_month  # noqa: F401
+from app.features.daily_challenges.games.wordle import generate_and_save_wordle_month  # noqa: F401
 from app.features.daily_challenges.schemas import (
+    ChallengeRangeResponse,
     DailyChallengeCreateRequest,
     DailyChallengeResponse,
     MonthChallengesResponse,
-    ChallengeRangeResponse
-)
-from app.features.daily_challenges.sudoku_generator import generate_sudoku_for_date
-from app.features.daily_challenges.wordle_generator import (
-    generate_wordle_challenge,
-    generate_wordle_hints
-)
-from app.features.daily_challenges.sopa_generator import generate_sopa_challenge_for_date
-from app.features.daily_challenges.crucigrama import generate_crucigrama_challenge_for_date
-from app.features.daily_challenges.crucigrama.bans import get_global_banned_words
-from app.features.daily_challenges.crucigrama_admin.service import (
-    get_recurring_published_config,
-    get_scheduled_published_config,
 )
 
 logger = logging.getLogger(__name__)
 
-CRUCIGRAMA_DIFFICULTIES = ["facil", "dificil"]
 
 def _serialize_challenge(doc: dict, today_str: Optional[str] = None) -> DailyChallengeResponse:
     if today_str is None:
         today_str = datetime.now().strftime("%Y-%m-%d")
-        
+
     doc_date = doc.get("date", "")
     created_at = doc.get("created_at")
     if isinstance(created_at, datetime):
@@ -53,6 +57,7 @@ def _serialize_challenge(doc: dict, today_str: Optional[str] = None) -> DailyCha
         is_future=(doc_date > today_str),
         created_at=created_at_str
     )
+
 
 async def get_challenge_by_date(
     game_id: str = "wordle",
@@ -78,6 +83,7 @@ async def get_challenge_by_date(
 
     return _serialize_challenge(challenge, today_str)
 
+
 async def get_today_challenge(
     game_id: str = "wordle",
     difficulty: str = "standard"
@@ -85,6 +91,7 @@ async def get_today_challenge(
     """Obtiene el desafío de hoy para el juego especificado."""
     today_str = datetime.now().strftime("%Y-%m-%d")
     return await get_challenge_by_date(game_id=game_id, target_date=today_str, difficulty=difficulty)
+
 
 async def get_month_challenges(
     year: int,
@@ -99,18 +106,16 @@ async def get_month_challenges(
     """
     if not (1 <= month <= 12):
         raise HTTPException(status_code=400, detail="El mes debe estar comprendido entre 1 y 12.")
-    
+
     if not (2020 <= year <= 2050):
         raise HTTPException(status_code=400, detail="Año fuera del rango admitido (2020-2050).")
 
-    # Calcula la cantidad exacta de días del mes solicitado (ej. 31 en octubre, 28/29 en febrero)
     _, days_in_month = calendar.monthrange(year, month)
 
     start_date = f"{year:04d}-{month:02d}-01"
     end_date = f"{year:04d}-{month:02d}-{days_in_month:02d}"
     today_str = datetime.now().strftime("%Y-%m-%d")
 
-    # Si se solicita solo hasta el día de hoy y el mes consultado incluye la fecha actual o futura
     if until_today and today_str < end_date:
         effective_end_date = today_str
     else:
@@ -126,7 +131,6 @@ async def get_month_challenges(
         }
     }
 
-    # Se ordena de forma ascendente (del día 1 en adelante) y se limita estrictamente a days_in_month
     cursor = db["daily_challenges"].find(query).sort("date", ASCENDING).limit(days_in_month)
     results = await cursor.to_list(length=days_in_month)
 
@@ -139,6 +143,7 @@ async def get_month_challenges(
         total_challenges=len(challenges),
         challenges=challenges
     )
+
 
 async def upsert_challenge(req: DailyChallengeCreateRequest) -> DailyChallengeResponse:
     """Crea o actualiza un desafío diario de forma idempotente."""
@@ -171,6 +176,7 @@ async def upsert_challenge(req: DailyChallengeCreateRequest) -> DailyChallengeRe
 
     return _serialize_challenge(result, today_str)
 
+
 async def get_challenge_date_range(game_id: str = "wordle") -> ChallengeRangeResponse:
     """Busca la fecha mínima y máxima con desafíos disponibles para un juego."""
     db = get_database()
@@ -188,432 +194,6 @@ async def get_challenge_date_range(game_id: str = "wordle") -> ChallengeRangeRes
         max_date=last_doc.get("date") if last_doc else None
     )
 
-MONTH_NAMES_ES = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-]
-
-async def generate_and_save_sudoku_month(year: int, month: int, force: bool = False) -> dict:
-    """
-    Genera y guarda de forma atómica e idempotente los desafíos diarios de Sudoku.
-    Verifica primero si el mes o día ya existen en la base de datos; si ya existen,
-    los saltea instantáneamente para no bloquear ni demorar el arranque del backend.
-    """
-    if not (1 <= month <= 12):
-        raise HTTPException(status_code=400, detail="El mes debe estar comprendido entre 1 y 12.")
-
-    db = get_database()
-    now_utc = datetime.now(timezone.utc)
-    _, days_in_month = calendar.monthrange(year, month)
-
-    start_date = f"{year:04d}-{month:02d}-01"
-    end_date = f"{year:04d}-{month:02d}-{days_in_month:02d}"
-
-    # Si no es forzado, revisar si el mes ya está 100% completo
-    if not force:
-        existing_count = await db["daily_challenges"].count_documents({
-            "game_id": "sudoku",
-            "date": {"$gte": start_date, "$lte": end_date}
-        })
-        if existing_count >= days_in_month:
-            logger.info(f"[SUDOKU] Mes {year}-{month:02d} ya está completamente generado ({existing_count}/{days_in_month}). Saltando en 0ms.")
-            return {
-                "success": True,
-                "game_id": "sudoku",
-                "year": year,
-                "month": month,
-                "month_name": MONTH_NAMES_ES[month - 1],
-                "days_in_month": days_in_month,
-                "generated_count": 0,
-                "already_complete": True
-            }
-
-    generated_count = 0
-
-    for day in range(1, days_in_month + 1):
-        date_str = f"{year:04d}-{month:02d}-{day:02d}"
-
-        # Revisar si el día ya existe para no recalcular
-        if not force:
-            existing = await db["daily_challenges"].find_one({
-                "game_id": "sudoku",
-                "date": date_str
-            })
-            if existing and existing.get("config", {}).get("solution"):
-                continue
-
-        sudoku_data = generate_sudoku_for_date(date_str)
-
-        doc = {
-            "game_id": "sudoku",
-            "date": date_str,
-            "difficulty": "standard",
-            "title": f"Sudoku del Día ({date_str})",
-            "config": sudoku_data,
-            "updated_at": now_utc
-        }
-
-        await db["daily_challenges"].update_one(
-            {
-                "game_id": "sudoku",
-                "date": date_str,
-                "difficulty": "standard"
-            },
-            {
-                "$set": doc,
-                "$setOnInsert": {"created_at": now_utc}
-            },
-            upsert=True
-        )
-        generated_count += 1
-
-    logger.info(f"[SUDOKU] {generated_count} nuevos desafíos de Sudoku generados para {year}-{month:02d}.")
-    return {
-        "success": True,
-        "game_id": "sudoku",
-        "year": year,
-        "month": month,
-        "month_name": MONTH_NAMES_ES[month - 1],
-        "days_in_month": days_in_month,
-        "generated_count": generated_count
-    }
-
-async def get_challenges_monthly_status(year: int, game_id: str = "sudoku") -> dict:
-    """
-    Calcula el estado de cobertura de desafíos para cada uno de los 12 meses de un año.
-    Permite a la Torre de Control auditar y generar meses faltantes.
-    """
-    db = get_database()
-    months_status = []
-
-    for m in range(1, 13):
-        _, days_in_month = calendar.monthrange(year, m)
-        start_date = f"{year:04d}-{m:02d}-01"
-        end_date = f"{year:04d}-{m:02d}-{days_in_month:02d}"
-
-        count = await db["daily_challenges"].count_documents({
-            "game_id": game_id,
-            "date": {"$gte": start_date, "$lte": end_date}
-        })
-
-        if count >= days_in_month:
-            status = "completed"
-        elif count > 0:
-            status = "partial"
-        else:
-            status = "pending"
-
-        months_status.append({
-            "month": m,
-            "name": MONTH_NAMES_ES[m - 1],
-            "days_in_month": days_in_month,
-            "generated_count": count,
-            "status": status,
-            "is_complete": count >= days_in_month
-        })
-
-    return {
-        "game_id": game_id,
-        "year": year,
-        "months": months_status
-    }
-
-async def generate_and_save_wordle_month(year: int, month: int, force: bool = False) -> dict:
-    """
-    Genera y guarda de forma atómica e idempotente los desafíos diarios de Wordle
-    para el mes y año especificados, extrayendo palabras del pool de 4.933 palabras frecuentes.
-    Si force=False, saltea instantáneamente en 0ms si el mes ya está completo.
-    Si force=True, refresca las pistas y definiciones de la RAE respetando las soluciones existentes.
-    """
-    if not (1 <= month <= 12):
-        raise HTTPException(status_code=400, detail="El mes debe estar comprendido entre 1 y 12.")
-
-    db = get_database()
-    now_utc = datetime.now(timezone.utc)
-    _, days_in_month = calendar.monthrange(year, month)
-
-    start_date = f"{year:04d}-{month:02d}-01"
-    end_date = f"{year:04d}-{month:02d}-{days_in_month:02d}"
-
-    # Si no es forzado, revisar si el mes ya está 100% completo
-    if not force:
-        existing_count = await db["daily_challenges"].count_documents({
-            "game_id": "wordle",
-            "date": {"$gte": start_date, "$lte": end_date}
-        })
-        if existing_count >= days_in_month:
-            logger.info(f"[WORDLE] Mes {year}-{month:02d} ya está completamente generado ({existing_count}/{days_in_month}). Saltando en 0ms.")
-            return {
-                "success": True,
-                "game_id": "wordle",
-                "year": year,
-                "month": month,
-                "month_name": MONTH_NAMES_ES[month - 1],
-                "days_in_month": days_in_month,
-                "generated_count": 0,
-                "already_complete": True
-            }
-
-    # 1. Recuperar todas las palabras ya usadas en Wordle para no repetir
-    cursor = db["daily_challenges"].find({"game_id": "wordle"}, {"config.solution": 1})
-    used_words = set()
-    async for doc in cursor:
-        sol = doc.get("config", {}).get("solution")
-        if sol:
-            used_words.add(sol.upper().strip())
-
-    generated_count = 0
-
-    # 2. Iterar por cada día del mes
-    for day in range(1, days_in_month + 1):
-        date_str = f"{year:04d}-{month:02d}-{day:02d}"
-
-        existing = await db["daily_challenges"].find_one({
-            "game_id": "wordle",
-            "date": date_str
-        })
-
-        if not force and existing and existing.get("config", {}).get("solution"):
-            used_words.add(existing["config"]["solution"].upper().strip())
-            continue
-
-        if existing and existing.get("config", {}).get("solution"):
-            # Respetar la solución original asignada pero refrescar pistas y definición RAE
-            sol = existing["config"]["solution"].upper().strip()
-            hints = generate_wordle_hints(sol)
-            challenge_config = {
-                "solution": sol,
-                "word_length": 5,
-                "max_attempts": 6,
-                "hints": hints
-            }
-        else:
-            challenge_config = generate_wordle_challenge(date_str, used_words, index=day)
-            used_words.add(challenge_config["solution"])
-
-        doc = {
-            "game_id": "wordle",
-            "date": date_str,
-            "difficulty": "standard",
-            "title": f"Palabra del Día ({date_str})",
-            "config": challenge_config,
-            "updated_at": now_utc
-        }
-
-        await db["daily_challenges"].update_one(
-            {
-                "game_id": "wordle",
-                "date": date_str,
-                "difficulty": "standard"
-            },
-            {
-                "$set": doc,
-                "$setOnInsert": {"created_at": now_utc}
-            },
-            upsert=True
-        )
-        generated_count += 1
-        await asyncio.sleep(0.2)
-
-    logger.info(f"[WORDLE] {generated_count} desafíos de Wordle actualizados/generados para {year}-{month:02d}.")
-    return {
-        "success": True,
-        "game_id": "wordle",
-        "year": year,
-        "month": month,
-        "month_name": MONTH_NAMES_ES[month - 1],
-        "days_in_month": days_in_month,
-        "generated_count": generated_count
-    }
-
-async def generate_and_save_sopa_month(year: int, month: int, force: bool = False) -> dict:
-    """
-    Genera y guarda de forma atómica e idempotente los desafíos diarios de Sopa de Letras
-    para el mes y año especificados, enriqueciendo las pistas con definiciones de la RAE.
-    Si force=False, saltea instantáneamente en 0ms si el mes ya está completo.
-    """
-    if not (1 <= month <= 12):
-        raise HTTPException(status_code=400, detail="El mes debe estar comprendido entre 1 y 12.")
-
-    db = get_database()
-    now_utc = datetime.now(timezone.utc)
-    _, days_in_month = calendar.monthrange(year, month)
-
-    start_date = f"{year:04d}-{month:02d}-01"
-    end_date = f"{year:04d}-{month:02d}-{days_in_month:02d}"
-
-    if not force:
-        existing_count = await db["daily_challenges"].count_documents({
-            "game_id": "sopa_letras",
-            "date": {"$gte": start_date, "$lte": end_date}
-        })
-        if existing_count >= days_in_month:
-            logger.info(f"[SOPA_LETRAS] Mes {year}-{month:02d} ya está completamente generado ({existing_count}/{days_in_month}). Saltando en 0ms.")
-            return {
-                "success": True,
-                "game_id": "sopa_letras",
-                "year": year,
-                "month": month,
-                "month_name": MONTH_NAMES_ES[month - 1],
-                "days_in_month": days_in_month,
-                "generated_count": 0,
-                "already_complete": True
-            }
-
-    generated_count = 0
-
-    for day in range(1, days_in_month + 1):
-        date_str = f"{year:04d}-{month:02d}-{day:02d}"
-
-        if not force:
-            existing = await db["daily_challenges"].find_one({
-                "game_id": "sopa_letras",
-                "date": date_str
-            })
-            if existing and existing.get("config", {}).get("grid"):
-                continue
-
-        sopa_data = generate_sopa_challenge_for_date(date_str)
-
-        doc = {
-            "game_id": "sopa_letras",
-            "date": date_str,
-            "difficulty": "standard",
-            "title": f"Sopa de Letras: {sopa_data['theme']} ({date_str})",
-            "config": sopa_data,
-            "updated_at": now_utc
-        }
-
-        await db["daily_challenges"].update_one(
-            {
-                "game_id": "sopa_letras",
-                "date": date_str,
-                "difficulty": "standard"
-            },
-            {
-                "$set": doc,
-                "$setOnInsert": {"created_at": now_utc}
-            },
-            upsert=True
-        )
-        generated_count += 1
-        await asyncio.sleep(0.15)
-
-    logger.info(f"[SOPA_LETRAS] {generated_count} desafíos de Sopa de Letras generados para {year}-{month:02d}.")
-    return {
-        "success": True,
-        "game_id": "sopa_letras",
-        "year": year,
-        "month": month,
-        "month_name": MONTH_NAMES_ES[month - 1],
-        "days_in_month": days_in_month,
-        "generated_count": generated_count
-    }
-
-async def generate_and_save_crucigrama_month(year: int, month: int, force: bool = False) -> dict:
-    """
-    Genera y guarda de forma atómica e idempotente los desafíos diarios de Crucigrama
-    en sus dos dificultades (facil 7x7 y dificil 11x11) para el mes y año especificados.
-    Si force=False, saltea instantáneamente en 0ms si el mes ya está completo para ambas.
-    """
-    if not (1 <= month <= 12):
-        raise HTTPException(status_code=400, detail="El mes debe estar comprendido entre 1 y 12.")
-
-    db = get_database()
-    now_utc = datetime.now(timezone.utc)
-    _, days_in_month = calendar.monthrange(year, month)
-
-    start_date = f"{year:04d}-{month:02d}-01"
-    end_date = f"{year:04d}-{month:02d}-{days_in_month:02d}"
-
-    if not force:
-        complete = True
-        for diff in CRUCIGRAMA_DIFFICULTIES:
-            existing_count = await db["daily_challenges"].count_documents({
-                "game_id": "crucigrama",
-                "difficulty": diff,
-                "date": {"$gte": start_date, "$lte": end_date}
-            })
-            if existing_count < days_in_month:
-                complete = False
-                break
-        if complete:
-            logger.info(f"[CRUCIGRAMA] Mes {year}-{month:02d} ya está completamente generado en {len(CRUCIGRAMA_DIFFICULTIES)} dificultades. Saltando en 0ms.")
-            return {
-                "success": True,
-                "game_id": "crucigrama",
-                "year": year,
-                "month": month,
-                "month_name": MONTH_NAMES_ES[month - 1],
-                "days_in_month": days_in_month,
-                "generated_count": 0,
-                "already_complete": True
-            }
-
-    generated_count = 0
-    global_bans = await get_global_banned_words()
-
-    for day in range(1, days_in_month + 1):
-        date_str = f"{year:04d}-{month:02d}-{day:02d}"
-
-        for diff in CRUCIGRAMA_DIFFICULTIES:
-            if not force:
-                existing = await db["daily_challenges"].find_one({
-                    "game_id": "crucigrama",
-                    "date": date_str,
-                    "difficulty": diff
-                })
-                if existing and existing.get("config", {}).get("cells"):
-                    continue
-
-            crucigrama_data = await get_scheduled_published_config(date_str, diff)
-            if not crucigrama_data:
-                crucigrama_data = await get_recurring_published_config(
-                    date_str, diff, global_bans
-                )
-            if crucigrama_data:
-                crucigrama_data = dict(crucigrama_data)
-                crucigrama_data["date"] = date_str
-            else:
-                crucigrama_data = generate_crucigrama_challenge_for_date(
-                    date_str, diff, banned_words=global_bans
-                )
-
-            doc = {
-                "game_id": "crucigrama",
-                "date": date_str,
-                "difficulty": diff,
-                "title": f"Crucigrama ({diff.capitalize()}): {crucigrama_data['theme']} ({date_str})",
-                "config": crucigrama_data,
-                "updated_at": now_utc
-            }
-
-            await db["daily_challenges"].update_one(
-                {
-                    "game_id": "crucigrama",
-                    "date": date_str,
-                    "difficulty": diff
-                },
-                {
-                    "$set": doc,
-                    "$setOnInsert": {"created_at": now_utc}
-                },
-                upsert=True
-            )
-            generated_count += 1
-
-        await asyncio.sleep(0.1)
-
-    logger.info(f"[CRUCIGRAMA] {generated_count} desafíos de Crucigrama generados para {year}-{month:02d}.")
-    return {
-        "success": True,
-        "game_id": "crucigrama",
-        "year": year,
-        "month": month,
-        "month_name": MONTH_NAMES_ES[month - 1],
-        "days_in_month": days_in_month,
-        "generated_count": generated_count
-    }
 
 async def ensure_current_and_next_month_generated(game_id: Optional[str] = None):
     """
@@ -676,6 +256,3 @@ async def ensure_current_and_next_month_generated(game_id: Optional[str] = None)
                         await generar_mes_narrativo(year=y, month=m, universo_id="corte_medieval")
                     except Exception as e_narr:
                         logger.warning(f"Error autogenerando mes narrativo {y}-{m:02d}: {e_narr}")
-
-
-

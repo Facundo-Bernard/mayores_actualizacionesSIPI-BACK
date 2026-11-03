@@ -50,12 +50,12 @@ from app.features.narrative.engine.event_director import (
     sortear_resultado_opcion,
     calcular_opciones_evento
 )
-from app.features.narrative.engine.graph_engine import graph_engine
-from app.features.narrative.game.endings_service import (
+from app.features.narrative.game.motor_v2.graph_engine import graph_engine
+from app.features.narrative.game.motor_v2.endings_service import (
     verificar_colapso_recursos,
     sincronizar_intento_usuario
 )
-from app.features.narrative.game.setup_service import _obtener_mapa_recursos_universo
+from app.features.narrative.game.universe_resources import obtener_mapa_recursos_universo
 from app.features.narrative.game.run_repository import persistir_run
 from app.features.narrative.game.identity import filtro_run
 
@@ -90,7 +90,7 @@ async def elegir_carta_mes_v2(user_id: int, req: ElegirCartaMesRequest) -> Elegi
             if t not in run["tags_activos"]:
                 run["tags_activos"].append(t)
 
-        recursos_mapa = await _obtener_mapa_recursos_universo(run["universo_id"])
+        recursos_mapa = await obtener_mapa_recursos_universo(run["universo_id"])
         efectos_carta = [EfectoSchema(**e) for e in carta_doc.get("efectos", [])]
         despachar_efectos(DisparadorEnum.AL_OBTENER, run, efectos_carta, recursos_mapa)
 
@@ -241,7 +241,7 @@ async def decidir_evento_v2(user_id: int, req: DecidirEventoRequest) -> DecidirE
     if not res_doc:
         raise HTTPException(status_code=500, detail="No se encontró el desenlace obtenido en la base de datos.")
 
-    recursos_mapa = await _obtener_mapa_recursos_universo(run["universo_id"])
+    recursos_mapa = await obtener_mapa_recursos_universo(run["universo_id"])
     efectos_res = [EfectoSchema(**e) for e in res_doc.get("efectos", [])]
     despachar_efectos(DisparadorEnum.AL_OBTENER, run, efectos_res, recursos_mapa)
 

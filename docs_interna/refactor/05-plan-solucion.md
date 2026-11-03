@@ -1,6 +1,6 @@
 # Plan de solución — backend de juegos
 
-> **Estado:** Fases 0, 0.5, 1, 2 y 3 implementadas en `feature/refactor-backend` (2/11/2026). Pendiente: Fase 4 (estructura/operación) y Fase 5 (V2 oficial, gated).
+> **Estado:** Fases 0, 0.5, 1, 2, 3 y 4 implementadas en `feature/refactor-backend` (3/11/2026). Pendiente: Fase 5 (V2 oficial, gated).
 > **Base:** commit `d2a117b` + relevamiento de solo lectura del frontend (`Desktop/proyectos/frontend`, 2/11/2026).
 > **Restricciones acordadas:**
 > - Los routers son contrato sagrado: no se cambian paths, métodos, campos ni códigos del camino feliz.
@@ -396,7 +396,7 @@ Objetivo: que V1 sea seguro y que V2 tenga una prueba objetiva de que puede ser 
    - **Puntos:** solo en `localStorage`. Para una partida de invitado, el servidor calcula y devuelve `puntos_ganados`; el cliente lo suma localmente. No se acredita a `user_id = 0`.
    - **Crear cuenta:** volcado único del saldo local al servidor mediante un endpoint de reclamo (ruta nueva, p. ej. `POST /api/economy/guest-migration`), con tope configurable (`guest_migration_max_points`, propuesto 1.000) y asiento de auditoría (`guest_migration`) que registre `solicitado`, `aplicado` y `tope`; luego se limpia la clave local. Idempotente por cuenta.
    - **Iniciar sesión con otra cuenta:** el saldo del servidor pisa el local. No hay fusión bidireccional.
-   - **Run narrativa:** hoy todos los invitados comparten `run_0_<fecha>` ([setup_service.py:184](../../app/features/narrative/game/setup_service.py#L184)). Agregar `guest_id` por dispositivo (header o body opcional) para aislar la partida; si no llega, fallback al comportamiento actual.
+   - **Run narrativa:** hoy todos los invitados comparten `run_0_<fecha>` ([identity.py:67](../../app/features/narrative/game/identity.py#L67)). Agregar `guest_id` por dispositivo (header o body opcional) para aislar la partida; si no llega, fallback al comportamiento actual.
    - **Riesgo asumido:** el saldo de `localStorage` es manipulable por el cliente; el tope de migración es la única defensa. Documentarlo.
 
 **Criterio de aceptación:** el dry-run de 12 meses pasa; los endpoints manuales no permiten saltar fases; el seed no pisa ediciones; V2 se puede activar y desactivar sin migración de datos; una partida narrativa acredita puntos una sola vez, también para invitados con `guest_id`.
@@ -415,6 +415,8 @@ Objetivo: que V1 sea seguro y que V2 tenga una prueba objetiva de que puede ser 
 8. Rate limiting en economía, attempts, pistas y narrativo.
 9. Limpiar código muerto: `puntos_por_juego`, `get_points_for_game`, `get_points_for_grade`, `vidas_maximas` sin uso, `attempt_budgets`, duplicación de Sopa.
 10. Actualizar documentación y borrar docs obsoletas.
+
+**Estado al 3/11/2026:** Fase 4 implementada en su núcleo estructural y operativo. `daily_challenges/service.py` queda como fachada de serialización/persistencia y los generadores viven en `games/` (`wordle`, `sopa`, `sudoku`, `crucigrama`, `coverage`, `common`), con la generación CPU-bound y la resolución de plantillas en `asyncio.to_thread`; el acoplamiento con `crucigrama_admin` se cortó mediante `crucigrama/published_templates.py`. `economy/service.py` se dividió en `config`, `lives`, `points`, `hints`, `unlock` y `admin`, conservando la fachada de imports. El narrativo se separó en `game/motor_v1/` (setup legacy y modales) y `game/motor_v2/` (setup, ciclo mensual, transiciones, desenlaces, estado reactivo y motor de grafos), con `identity`, `run_repository` y `universe_resources` como piezas compartidas; los routers y sus paths no cambiaron. Operación: `force=false` por defecto y regeneración bloqueada con 409 si el mes tiene intentos; seeds no destructivos y seeds estáticos opt-in (`SEED_STATIC_CHALLENGES=false`); rate limiting en economía, intentos y narrativo (ventana deslizante en memoria, límites configurables por minuto) y se conservó el límite anti-fuerza bruta del login con bypass de admin. El único cambio de contrato OpenAPI es el default/descripción de `force` en `POST /api/challenges/admin/generate-month`; snapshot regenerado. Suite: 169 passed, 18 integration/live deseleccionados. Queda como deuda menor revisar las referencias históricas de los documentos de relevamiento (01–04) que describen el layout previo.
 
 ### Fase 5 — V2 oficial (gated)
 

@@ -16,7 +16,7 @@ from app.features.narrative.constants import (
     COLL_V2_EVENTS,
     COLL_RUNS
 )
-from app.features.narrative.engine.graph_engine import graph_engine
+from app.features.narrative.game.motor_v2.graph_engine import graph_engine
 
 
 def test_v2_desenlaces_y_tags():
@@ -113,7 +113,7 @@ async def _ejecutar_tests():
     # ========================================================================
     # TEST 2: Sorteo determinista (fin_a peso 0) resuelve a fin_b
     # ========================================================================
-    with patch("app.features.narrative.engine.graph_engine.random.random", return_value=0.99):
+    with patch("app.features.narrative.game.motor_v2.graph_engine.random.random", return_value=0.99):
         estado = await graph_engine.avanzar_nodo(run, "opt_azar")
 
     assert estado.nodo_actual.id == "fin_b", f"Se esperaba fin_b, se obtuvo {estado.nodo_actual.id}"
