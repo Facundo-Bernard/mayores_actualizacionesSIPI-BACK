@@ -5947,9 +5947,28 @@
             "type": "integer"
           },
           "racha": {
-            "default": 1,
+            "default": 0,
+            "description": "Días consecutivos con al menos un desafío diario completado",
             "title": "Racha",
             "type": "integer"
+          },
+          "racha_hoy_jugada": {
+            "default": false,
+            "description": "Indica si ya completó un desafío diario hoy (ART)",
+            "title": "Racha Hoy Jugada",
+            "type": "boolean"
+          },
+          "racha_ultima_fecha": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Último día jugado en formato YYYY-MM-DD",
+            "title": "Racha Ultima Fecha"
           },
           "suscripcion": {
             "default": "basica",

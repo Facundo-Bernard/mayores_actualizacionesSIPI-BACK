@@ -118,6 +118,10 @@ async def init_indexes():
             unique=True
         )
         await user_attempts.create_index([("user_id", ASCENDING), ("date", -1)])
+        # Racha: fechas de desafíos diarios completados, en orden descendente.
+        await user_attempts.create_index(
+            [("user_id", ASCENDING), ("mode", ASCENDING), ("status", ASCENDING), ("date", -1)]
+        )
 
         # Ledger de puntos: una acreditación por clave de negocio
         await db["economy_ledger"].create_index(

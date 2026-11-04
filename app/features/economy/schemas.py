@@ -116,7 +116,9 @@ class UserEconomyResponse(BaseModel):
     user_id: int
     vidas: Optional[int] = Field(5, description="Deprecado: vidas globales informativas")
     puntos: int
-    racha: int = 1
+    racha: int = Field(0, description="Días consecutivos con al menos un desafío diario completado")
+    racha_ultima_fecha: Optional[str] = Field(None, description="Último día jugado en formato YYYY-MM-DD")
+    racha_hoy_jugada: bool = Field(False, description="Indica si ya completó un desafío diario hoy (ART)")
     suscripcion: str = Field("basica", description="'basica' | 'premium'")
     dias_desbloqueados: List[str] = Field(default_factory=list, description="Días históricos desbloqueados ej: ['crucigrama:2026-10-15']")
     costo_pista_puntos: int = Field(20, description="Costo en puntos para solicitar una pista")

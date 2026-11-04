@@ -16,6 +16,7 @@ from app.features.economy.schemas import (
     RefillLivesResponse,
     UserEconomyResponse,
 )
+from app.shared.streak import calcular_racha
 
 logger = logging.getLogger("EconomyService")
 
@@ -49,7 +50,7 @@ async def get_user_economy(user_id: int) -> UserEconomyResponse:
 
     vidas = int(user.get("vidas", config.vidas_iniciales))
     puntos = int(user.get("puntos", 0))
-    racha = int(user.get("racha", 0))
+    racha = await calcular_racha(user_id)
 
     suscripcion = str(user.get("suscripcion", "basica")).lower()
     dias_desbloqueados = user.get("dias_desbloqueados", [])
@@ -58,7 +59,9 @@ async def get_user_economy(user_id: int) -> UserEconomyResponse:
         user_id=user_id,
         vidas=vidas,
         puntos=puntos,
-        racha=racha,
+        racha=racha.actual,
+        racha_ultima_fecha=racha.ultima_fecha,
+        racha_hoy_jugada=racha.hoy_jugada,
         suscripcion=suscripcion,
         dias_desbloqueados=dias_desbloqueados,
         costo_pista_puntos=int(config.costo_pista_puntos or 20),
