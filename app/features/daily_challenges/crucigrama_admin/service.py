@@ -10,6 +10,7 @@ from fastapi import HTTPException
 from pymongo import DESCENDING
 from pymongo.errors import DuplicateKeyError
 
+from app.core.config import settings
 from app.core.database import get_database
 from app.core.rae_client import get_masked_definition
 from app.features.daily_challenges.crucigrama.bans import (
@@ -642,8 +643,8 @@ def lookup_definition(word: str) -> Dict[str, Any]:
 def lookup_definitions(words: List[str]) -> Dict[str, Any]:
     """
     Definiciones RAE en lote para autocompletar pistas. La caché local evita
-    consultar dos veces la misma palabra y la concurrencia aprovecha el cupo
-    de la API (token configurado).
+    consultar dos veces la misma palabra y la concurrencia queda acotada por
+    RAE_MAX_CONCURRENCY, con espaciado global en el cliente.
     """
     unicas: List[str] = []
     for raw in words:
@@ -653,7 +654,7 @@ def lookup_definitions(words: List[str]) -> Dict[str, Any]:
     if not unicas:
         return {"definitions": {}, "missing": []}
 
-    trabajadores = min(16, len(unicas))
+    trabajadores = max(1, min(settings.RAE_MAX_CONCURRENCY, len(unicas)))
     with concurrent.futures.ThreadPoolExecutor(max_workers=trabajadores) as executor:
         resultados = list(executor.map(get_masked_definition, unicas))
 

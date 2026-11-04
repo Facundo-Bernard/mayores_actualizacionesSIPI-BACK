@@ -99,6 +99,14 @@ class Settings(BaseSettings):
 
     # RAE API (Wordle / Desafíos)
     RAE_API_KEY: Optional[str] = None
+    # Límites del cliente RAE: espaciado global, reintentos y caché negativa.
+    RAE_MIN_INTERVAL_MS: int = 250
+    RAE_MAX_RETRIES: int = 2
+    RAE_RETRY_BASE_SECONDS: float = 1.0
+    RAE_MAX_BACKOFF_SECONDS: float = 10.0
+    RAE_NEGATIVE_CACHE_TTL_SECONDS: int = 300
+    RAE_CACHE_FLUSH_SECONDS: float = 2.0
+    RAE_MAX_CONCURRENCY: int = 3
 
     # Correo SMTP / Brevo (Opcional)
     SMTP_HOST: Optional[str] = None

@@ -15,6 +15,8 @@ import os
 import re
 import time
 import json
+import atexit
+import random
 import logging
 import threading
 import urllib.request
@@ -36,6 +38,20 @@ _DEFINICIONES_CACHE: Dict[str, str] = {}
 _ACENTOS_MAP: Dict[str, str] = {}
 _CACHE_LOCK = threading.RLock()
 
+# Caché negativa: evita repetir palabras que ya fallaron (429 o sin acepción) durante un TTL.
+_NEGATIVE_CACHE: Dict[str, float] = {}
+_NEGATIVE_LOCK = threading.Lock()
+
+# Espaciado global entre llamadas HTTP: los pools concurrentes no saturan la cuota de la RAE.
+_CALL_GATE = threading.Lock()
+_NEXT_CALL_AT = 0.0
+
+# Persistencia diferida: varias definiciones seguidas generan una sola escritura atómica.
+_FLUSH_LOCK = threading.Lock()
+_FLUSH_TIMER: Optional[threading.Timer] = None
+_DIRTY = False
+_LAST_FLUSH = 0.0
+
 def _load_definitions_cache() -> Dict[str, str]:
     """Carga la caché local de definiciones desde el archivo JSON en disco."""
     global _DEFINICIONES_CACHE
@@ -55,15 +71,49 @@ def _load_definitions_cache() -> Dict[str, str]:
 
     return _DEFINICIONES_CACHE
 
-def _save_definitions_cache():
-    """Persiste en disco la caché local de definiciones en formato JSON."""
+def _write_definitions_cache() -> None:
+    """Escritura atómica: el archivo final nunca queda a medio escribir."""
     try:
         os.makedirs(DATA_DIR, exist_ok=True)
         with _CACHE_LOCK:
-            with open(CACHE_PATH, "w", encoding="utf-8") as f:
-                json.dump(_DEFINICIONES_CACHE, f, ensure_ascii=False, indent=2)
+            payload = dict(_DEFINICIONES_CACHE)
+        tmp_path = f"{CACHE_PATH}.tmp"
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+        os.replace(tmp_path, CACHE_PATH)
     except Exception as e:
         logger.warning(f"[RAE] Error al persistir caché de definiciones: {e}")
+
+
+def _flush_definitions_cache() -> None:
+    global _DIRTY, _LAST_FLUSH
+    with _FLUSH_LOCK:
+        if not _DIRTY:
+            return
+        _DIRTY = False
+        _LAST_FLUSH = time.monotonic()
+        _write_definitions_cache()
+
+
+def _save_definitions_cache() -> None:
+    """Marca la caché como sucia y la persiste como máximo cada RAE_CACHE_FLUSH_SECONDS."""
+    global _DIRTY, _FLUSH_TIMER
+    interval = max(0.0, float(settings.RAE_CACHE_FLUSH_SECONDS))
+    with _FLUSH_LOCK:
+        _DIRTY = True
+        if interval == 0:
+            _DIRTY = False
+            _LAST_FLUSH = time.monotonic()
+            _write_definitions_cache()
+            return
+        if _FLUSH_TIMER is None or not _FLUSH_TIMER.is_alive():
+            espera = max(0.0, interval - (time.monotonic() - _LAST_FLUSH))
+            _FLUSH_TIMER = threading.Timer(espera, _flush_definitions_cache)
+            _FLUSH_TIMER.daemon = True
+            _FLUSH_TIMER.start()
+
+
+atexit.register(_flush_definitions_cache)
 
 def _load_acentos_map() -> Dict[str, str]:
     """Carga el diccionario completo de palabras normalizadas a sus formas oficiales con tilde."""
@@ -118,13 +168,75 @@ def clean_and_mask_definition(raw_text: str, word: str, mask_spoiler: bool = Tru
     text = text[0].upper() + text[1:]
     return text
 
+def _negative_key(word: str) -> str:
+    return word.upper().strip()
+
+
+def _is_negative(word: str) -> bool:
+    key = _negative_key(word)
+    with _NEGATIVE_LOCK:
+        expiry = _NEGATIVE_CACHE.get(key)
+        if expiry is None:
+            return False
+        if expiry <= time.monotonic():
+            _NEGATIVE_CACHE.pop(key, None)
+            return False
+        return True
+
+
+def _mark_negative(word: str) -> None:
+    ttl = max(0.0, float(settings.RAE_NEGATIVE_CACHE_TTL_SECONDS))
+    if ttl == 0:
+        return
+    with _NEGATIVE_LOCK:
+        _NEGATIVE_CACHE[_negative_key(word)] = time.monotonic() + ttl
+
+
+def _wait_for_call_slot() -> None:
+    """Espacia las llamadas HTTP a nivel global, aunque haya varios hilos consultando."""
+    global _NEXT_CALL_AT
+    interval = max(0.0, float(settings.RAE_MIN_INTERVAL_MS) / 1000.0)
+    if interval == 0:
+        return
+    with _CALL_GATE:
+        now = time.monotonic()
+        wait = _NEXT_CALL_AT - now
+        if wait < 0:
+            wait = 0.0
+        _NEXT_CALL_AT = max(now, _NEXT_CALL_AT) + interval
+    if wait > 0:
+        time.sleep(wait)
+
+
+def _backoff_delay(attempt: int) -> float:
+    base = max(0.0, float(settings.RAE_RETRY_BASE_SECONDS))
+    delay = base * (2 ** attempt) + random.uniform(0.0, 0.3)
+    max_backoff = max(0.0, float(settings.RAE_MAX_BACKOFF_SECONDS))
+    return max(0.0, min(delay, max_backoff))
+
+
+def _retry_delay(error: urllib.error.HTTPError, attempt: int) -> float:
+    retry_after: Optional[float] = None
+    try:
+        raw = error.headers.get("Retry-After") if error.headers else None
+        if raw is not None:
+            retry_after = float(raw)
+    except (TypeError, ValueError):
+        retry_after = None
+
+    if retry_after is None:
+        return _backoff_delay(attempt)
+    max_backoff = max(0.0, float(settings.RAE_MAX_BACKOFF_SECONDS))
+    return max(0.0, min(retry_after, max_backoff))
+
+
 def fetch_rae_definition(word: str, mask_spoiler: bool = True) -> Optional[str]:
     """
     Consulta la definición de una palabra en la RAE.
-    1. Revisa primero en la caché local (0 ms).
+    1. Revisa primero la caché local (0 ms) y la caché negativa (fallos recientes).
     2. Prueba forma canónica con tilde (si aplica), forma minúscula directa y lemas singulares.
-    3. Maneja autenticación con X-API-Key y control de límites de tasa (HTTP 429).
-    4. Guarda el resultado en caché para no volver a consultar a internet.
+    3. Espacia las llamadas y reintenta 429/5xx respetando Retry-After.
+    4. Persiste los aciertos en caché de forma atómica y diferida.
     """
     cache = _load_definitions_cache()
     word_upper = word.upper().strip()
@@ -132,11 +244,13 @@ def fetch_rae_definition(word: str, mask_spoiler: bool = True) -> Optional[str]:
     # Si la solicitud es con máscara y ya está en caché, devolver de inmediato
     if mask_spoiler and word_upper in cache:
         return cache[word_upper]
+    if _is_negative(word_upper):
+        return None
 
     acentos_map = _load_acentos_map()
 
     # Generar candidatos de búsqueda ordenados por probabilidad de éxito en la RAE
-    candidates = []
+    candidates: List[str] = []
     if word_upper in acentos_map:
         candidates.append(acentos_map[word_upper])
     candidates.append(word_upper.lower())
@@ -146,6 +260,7 @@ def fetch_rae_definition(word: str, mask_spoiler: bool = True) -> Optional[str]:
         candidates.append(word_upper[:-2].lower())
     elif word_upper.endswith("S") and len(word_upper) >= 4:
         candidates.append(word_upper[:-1].lower())
+    candidates = list(dict.fromkeys(candidates))
 
     # Obtener API Key desde settings o variables de entorno
     api_key = (settings.RAE_API_KEY or os.environ.get("RAE_API_KEY", "")).strip()
@@ -154,11 +269,15 @@ def fetch_rae_definition(word: str, mask_spoiler: bool = True) -> Optional[str]:
     if api_key:
         headers["X-API-Key"] = api_key
 
+    max_retries = max(0, int(settings.RAE_MAX_RETRIES))
+
     for term in candidates:
         url = f"https://rae-api.com/api/words/{urllib.parse.quote(term)}"
         req = urllib.request.Request(url, headers=headers)
 
-        for attempt in range(2):
+        attempt = 0
+        while attempt <= max_retries:
+            _wait_for_call_slot()
             try:
                 with urllib.request.urlopen(req, timeout=3.5) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
@@ -181,19 +300,42 @@ def fetch_rae_definition(word: str, mask_spoiler: bool = True) -> Optional[str]:
                         if mask_spoiler:
                             with _CACHE_LOCK:
                                 cache[word_upper] = best_cleaned
-                                _save_definitions_cache()
+                            _save_definitions_cache()
                         return best_cleaned
                 break
             except urllib.error.HTTPError as he:
-                if he.code == 429 and attempt == 0:
-                    logger.warning(f"[RAE] Límite de tasa (429) para '{term}'. Esperando 1.2s antes de reintentar...")
-                    time.sleep(1.2)
+                if he.code == 429:
+                    if attempt >= max_retries:
+                        _mark_negative(word_upper)
+                        return None
+                    delay = _retry_delay(he, attempt)
+                    logger.warning(
+                        f"[RAE] Límite de tasa (429) para '{term}'. Reintentando en {delay:.2f}s "
+                        f"({attempt + 1}/{max_retries})."
+                    )
+                    time.sleep(delay)
+                    attempt += 1
+                    continue
+                if he.code in (500, 502, 503, 504) and attempt < max_retries:
+                    delay = _retry_delay(he, attempt)
+                    logger.warning(f"[RAE] Error {he.code} para '{term}'. Reintentando en {delay:.2f}s.")
+                    time.sleep(delay)
+                    attempt += 1
+                    continue
+                break
+            except (urllib.error.URLError, TimeoutError):
+                if attempt < max_retries:
+                    delay = _backoff_delay(attempt)
+                    logger.warning(f"[RAE] Error de red para '{term}'. Reintentando en {delay:.2f}s.")
+                    time.sleep(delay)
+                    attempt += 1
                     continue
                 break
             except Exception as e:
                 logger.debug(f"[RAE] Error consultando candidato '{term}': {e}")
                 break
 
+    _mark_negative(word_upper)
     return None
 
 def get_masked_definition(word: str) -> Optional[str]:

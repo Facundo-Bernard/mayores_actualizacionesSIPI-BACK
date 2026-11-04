@@ -48,6 +48,13 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"Aviso al verificar catálogo de estados de usuario ({e}). Se continuará con el inicio del servicio.")
     import asyncio
+    autogen_lock = asyncio.Lock()
+
+    async def _generar_desafios_si_falta():
+        # Serializa arranque y ciclo periódico: dos corridas superpuestas multiplican las ráfagas a la RAE.
+        async with autogen_lock:
+            await ensure_current_and_next_month_generated()
+
     async def _background_seeds():
         try:
             if settings.SEED_STATIC_CHALLENGES:
@@ -57,7 +64,7 @@ async def lifespan(app: FastAPI):
                     await seed_sudoku_challenges()
                 except Exception as e_static:
                     logger.warning(f"Aviso durante la siembra estática de desafíos: {e_static}")
-            await ensure_current_and_next_month_generated()
+            await _generar_desafios_si_falta()
             try:
                 from app.scripts.seed_narrative import seed_narrative_game
                 await seed_narrative_game()
@@ -80,7 +87,7 @@ async def lifespan(app: FastAPI):
         while True:
             try:
                 await asyncio.sleep(43200)
-                await ensure_current_and_next_month_generated()
+                await _generar_desafios_si_falta()
             except Exception as e_loop:
                 logger.warning(f"Error en ciclo periódico de desafíos: {e_loop}")
 
@@ -228,4 +235,20 @@ app.mount("/assets/narrative", StaticFiles(directory=static_narrative_dir), name
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host=settings.HOST, port=settings.PORT, reload=True)
+    # app/data guarda la caché RAE que se reescribe durante la generación. Excluirla del
+    # watcher evita reinicios si se amplía el filtro de reload (uvicorn solo vigila *.py
+    # por defecto). Los estáticos también se excluyen para que el build del admin no
+    # provoque detecciones innecesarias.
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    uvicorn.run(
+        "app.main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=True,
+        reload_dirs=[app_dir],
+        reload_excludes=[
+            os.path.join(app_dir, "data"),
+            os.path.join(app_dir, "static"),
+            "*.log",
+        ],
+    )

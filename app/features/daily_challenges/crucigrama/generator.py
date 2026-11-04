@@ -18,6 +18,7 @@ import random
 import re
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
+from app.core.config import settings
 from app.core.rae_client import fetch_rae_definition
 from app.features.daily_challenges.crucigrama.clues import CURATED_CLUES
 from app.features.daily_challenges.crucigrama.growth import generate_growth_board
@@ -140,7 +141,9 @@ def _parse_and_build_challenge(
             return rae_def
         return f"Palabra de {len(w)} letras que comienza con '{w[0]}' y termina en '{w[-1]}'."
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=max(1, min(settings.RAE_MAX_CONCURRENCY, len(all_words) or 1))
+    ) as executor:
         raw_clues = list(executor.map(_resolve_clue, all_words))
 
     for item, raw_clue in zip(all_words, raw_clues):
