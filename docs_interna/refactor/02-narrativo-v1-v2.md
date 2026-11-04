@@ -582,7 +582,7 @@ No se valida que `resultado_id`, `siguiente_nodo`, `desenlaces[].nodo`, personaj
 6. **La lógica nueva va en services.** El router valida y delega; no mutar la run en el router.
 7. **Los cambios de datos necesitan migración.** Agregar `schema_version`, `motor` a schemas o `grafo_activo` a `NarrativeRunSchema` sin romper runs viejas.
 8. **Tests de caracterización antes de tocar.** Congelar respuestas de iniciar, draft, evento, conversación, avance y modales.
-9. **No tocar la SPA admin sin coordinar.** El panel puede no enviar Bearer en todos los flujos; verificar.
+9. **No tocar la SPA admin sin coordinar.** El panel puede no enviar Bearer en todos los flujos; verificar. (Actualizado 3/11/2026: el panel vive en `admin_src` y `authService.js` instala un interceptor global de `fetch` que inyecta el Bearer en `/api/narrative/admin`, `/api/challenges/admin`, `/api/economy`, `/api/admin` y `/usuario`.)
 10. **Mantener la compatibilidad de assets.** No cambiar URLs existentes sin alias.
 
 ---

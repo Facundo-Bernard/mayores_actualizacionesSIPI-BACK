@@ -214,7 +214,7 @@ Para garantizar total compatibilidad con los endpoints ahora autenticados:
    };
    ```
 2. Todas las llamadas a `obtenerProgresoUsuario`, `actualizar` y `crear` transmiten el Bearer Token en cada solicitud HTTP.
-3. El panel de administración (`PanelAltasSistemas.jsx`) ya incluía `Authorization: Bearer <token>` en sus peticiones a `/usuario`.
+3. El panel de administración (`frontend/admin_src`, vía `authService.js`) ya incluía `Authorization: Bearer <token>` en sus peticiones a `/usuario`.
 
 ---
 

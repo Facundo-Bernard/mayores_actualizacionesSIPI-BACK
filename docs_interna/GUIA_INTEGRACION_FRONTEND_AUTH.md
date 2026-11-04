@@ -356,7 +356,7 @@ const handleIngresarCodigo = async (codigoInput) => {
 
 ## 4.4. Autenticación de Sistemas / Operadores (Torre de Control)
 
-Para que el personal de sistemas pueda acceder al panel de gestión de usuarios (`PanelAltasSistemas.jsx`), se cuenta con un inicio de sesión restringido a administradores.
+Para que el personal de sistemas pueda acceder al panel de administración de juegos (`/admin`, `frontend/admin_src`), se cuenta con un inicio de sesión restringido a administradores. La gestión de altas y cuentas de usuario migró al Autenticador Central y ya no forma parte de este panel.
 
 - **Método:** `POST`
 - **Ruta:** `/api/auth/login-sistemas` (o `/api/auth/login-admin`)
@@ -438,7 +438,7 @@ Para que el personal de sistemas pueda acceder al panel de gestión de usuarios 
 }
 ```
 
-#### Ejemplo de integración en `PanelAltasSistemas.jsx`:
+#### Ejemplo de integración del listado de usuarios (API `/usuario`):
 ```javascript
 const fetchUsuarios = async ({ skip = 0, limit = 20, nombre = '', fechaDesde = '', fechaHasta = '' }) => {
   const params = new URLSearchParams({
