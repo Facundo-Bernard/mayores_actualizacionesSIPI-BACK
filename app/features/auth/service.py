@@ -91,7 +91,6 @@ async def sync_local_user_from_auth_service(remote_user: dict) -> dict:
             "$setOnInsert": {
                 "date_start": datetime.now(timezone.utc),
                 "date_end": None,
-                "progresos": [],
                 "puntos": 0
             }
         },

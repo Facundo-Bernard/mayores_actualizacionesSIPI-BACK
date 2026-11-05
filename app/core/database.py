@@ -1,9 +1,56 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo import ReturnDocument, ASCENDING
 import logging
+from urllib.parse import unquote, urlsplit
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def validate_test_mongodb_config(url: str, expected_db_name: str) -> str:
+    """Valida, sin I/O, que una URI de tests solo apunte a Mongo local y a la base esperada."""
+    try:
+        parsed = urlsplit(url)
+    except ValueError as exc:
+        raise ValueError("URI de MongoDB inválida para la suite de tests.") from exc
+
+    if parsed.scheme not in {"mongodb", "mongodb+srv"}:
+        raise ValueError("La suite de tests solo admite URIs mongodb:// o mongodb+srv://.")
+    if not parsed.netloc:
+        raise ValueError("La URI de MongoDB debe incluir al menos un host.")
+
+    authority = parsed.netloc.rsplit("@", 1)[-1]
+    for host_port in authority.split(","):
+        if host_port.startswith("["):
+            closing_bracket = host_port.find("]")
+            if closing_bracket == -1:
+                raise ValueError("Host IPv6 inválido en la URI de MongoDB.")
+            host = host_port[1:closing_bracket]
+            remainder = host_port[closing_bracket + 1:]
+            if remainder and not remainder.startswith(":"):
+                raise ValueError("Host inválido en la URI de MongoDB.")
+        else:
+            if host_port.count(":") > 1:
+                raise ValueError("Los hosts IPv6 deben estar entre corchetes.")
+            host = host_port.split(":", 1)[0]
+        if host.lower() not in {"localhost", "127.0.0.1", "::1"}:
+            raise ValueError(f"Host de MongoDB no permitido en tests: {host!r}.")
+
+    if parsed.path in {"", "/"}:
+        effective_db_name = expected_db_name
+    else:
+        raw_db_name = parsed.path[1:]
+        if not raw_db_name or "/" in raw_db_name:
+            raise ValueError("La URI de MongoDB contiene un path de base inválido.")
+        effective_db_name = unquote(raw_db_name)
+
+    if effective_db_name != expected_db_name:
+        raise ValueError(
+            f"La suite debe usar {expected_db_name!r}, pero la URI apunta a "
+            f"{effective_db_name!r}."
+        )
+    return effective_db_name
+
 
 class Database:
     client: AsyncIOMotorClient = None

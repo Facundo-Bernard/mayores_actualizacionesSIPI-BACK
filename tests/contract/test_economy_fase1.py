@@ -64,63 +64,6 @@ async def test_refill_lives_requires_token(client):
 
 
 @pytest.mark.asyncio
-async def test_buy_lives_applies_vidas_maximas_atomically(
-    client, test_db, seeded_user, make_token, cleanup
-):
-    config = {
-        "_id": "global_economy",
-        "vidas_maximas": 6,
-        "paquetes_tienda": [
-            {
-                "id": "pack_3",
-                "vidas": 3,
-                "puntos": 120,
-                "popular": True,
-                "badge": None,
-                "descuento": None,
-            }
-        ],
-    }
-    await test_db["configuracion_economia"].replace_one(
-        {"_id": "global_economy"}, config, upsert=True
-    )
-    cleanup.add("configuracion_economia", {"_id": "global_economy"})
-
-    user = await seeded_user(puntos=500, vidas=5)
-    token = make_token(user["id"])
-
-    response = await client.post(
-        "/api/economy/buy-lives",
-        json={"package_id": "pack_3"},
-        headers=_auth(token),
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["vidas"] == 6
-    assert body["puntos"] == 380
-
-
-@pytest.mark.asyncio
-async def test_buy_lives_ignores_legacy_direct_quantity(
-    client, test_db, seeded_user, make_token
-):
-    user = await seeded_user(puntos=100, vidas=0)
-    token = make_token(user["id"])
-
-    response = await client.post(
-        "/api/economy/buy-lives",
-        json={"vidas": 5},
-        headers=_auth(token),
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["compradas"] == 1
-    assert body["costo"] == 50
-    assert body["vidas"] == 1
-    assert body["puntos"] == 50
-
-
-@pytest.mark.asyncio
 async def test_admin_adjust_is_atomic_and_audited(
     client, test_db, seeded_user, admin_override
 ):

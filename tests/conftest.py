@@ -17,21 +17,27 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 from app.core.config import settings
-from app.core.database import close_mongo_connection, connect_to_mongo, db_instance
+from app.core.database import (
+    close_mongo_connection,
+    connect_to_mongo,
+    db_instance,
+    validate_test_mongodb_config,
+)
 from app.main import app
+
+
+def _validate_test_database():
+    assert settings.effective_db_name == TEST_DB_NAME, (
+        f"La suite debe usar {TEST_DB_NAME}, pero la configuración apunta a "
+        f"'{settings.effective_db_name}'."
+    )
+    return validate_test_mongodb_config(settings.mongodb_connection_url, TEST_DB_NAME)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def db_guard():
     """Falla antes de cualquier test si la configuración no apunta a la base de test local."""
-    assert settings.effective_db_name == TEST_DB_NAME, (
-        f"La suite debe usar {TEST_DB_NAME}, pero la configuración apunta a "
-        f"'{settings.effective_db_name}'."
-    )
-    url = settings.mongodb_connection_url
-    assert "localhost" in url or "127.0.0.1" in url, (
-        f"La suite solo puede correr contra MongoDB local, no contra {url!r}."
-    )
+    _validate_test_database()
     yield
 
 
@@ -42,6 +48,7 @@ def api_app():
 
 @pytest_asyncio.fixture
 async def test_db():
+    _validate_test_database()
     await connect_to_mongo()
     db = db_instance.db
     assert db.name == TEST_DB_NAME, f"Conectado a '{db.name}', se esperaba '{TEST_DB_NAME}'."

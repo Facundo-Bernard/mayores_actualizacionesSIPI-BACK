@@ -11,10 +11,7 @@ from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.core.security_middleware import AbsoluteSecurityMiddleware
 from app.core.rate_limit import RateLimitMiddleware
-from app.scripts.init_db import seed_estados_usuario
 from app.features.auth.router import router as auth_router
-from app.features.usuario.router import router as usuario_router
-from app.features.progreso.router import router as progreso_router
 from app.features.daily_challenges.router import router as daily_challenges_router
 from app.features.daily_challenges.crucigrama_admin.router import router as crucigrama_admin_router
 from app.features.user_attempts.router import router as user_attempts_router
@@ -43,10 +40,6 @@ async def lifespan(app: FastAPI):
     # Startup: Conectar a MongoDB, inicializar índices y catálogo esencial de estados de usuario
     logger.info("Iniciando aplicación Mayores Actualizaciones (FastAPI)...")
     await connect_to_mongo()
-    try:
-        await seed_estados_usuario()
-    except Exception as e:
-        logger.warning(f"Aviso al verificar catálogo de estados de usuario ({e}). Se continuará con el inicio del servicio.")
     import asyncio
     autogen_lock = asyncio.Lock()
 
@@ -111,6 +104,29 @@ async def lifespan(app: FastAPI):
     logger.info("Deteniendo aplicación y cerrando conexiones...")
     await close_mongo_connection()
 
+openapi_tags = [
+    {"name": "Estado"},
+    {"name": "Autenticación"},
+    {"name": "Autenticación - SSO"},
+    {"name": "Desafíos Diarios"},
+    {"name": "Desafíos Diarios - Administración de Crucigramas"},
+    {"name": "Partidas e Intentos de Usuarios"},
+    {"name": "Economía, Vidas y Mini-Tienda"},
+    {"name": "Narrativo - Flujo de Juego"},
+    {"name": "Narrativo - Administración"},
+    {"name": "Narrativo - CRUD Universos"},
+    {"name": "Narrativo - CRUD Personajes"},
+    {"name": "Narrativo - CRUD Cartas"},
+    {"name": "Narrativo - CRUD Resultados"},
+    {"name": "Narrativo - CRUD Eventos"},
+    {"name": "Narrativo - CRUD Conversaciones"},
+    {"name": "Narrativo - CRUD Finalizaciones"},
+    {"name": "Narrativo - CRUD Eventos V2"},
+    {"name": "Narrativo - CRUD Conversaciones V2"},
+    {"name": "Narrativo - CRUD Eventos Especiales V2"},
+    {"name": "Narrativo - Legacy V1 (Deprecado)"},
+]
+
 app = FastAPI(
     title="Mayores Actualizaciones API",
     description="Backend en FastAPI + MongoDB para la plataforma educativa de adultos mayores",
@@ -118,6 +134,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    openapi_tags=openapi_tags,
     lifespan=lifespan
 )
 
@@ -162,10 +179,8 @@ async def global_fail_closed_exception_handler(request: Request, exc: Exception)
         }
     )
 
-# Inclusión de routers esenciales (Auth, Usuarios, Progreso de Cursos, Desafíos, Narrativo, SSO)
+# Inclusión de routers esenciales (Auth, Desafíos, Narrativo, Economía, SSO)
 app.include_router(auth_router)
-app.include_router(usuario_router)
-app.include_router(progreso_router)
 app.include_router(daily_challenges_router)
 app.include_router(crucigrama_admin_router)
 app.include_router(user_attempts_router)

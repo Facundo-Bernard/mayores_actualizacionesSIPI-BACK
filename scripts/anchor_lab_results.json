@@ -1,0 +1,8082 @@
+{
+  "base": {
+    "summary": {
+      "condition": "base",
+      "runs": 96,
+      "success": 35,
+      "p": 0.3646,
+      "implied_6_attempts": 0.7167,
+      "median_nodes_ok": 20,
+      "mean_ms_ok": 46.0,
+      "median_ms_all": 458.8
+    },
+    "runs": [
+      {
+        "mask": 0,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 2097.6
+      },
+      {
+        "mask": 0,
+        "seed": 1,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 944.7
+      },
+      {
+        "mask": 0,
+        "seed": 2,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1015.6
+      },
+      {
+        "mask": 0,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1947.6
+      },
+      {
+        "mask": 0,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1144.4
+      },
+      {
+        "mask": 0,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 434.1
+      },
+      {
+        "mask": 1,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 492.1
+      },
+      {
+        "mask": 1,
+        "seed": 1,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 471.7
+      },
+      {
+        "mask": 1,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 8951,
+        "ms": 41.5
+      },
+      {
+        "mask": 1,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 439.0
+      },
+      {
+        "mask": 1,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 424.7
+      },
+      {
+        "mask": 1,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 416.0
+      },
+      {
+        "mask": 2,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 697.6
+      },
+      {
+        "mask": 2,
+        "seed": 1,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1033.8
+      },
+      {
+        "mask": 2,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 16,
+        "ms": 11.0
+      },
+      {
+        "mask": 2,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 837.4
+      },
+      {
+        "mask": 2,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 874.8
+      },
+      {
+        "mask": 2,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 411.2
+      },
+      {
+        "mask": 3,
+        "seed": 0,
+        "anchors": {},
+        "success": true,
+        "nodes": 19,
+        "ms": 10.3
+      },
+      {
+        "mask": 3,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 31,
+        "ms": 8.7
+      },
+      {
+        "mask": 3,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 16,
+        "ms": 10.3
+      },
+      {
+        "mask": 3,
+        "seed": 3,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 8.5
+      },
+      {
+        "mask": 3,
+        "seed": 4,
+        "anchors": {},
+        "success": true,
+        "nodes": 16,
+        "ms": 10.2
+      },
+      {
+        "mask": 3,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 502.6
+      },
+      {
+        "mask": 4,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1698.2
+      },
+      {
+        "mask": 4,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 273,
+        "ms": 19.3
+      },
+      {
+        "mask": 4,
+        "seed": 2,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 475.2
+      },
+      {
+        "mask": 4,
+        "seed": 3,
+        "anchors": {},
+        "success": true,
+        "nodes": 22220,
+        "ms": 92.5
+      },
+      {
+        "mask": 4,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1263.5
+      },
+      {
+        "mask": 4,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1511.6
+      },
+      {
+        "mask": 5,
+        "seed": 0,
+        "anchors": {},
+        "success": true,
+        "nodes": 339,
+        "ms": 35.9
+      },
+      {
+        "mask": 5,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 29.7
+      },
+      {
+        "mask": 5,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 33.8
+      },
+      {
+        "mask": 5,
+        "seed": 3,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 36.5
+      },
+      {
+        "mask": 5,
+        "seed": 4,
+        "anchors": {},
+        "success": true,
+        "nodes": 141,
+        "ms": 27.6
+      },
+      {
+        "mask": 5,
+        "seed": 5,
+        "anchors": {},
+        "success": true,
+        "nodes": 6515,
+        "ms": 47.1
+      },
+      {
+        "mask": 6,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1738.9
+      },
+      {
+        "mask": 6,
+        "seed": 1,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1440.9
+      },
+      {
+        "mask": 6,
+        "seed": 2,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1195.7
+      },
+      {
+        "mask": 6,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1713.8
+      },
+      {
+        "mask": 6,
+        "seed": 4,
+        "anchors": {},
+        "success": true,
+        "nodes": 9122,
+        "ms": 74.5
+      },
+      {
+        "mask": 6,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 1583.4
+      },
+      {
+        "mask": 7,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 478.0
+      },
+      {
+        "mask": 7,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 20,
+        "ms": 25.4
+      },
+      {
+        "mask": 7,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 19.1
+      },
+      {
+        "mask": 7,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 609.8
+      },
+      {
+        "mask": 7,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 515.9
+      },
+      {
+        "mask": 7,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 629.9
+      },
+      {
+        "mask": 8,
+        "seed": 0,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 10.4
+      },
+      {
+        "mask": 8,
+        "seed": 1,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 565.3
+      },
+      {
+        "mask": 8,
+        "seed": 2,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 684.0
+      },
+      {
+        "mask": 8,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 613.2
+      },
+      {
+        "mask": 8,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 777.1
+      },
+      {
+        "mask": 8,
+        "seed": 5,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 17.5
+      },
+      {
+        "mask": 9,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 4891.9
+      },
+      {
+        "mask": 9,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 41,
+        "ms": 32.5
+      },
+      {
+        "mask": 9,
+        "seed": 2,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 628.3
+      },
+      {
+        "mask": 9,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 4090.6
+      },
+      {
+        "mask": 9,
+        "seed": 4,
+        "anchors": {},
+        "success": true,
+        "nodes": 21,
+        "ms": 19.6
+      },
+      {
+        "mask": 9,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 493.4
+      },
+      {
+        "mask": 10,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 644.0
+      },
+      {
+        "mask": 10,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 23,
+        "ms": 10.8
+      },
+      {
+        "mask": 10,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 32282,
+        "ms": 220.1
+      },
+      {
+        "mask": 10,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 633.8
+      },
+      {
+        "mask": 10,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 373.2
+      },
+      {
+        "mask": 10,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 353.6
+      },
+      {
+        "mask": 11,
+        "seed": 0,
+        "anchors": {},
+        "success": true,
+        "nodes": 20,
+        "ms": 13.4
+      },
+      {
+        "mask": 11,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 20,
+        "ms": 12.7
+      },
+      {
+        "mask": 11,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 20,
+        "ms": 12.5
+      },
+      {
+        "mask": 11,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 459.4
+      },
+      {
+        "mask": 11,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 369.8
+      },
+      {
+        "mask": 11,
+        "seed": 5,
+        "anchors": {},
+        "success": true,
+        "nodes": 20,
+        "ms": 14.5
+      },
+      {
+        "mask": 12,
+        "seed": 0,
+        "anchors": {},
+        "success": true,
+        "nodes": 3267,
+        "ms": 57.9
+      },
+      {
+        "mask": 12,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 3877,
+        "ms": 32.0
+      },
+      {
+        "mask": 12,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 18,
+        "ms": 27.2
+      },
+      {
+        "mask": 12,
+        "seed": 3,
+        "anchors": {},
+        "success": true,
+        "nodes": 280,
+        "ms": 51.7
+      },
+      {
+        "mask": 12,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 751.4
+      },
+      {
+        "mask": 12,
+        "seed": 5,
+        "anchors": {},
+        "success": true,
+        "nodes": 53980,
+        "ms": 503.1
+      },
+      {
+        "mask": 13,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 3245.9
+      },
+      {
+        "mask": 13,
+        "seed": 1,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 478.5
+      },
+      {
+        "mask": 13,
+        "seed": 2,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 529.5
+      },
+      {
+        "mask": 13,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 554.9
+      },
+      {
+        "mask": 13,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 527.6
+      },
+      {
+        "mask": 13,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 586.7
+      },
+      {
+        "mask": 14,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 688.0
+      },
+      {
+        "mask": 14,
+        "seed": 1,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 649.5
+      },
+      {
+        "mask": 14,
+        "seed": 2,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 437.6
+      },
+      {
+        "mask": 14,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 581.3
+      },
+      {
+        "mask": 14,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 458.2
+      },
+      {
+        "mask": 14,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 367.2
+      },
+      {
+        "mask": 15,
+        "seed": 0,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 369.7
+      },
+      {
+        "mask": 15,
+        "seed": 1,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 15.3
+      },
+      {
+        "mask": 15,
+        "seed": 2,
+        "anchors": {},
+        "success": true,
+        "nodes": 17,
+        "ms": 17.9
+      },
+      {
+        "mask": 15,
+        "seed": 3,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 381.5
+      },
+      {
+        "mask": 15,
+        "seed": 4,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 492.9
+      },
+      {
+        "mask": 15,
+        "seed": 5,
+        "anchors": {},
+        "success": false,
+        "nodes": 150000,
+        "ms": 409.2
+      }
+    ]
+  },
+  "sol1_rand": {
+    "summary": {
+      "condition": "sol1_rand",
+      "runs": 96,
+      "success": 38,
+      "p": 0.3958,
+      "implied_6_attempts": 0.7058,
+      "median_nodes_ok": 41,
+      "mean_ms_ok": 23.7,
+      "median_ms_all": 421.4
+    },
+    "runs": [
+      {
+        "mask": 0,
+        "seed": 0,
+        "anchors": {
+          "V_0_6": "IDEA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1186.4
+      },
+      {
+        "mask": 0,
+        "seed": 1,
+        "anchors": {
+          "H_3_1": "CALIFAL"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 2258.2
+      },
+      {
+        "mask": 0,
+        "seed": 2,
+        "anchors": {
+          "H_10_0": "VARRACO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 797.4
+      },
+      {
+        "mask": 0,
+        "seed": 3,
+        "anchors": {
+          "V_1_2": "ETAPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 630.5
+      },
+      {
+        "mask": 0,
+        "seed": 4,
+        "anchors": {
+          "V_5_5": "PEDI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 426.7
+      },
+      {
+        "mask": 0,
+        "seed": 5,
+        "anchors": {
+          "V_0_9": "SEGUI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 769.6
+      },
+      {
+        "mask": 1,
+        "seed": 0,
+        "anchors": {
+          "H_3_1": "ARROZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 764.4
+      },
+      {
+        "mask": 1,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "ARGANEO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 945.7
+      },
+      {
+        "mask": 1,
+        "seed": 2,
+        "anchors": {
+          "V_5_4": "GRAO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 617.7
+      },
+      {
+        "mask": 1,
+        "seed": 3,
+        "anchors": {
+          "H_3_1": "ARROZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 557.0
+      },
+      {
+        "mask": 1,
+        "seed": 4,
+        "anchors": {
+          "H_8_1": "VADO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 479.9
+      },
+      {
+        "mask": 1,
+        "seed": 5,
+        "anchors": {
+          "V_5_6": "NEGADO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 503.9
+      },
+      {
+        "mask": 2,
+        "seed": 0,
+        "anchors": {
+          "V_0_4": "NAZI"
+        },
+        "success": true,
+        "nodes": 67,
+        "ms": 10.0
+      },
+      {
+        "mask": 2,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "LITOSFERA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1213.3
+      },
+      {
+        "mask": 2,
+        "seed": 2,
+        "anchors": {
+          "H_7_4": "AMORFO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 466.4
+      },
+      {
+        "mask": 2,
+        "seed": 3,
+        "anchors": {
+          "H_1_3": "TANGA"
+        },
+        "success": true,
+        "nodes": 77,
+        "ms": 10.8
+      },
+      {
+        "mask": 2,
+        "seed": 4,
+        "anchors": {
+          "V_1_6": "GENIAZO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 401.2
+      },
+      {
+        "mask": 2,
+        "seed": 5,
+        "anchors": {
+          "V_7_4": "AYTO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 425.7
+      },
+      {
+        "mask": 3,
+        "seed": 0,
+        "anchors": {
+          "H_3_7": "GAJO"
+        },
+        "success": true,
+        "nodes": 26629,
+        "ms": 80.6
+      },
+      {
+        "mask": 3,
+        "seed": 1,
+        "anchors": {
+          "V_2_1": "EPISTOLAR"
+        },
+        "success": true,
+        "nodes": 28,
+        "ms": 3.2
+      },
+      {
+        "mask": 3,
+        "seed": 2,
+        "anchors": {
+          "H_9_1": "AZOAR"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 12.8
+      },
+      {
+        "mask": 3,
+        "seed": 3,
+        "anchors": {
+          "H_9_1": "AZOAR"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 9.7
+      },
+      {
+        "mask": 3,
+        "seed": 4,
+        "anchors": {
+          "H_7_5": "CRUDA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 439.8
+      },
+      {
+        "mask": 3,
+        "seed": 5,
+        "anchors": {
+          "H_7_5": "CRUDA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 491.5
+      },
+      {
+        "mask": 4,
+        "seed": 0,
+        "anchors": {
+          "H_7_0": "MESON"
+        },
+        "success": true,
+        "nodes": 3036,
+        "ms": 22.5
+      },
+      {
+        "mask": 4,
+        "seed": 1,
+        "anchors": {
+          "V_4_3": "AMBO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 594.0
+      },
+      {
+        "mask": 4,
+        "seed": 2,
+        "anchors": {
+          "V_1_8": "CONTACTARE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1227.2
+      },
+      {
+        "mask": 4,
+        "seed": 3,
+        "anchors": {
+          "H_7_0": "MESON"
+        },
+        "success": true,
+        "nodes": 40,
+        "ms": 15.8
+      },
+      {
+        "mask": 4,
+        "seed": 4,
+        "anchors": {
+          "V_0_2": "CASI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 521.3
+      },
+      {
+        "mask": 4,
+        "seed": 5,
+        "anchors": {
+          "V_0_2": "CASI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1114.7
+      },
+      {
+        "mask": 5,
+        "seed": 0,
+        "anchors": {
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 321,
+        "ms": 32.3
+      },
+      {
+        "mask": 5,
+        "seed": 1,
+        "anchors": {
+          "V_2_2": "APOYO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.5
+      },
+      {
+        "mask": 5,
+        "seed": 2,
+        "anchors": {
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 321,
+        "ms": 32.5
+      },
+      {
+        "mask": 5,
+        "seed": 3,
+        "anchors": {
+          "V_4_0": "OLERLES"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 16.1
+      },
+      {
+        "mask": 5,
+        "seed": 4,
+        "anchors": {
+          "V_2_2": "APOYO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 10.4
+      },
+      {
+        "mask": 5,
+        "seed": 5,
+        "anchors": {
+          "H_0_0": "TIMPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 455.8
+      },
+      {
+        "mask": 6,
+        "seed": 0,
+        "anchors": {
+          "H_10_7": "ASIR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1683.1
+      },
+      {
+        "mask": 6,
+        "seed": 1,
+        "anchors": {
+          "V_4_3": "ENVIAS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 662.0
+      },
+      {
+        "mask": 6,
+        "seed": 2,
+        "anchors": {
+          "H_0_6": "LILAC"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1588.5
+      },
+      {
+        "mask": 6,
+        "seed": 3,
+        "anchors": {
+          "H_5_2": "INSERIR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1602.6
+      },
+      {
+        "mask": 6,
+        "seed": 4,
+        "anchors": {
+          "V_3_6": "FARRUCO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1663.3
+      },
+      {
+        "mask": 6,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "INSERIR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 837.6
+      },
+      {
+        "mask": 7,
+        "seed": 0,
+        "anchors": {
+          "H_7_0": "LIMA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 598.3
+      },
+      {
+        "mask": 7,
+        "seed": 1,
+        "anchors": {
+          "H_10_0": "CRUDA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 14.9
+      },
+      {
+        "mask": 7,
+        "seed": 2,
+        "anchors": {
+          "V_1_7": "MACEDONIO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 637.3
+      },
+      {
+        "mask": 7,
+        "seed": 3,
+        "anchors": {
+          "H_5_1": "OTORGADOR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 500.5
+      },
+      {
+        "mask": 7,
+        "seed": 4,
+        "anchors": {
+          "V_0_4": "CHUFERO"
+        },
+        "success": true,
+        "nodes": 39,
+        "ms": 16.4
+      },
+      {
+        "mask": 7,
+        "seed": 5,
+        "anchors": {
+          "V_1_7": "MACEDONIO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.1
+      },
+      {
+        "mask": 8,
+        "seed": 0,
+        "anchors": {
+          "V_1_9": "ASPA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.2
+      },
+      {
+        "mask": 8,
+        "seed": 1,
+        "anchors": {
+          "V_4_10": "UNIR"
+        },
+        "success": true,
+        "nodes": 32874,
+        "ms": 107.2
+      },
+      {
+        "mask": 8,
+        "seed": 2,
+        "anchors": {
+          "V_2_6": "ANOMALIAS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 674.1
+      },
+      {
+        "mask": 8,
+        "seed": 3,
+        "anchors": {
+          "V_2_6": "ANOMALIAS"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.4
+      },
+      {
+        "mask": 8,
+        "seed": 4,
+        "anchors": {
+          "V_1_1": "PURA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 519.2
+      },
+      {
+        "mask": 8,
+        "seed": 5,
+        "anchors": {
+          "V_0_3": "AHIJADOR"
+        },
+        "success": true,
+        "nodes": 21653,
+        "ms": 152.5
+      },
+      {
+        "mask": 9,
+        "seed": 0,
+        "anchors": {
+          "V_4_0": "ALBEDO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 980.9
+      },
+      {
+        "mask": 9,
+        "seed": 1,
+        "anchors": {
+          "V_0_2": "SALSERA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 3410.1
+      },
+      {
+        "mask": 9,
+        "seed": 2,
+        "anchors": {
+          "H_3_4": "RELIEVE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 417.1
+      },
+      {
+        "mask": 9,
+        "seed": 3,
+        "anchors": {
+          "V_0_8": "ESTE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 478.2
+      },
+      {
+        "mask": 9,
+        "seed": 4,
+        "anchors": {
+          "V_6_9": "VOTAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 412.4
+      },
+      {
+        "mask": 9,
+        "seed": 5,
+        "anchors": {
+          "V_3_7": "IMAGENES"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 3426.7
+      },
+      {
+        "mask": 10,
+        "seed": 0,
+        "anchors": {
+          "V_7_1": "CINC"
+        },
+        "success": true,
+        "nodes": 1505,
+        "ms": 10.5
+      },
+      {
+        "mask": 10,
+        "seed": 1,
+        "anchors": {
+          "H_7_4": "MIMI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 458.8
+      },
+      {
+        "mask": 10,
+        "seed": 2,
+        "anchors": {
+          "V_0_10": "TOUR"
+        },
+        "success": true,
+        "nodes": 13361,
+        "ms": 53.9
+      },
+      {
+        "mask": 10,
+        "seed": 3,
+        "anchors": {
+          "H_10_1": "COLORIR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 6.8
+      },
+      {
+        "mask": 10,
+        "seed": 4,
+        "anchors": {
+          "H_7_4": "MIMI"
+        },
+        "success": true,
+        "nodes": 11025,
+        "ms": 33.4
+      },
+      {
+        "mask": 10,
+        "seed": 5,
+        "anchors": {
+          "V_2_0": "GRAVE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 429.8
+      },
+      {
+        "mask": 11,
+        "seed": 0,
+        "anchors": {
+          "V_3_6": "INMATURO"
+        },
+        "success": true,
+        "nodes": 106,
+        "ms": 3.0
+      },
+      {
+        "mask": 11,
+        "seed": 1,
+        "anchors": {
+          "H_1_2": "CATARI"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 13.5
+      },
+      {
+        "mask": 11,
+        "seed": 2,
+        "anchors": {
+          "V_1_0": "RAPE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 400.4
+      },
+      {
+        "mask": 11,
+        "seed": 3,
+        "anchors": {
+          "H_5_1": "ENCHUMBAR"
+        },
+        "success": true,
+        "nodes": 50,
+        "ms": 8.4
+      },
+      {
+        "mask": 11,
+        "seed": 4,
+        "anchors": {
+          "V_7_10": "LAZO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 434.4
+      },
+      {
+        "mask": 11,
+        "seed": 5,
+        "anchors": {
+          "V_3_6": "INMATURO"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 3.2
+      },
+      {
+        "mask": 12,
+        "seed": 0,
+        "anchors": {
+          "H_3_4": "GRADUAL"
+        },
+        "success": true,
+        "nodes": 58,
+        "ms": 15.9
+      },
+      {
+        "mask": 12,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "LOMBRIZ"
+        },
+        "success": true,
+        "nodes": 42,
+        "ms": 15.9
+      },
+      {
+        "mask": 12,
+        "seed": 2,
+        "anchors": {
+          "V_3_6": "ARRITMIA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 388.3
+      },
+      {
+        "mask": 12,
+        "seed": 3,
+        "anchors": {
+          "V_3_6": "ARRITMIA"
+        },
+        "success": true,
+        "nodes": 44,
+        "ms": 3.3
+      },
+      {
+        "mask": 12,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "JUEZ"
+        },
+        "success": true,
+        "nodes": 2198,
+        "ms": 23.8
+      },
+      {
+        "mask": 12,
+        "seed": 5,
+        "anchors": {
+          "H_7_2": "ASISTENTA"
+        },
+        "success": true,
+        "nodes": 70,
+        "ms": 15.9
+      },
+      {
+        "mask": 13,
+        "seed": 0,
+        "anchors": {
+          "V_1_8": "PERRONA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 656.9
+      },
+      {
+        "mask": 13,
+        "seed": 1,
+        "anchors": {
+          "H_0_1": "SDAD"
+        },
+        "success": true,
+        "nodes": 1646,
+        "ms": 53.3
+      },
+      {
+        "mask": 13,
+        "seed": 2,
+        "anchors": {
+          "H_5_2": "QUEMALO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 459.5
+      },
+      {
+        "mask": 13,
+        "seed": 3,
+        "anchors": {
+          "H_7_4": "ETAPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 370.7
+      },
+      {
+        "mask": 13,
+        "seed": 4,
+        "anchors": {
+          "V_1_8": "PERRONA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 496.8
+      },
+      {
+        "mask": 13,
+        "seed": 5,
+        "anchors": {
+          "V_7_5": "THEO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 15.6
+      },
+      {
+        "mask": 14,
+        "seed": 0,
+        "anchors": {
+          "V_1_0": "AFIBLAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 516.8
+      },
+      {
+        "mask": 14,
+        "seed": 1,
+        "anchors": {
+          "V_6_10": "IDOS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 623.7
+      },
+      {
+        "mask": 14,
+        "seed": 2,
+        "anchors": {
+          "V_5_6": "ASNO"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 18.1
+      },
+      {
+        "mask": 14,
+        "seed": 3,
+        "anchors": {
+          "V_5_6": "ASNO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 398.6
+      },
+      {
+        "mask": 14,
+        "seed": 4,
+        "anchors": {
+          "H_2_3": "DINTELAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 532.8
+      },
+      {
+        "mask": 14,
+        "seed": 5,
+        "anchors": {
+          "H_2_3": "DINTELAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 474.8
+      },
+      {
+        "mask": 15,
+        "seed": 0,
+        "anchors": {
+          "V_3_2": "RITMICO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 403.0
+      },
+      {
+        "mask": 15,
+        "seed": 1,
+        "anchors": {
+          "V_3_6": "MADRONA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 352.0
+      },
+      {
+        "mask": 15,
+        "seed": 2,
+        "anchors": {
+          "V_3_9": "MALI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 394.5
+      },
+      {
+        "mask": 15,
+        "seed": 3,
+        "anchors": {
+          "V_0_3": "BESO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 10.1
+      },
+      {
+        "mask": 15,
+        "seed": 4,
+        "anchors": {
+          "V_0_0": "CRUP"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 11.2
+      },
+      {
+        "mask": 15,
+        "seed": 5,
+        "anchors": {
+          "V_6_0": "DADME"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 505.4
+      }
+    ]
+  },
+  "sol2_rand": {
+    "summary": {
+      "condition": "sol2_rand",
+      "runs": 96,
+      "success": 55,
+      "p": 0.5729,
+      "implied_6_attempts": 0.8218,
+      "median_nodes_ok": 23,
+      "mean_ms_ok": 50.4,
+      "median_ms_all": 104.2
+    },
+    "runs": [
+      {
+        "mask": 0,
+        "seed": 0,
+        "anchors": {
+          "H_10_0": "VARRACO",
+          "V_7_1": "SAGA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 726.5
+      },
+      {
+        "mask": 0,
+        "seed": 1,
+        "anchors": {
+          "V_5_3": "TROCAR",
+          "V_7_1": "SAGA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 725.5
+      },
+      {
+        "mask": 0,
+        "seed": 2,
+        "anchors": {
+          "V_7_1": "SAGA",
+          "V_4_0": "PIPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 829.7
+      },
+      {
+        "mask": 0,
+        "seed": 3,
+        "anchors": {
+          "V_4_10": "LISTO",
+          "H_3_1": "CALIFAL"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1447.1
+      },
+      {
+        "mask": 0,
+        "seed": 4,
+        "anchors": {
+          "H_10_0": "VARRACO",
+          "V_4_8": "VORAZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 369.0
+      },
+      {
+        "mask": 0,
+        "seed": 5,
+        "anchors": {
+          "H_1_1": "DESANDARE",
+          "V_5_5": "PEDI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 916.0
+      },
+      {
+        "mask": 1,
+        "seed": 0,
+        "anchors": {
+          "H_0_7": "ONCE",
+          "H_3_1": "ARROZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 492.8
+      },
+      {
+        "mask": 1,
+        "seed": 1,
+        "anchors": {
+          "V_7_1": "IVAN",
+          "V_1_5": "LEZNA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 544.5
+      },
+      {
+        "mask": 1,
+        "seed": 2,
+        "anchors": {
+          "H_8_1": "VADO",
+          "H_3_1": "ARROZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 479.2
+      },
+      {
+        "mask": 1,
+        "seed": 3,
+        "anchors": {
+          "H_7_4": "ARGOT",
+          "H_0_7": "ONCE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 510.2
+      },
+      {
+        "mask": 1,
+        "seed": 4,
+        "anchors": {
+          "H_3_1": "ARROZ",
+          "V_5_4": "GRAO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 430.4
+      },
+      {
+        "mask": 1,
+        "seed": 5,
+        "anchors": {
+          "H_0_7": "ONCE",
+          "V_7_1": "IVAN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 470.2
+      },
+      {
+        "mask": 2,
+        "seed": 0,
+        "anchors": {
+          "V_3_3": "CURO",
+          "V_7_4": "AYTO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 408.4
+      },
+      {
+        "mask": 2,
+        "seed": 1,
+        "anchors": {
+          "V_7_2": "GAMO",
+          "V_7_4": "AYTO"
+        },
+        "success": true,
+        "nodes": 22733,
+        "ms": 136.6
+      },
+      {
+        "mask": 2,
+        "seed": 2,
+        "anchors": {
+          "H_3_3": "CIENCIA",
+          "H_5_2": "PROBADO"
+        },
+        "success": true,
+        "nodes": 50,
+        "ms": 2.2
+      },
+      {
+        "mask": 2,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "V_7_2": "GAMO"
+        },
+        "success": true,
+        "nodes": 96857,
+        "ms": 835.8
+      },
+      {
+        "mask": 2,
+        "seed": 4,
+        "anchors": {
+          "H_8_1": "LADY",
+          "H_9_4": "TAJAR"
+        },
+        "success": true,
+        "nodes": 126,
+        "ms": 4.8
+      },
+      {
+        "mask": 2,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "PROBADO",
+          "H_3_3": "CIENCIA"
+        },
+        "success": true,
+        "nodes": 67017,
+        "ms": 139.5
+      },
+      {
+        "mask": 3,
+        "seed": 0,
+        "anchors": {
+          "V_0_10": "LATO",
+          "H_3_7": "GAJO"
+        },
+        "success": true,
+        "nodes": 919,
+        "ms": 10.7
+      },
+      {
+        "mask": 3,
+        "seed": 1,
+        "anchors": {
+          "H_3_7": "GAJO",
+          "V_3_9": "JORNADA"
+        },
+        "success": true,
+        "nodes": 467,
+        "ms": 6.2
+      },
+      {
+        "mask": 3,
+        "seed": 2,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "H_7_5": "CRUDA"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 1.2
+      },
+      {
+        "mask": 3,
+        "seed": 3,
+        "anchors": {
+          "H_3_7": "GAJO",
+          "H_1_6": "ANCHA"
+        },
+        "success": true,
+        "nodes": 19823,
+        "ms": 55.5
+      },
+      {
+        "mask": 3,
+        "seed": 4,
+        "anchors": {
+          "H_1_6": "ANCHA",
+          "V_2_1": "EPISTOLAR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 2.4
+      },
+      {
+        "mask": 3,
+        "seed": 5,
+        "anchors": {
+          "H_3_1": "PUNIR",
+          "V_2_4": "MIOPE"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 2.6
+      },
+      {
+        "mask": 4,
+        "seed": 0,
+        "anchors": {
+          "H_2_1": "ESMOG",
+          "H_9_3": "ESPURRIR"
+        },
+        "success": true,
+        "nodes": 23,
+        "ms": 3.2
+      },
+      {
+        "mask": 4,
+        "seed": 1,
+        "anchors": {
+          "V_4_1": "AGUERAR",
+          "H_7_0": "MESON"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 13.0
+      },
+      {
+        "mask": 4,
+        "seed": 2,
+        "anchors": {
+          "V_4_3": "AMBO",
+          "H_2_1": "ESMOG"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 460.1
+      },
+      {
+        "mask": 4,
+        "seed": 3,
+        "anchors": {
+          "V_4_1": "AGUERAR",
+          "H_2_1": "ESMOG"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 10.0
+      },
+      {
+        "mask": 4,
+        "seed": 4,
+        "anchors": {
+          "V_4_1": "AGUERAR",
+          "H_3_5": "ALON"
+        },
+        "success": true,
+        "nodes": 276,
+        "ms": 8.0
+      },
+      {
+        "mask": 4,
+        "seed": 5,
+        "anchors": {
+          "H_1_5": "EPOCA",
+          "H_9_3": "ESPURRIR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 683.6
+      },
+      {
+        "mask": 5,
+        "seed": 0,
+        "anchors": {
+          "H_0_0": "TIMPA",
+          "V_4_0": "OLERLES"
+        },
+        "success": true,
+        "nodes": 92805,
+        "ms": 299.5
+      },
+      {
+        "mask": 5,
+        "seed": 1,
+        "anchors": {
+          "V_1_6": "PORQUE",
+          "H_10_0": "SATANDERA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 2.2
+      },
+      {
+        "mask": 5,
+        "seed": 2,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_8_5": "ABIAR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 16.0
+      },
+      {
+        "mask": 5,
+        "seed": 3,
+        "anchors": {
+          "H_8_0": "LEGA",
+          "V_4_0": "OLERLES"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 16.1
+      },
+      {
+        "mask": 5,
+        "seed": 4,
+        "anchors": {
+          "V_4_0": "OLERLES",
+          "H_8_0": "LEGA"
+        },
+        "success": true,
+        "nodes": 95,
+        "ms": 16.9
+      },
+      {
+        "mask": 5,
+        "seed": 5,
+        "anchors": {
+          "V_1_6": "PORQUE",
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 31,
+        "ms": 9.3
+      },
+      {
+        "mask": 6,
+        "seed": 0,
+        "anchors": {
+          "H_0_6": "LILAC",
+          "V_4_3": "ENVIAS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 696.6
+      },
+      {
+        "mask": 6,
+        "seed": 1,
+        "anchors": {
+          "V_0_0": "SETA",
+          "H_5_2": "INSERIR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 598.7
+      },
+      {
+        "mask": 6,
+        "seed": 2,
+        "anchors": {
+          "H_8_2": "SALACOT",
+          "V_4_3": "ENVIAS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 489.2
+      },
+      {
+        "mask": 6,
+        "seed": 3,
+        "anchors": {
+          "H_8_2": "SALACOT",
+          "V_2_8": "TORRONTES"
+        },
+        "success": true,
+        "nodes": 1859,
+        "ms": 41.4
+      },
+      {
+        "mask": 6,
+        "seed": 4,
+        "anchors": {
+          "H_0_6": "LILAC",
+          "H_10_7": "ASIR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 503.3
+      },
+      {
+        "mask": 6,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_4_3": "ENVIAS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 756.1
+      },
+      {
+        "mask": 7,
+        "seed": 0,
+        "anchors": {
+          "H_9_5": "AZORAR",
+          "H_3_7": "CABE"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 8.1
+      },
+      {
+        "mask": 7,
+        "seed": 1,
+        "anchors": {
+          "H_2_1": "VAGUADA",
+          "H_1_7": "MIMO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 2.0
+      },
+      {
+        "mask": 7,
+        "seed": 2,
+        "anchors": {
+          "H_3_7": "CABE",
+          "H_0_3": "ICHU"
+        },
+        "success": true,
+        "nodes": 61,
+        "ms": 8.0
+      },
+      {
+        "mask": 7,
+        "seed": 3,
+        "anchors": {
+          "H_2_1": "VAGUADA",
+          "V_1_7": "MACEDONIO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 2.2
+      },
+      {
+        "mask": 7,
+        "seed": 4,
+        "anchors": {
+          "V_0_4": "CHUFERO",
+          "V_0_10": "POMEZ"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 15.6
+      },
+      {
+        "mask": 7,
+        "seed": 5,
+        "anchors": {
+          "H_10_0": "CRUDA",
+          "V_0_10": "POMEZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 314.7
+      },
+      {
+        "mask": 8,
+        "seed": 0,
+        "anchors": {
+          "H_9_2": "COMPARTI",
+          "H_2_3": "IRGAMOS"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 1.5
+      },
+      {
+        "mask": 8,
+        "seed": 1,
+        "anchors": {
+          "H_9_2": "COMPARTI",
+          "V_7_4": "OLMO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 11.7
+      },
+      {
+        "mask": 8,
+        "seed": 2,
+        "anchors": {
+          "V_2_6": "ANOMALIAS",
+          "V_7_4": "OLMO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 400.5
+      },
+      {
+        "mask": 8,
+        "seed": 3,
+        "anchors": {
+          "V_1_1": "PURA",
+          "H_0_2": "KAPPA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 3.0
+      },
+      {
+        "mask": 8,
+        "seed": 4,
+        "anchors": {
+          "V_1_9": "ASPA",
+          "H_7_3": "ROLLA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 409.9
+      },
+      {
+        "mask": 8,
+        "seed": 5,
+        "anchors": {
+          "H_0_2": "KAPPA",
+          "H_5_2": "IDIOMA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 2.6
+      },
+      {
+        "mask": 9,
+        "seed": 0,
+        "anchors": {
+          "H_2_1": "ALBA",
+          "H_5_2": "REUNIAN"
+        },
+        "success": true,
+        "nodes": 13240,
+        "ms": 304.1
+      },
+      {
+        "mask": 9,
+        "seed": 1,
+        "anchors": {
+          "V_4_0": "ALBEDO",
+          "V_0_4": "CHARRUA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 411.6
+      },
+      {
+        "mask": 9,
+        "seed": 2,
+        "anchors": {
+          "V_3_7": "IMAGENES",
+          "H_9_6": "SEGA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 3422.0
+      },
+      {
+        "mask": 9,
+        "seed": 3,
+        "anchors": {
+          "V_6_9": "VOTAR",
+          "V_0_8": "ESTE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 458.0
+      },
+      {
+        "mask": 9,
+        "seed": 4,
+        "anchors": {
+          "H_0_0": "INSECABLE",
+          "H_5_2": "REUNIAN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 435.3
+      },
+      {
+        "mask": 9,
+        "seed": 5,
+        "anchors": {
+          "V_0_10": "ALMENA",
+          "V_0_2": "SALSERA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 4579.8
+      },
+      {
+        "mask": 10,
+        "seed": 0,
+        "anchors": {
+          "V_3_9": "AVENTADO",
+          "H_7_4": "MIMI"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 10.4
+      },
+      {
+        "mask": 10,
+        "seed": 1,
+        "anchors": {
+          "V_1_7": "MECHA",
+          "H_10_1": "COLORIR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 8.2
+      },
+      {
+        "mask": 10,
+        "seed": 2,
+        "anchors": {
+          "V_2_0": "GRAVE",
+          "V_3_9": "AVENTADO"
+        },
+        "success": true,
+        "nodes": 1480,
+        "ms": 23.3
+      },
+      {
+        "mask": 10,
+        "seed": 3,
+        "anchors": {
+          "H_1_2": "BREN",
+          "V_0_10": "TOUR"
+        },
+        "success": true,
+        "nodes": 31461,
+        "ms": 174.0
+      },
+      {
+        "mask": 10,
+        "seed": 4,
+        "anchors": {
+          "H_1_2": "BREN",
+          "H_1_7": "MATO"
+        },
+        "success": true,
+        "nodes": 3985,
+        "ms": 71.8
+      },
+      {
+        "mask": 10,
+        "seed": 5,
+        "anchors": {
+          "H_10_1": "COLORIR",
+          "V_5_6": "CUMPLI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1318.9
+      },
+      {
+        "mask": 11,
+        "seed": 0,
+        "anchors": {
+          "V_7_10": "LAZO",
+          "H_5_1": "ENCHUMBAR"
+        },
+        "success": true,
+        "nodes": 127,
+        "ms": 8.1
+      },
+      {
+        "mask": 11,
+        "seed": 1,
+        "anchors": {
+          "V_3_9": "AGRIO",
+          "V_1_2": "CREANME"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 2.3
+      },
+      {
+        "mask": 11,
+        "seed": 2,
+        "anchors": {
+          "H_5_1": "ENCHUMBAR",
+          "H_0_7": "LTDO"
+        },
+        "success": true,
+        "nodes": 23,
+        "ms": 7.7
+      },
+      {
+        "mask": 11,
+        "seed": 3,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "V_3_4": "ECHADLES"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.8
+      },
+      {
+        "mask": 11,
+        "seed": 4,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "V_3_6": "INMATURO"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.0
+      },
+      {
+        "mask": 11,
+        "seed": 5,
+        "anchors": {
+          "V_3_6": "INMATURO",
+          "V_1_2": "CREANME"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.9
+      },
+      {
+        "mask": 12,
+        "seed": 0,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "V_7_9": "TAMO"
+        },
+        "success": true,
+        "nodes": 68,
+        "ms": 10.6
+      },
+      {
+        "mask": 12,
+        "seed": 1,
+        "anchors": {
+          "V_0_5": "ASAR",
+          "V_2_8": "JUEZ"
+        },
+        "success": true,
+        "nodes": 1504,
+        "ms": 23.5
+      },
+      {
+        "mask": 12,
+        "seed": 2,
+        "anchors": {
+          "H_0_2": "VACAR",
+          "H_7_2": "ASISTENTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 444.6
+      },
+      {
+        "mask": 12,
+        "seed": 3,
+        "anchors": {
+          "V_7_9": "TAMO",
+          "V_3_4": "GAMBITO"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 2.0
+      },
+      {
+        "mask": 12,
+        "seed": 4,
+        "anchors": {
+          "V_1_0": "SOLARIUM",
+          "V_2_8": "JUEZ"
+        },
+        "success": true,
+        "nodes": 1438,
+        "ms": 29.6
+      },
+      {
+        "mask": 12,
+        "seed": 5,
+        "anchors": {
+          "V_7_9": "TAMO",
+          "H_7_2": "ASISTENTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 396.3
+      },
+      {
+        "mask": 13,
+        "seed": 0,
+        "anchors": {
+          "V_3_0": "RESORBER",
+          "V_7_5": "THEO"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 19.2
+      },
+      {
+        "mask": 13,
+        "seed": 1,
+        "anchors": {
+          "V_3_0": "RESORBER",
+          "H_2_3": "VOLQUEAR"
+        },
+        "success": true,
+        "nodes": 4872,
+        "ms": 52.2
+      },
+      {
+        "mask": 13,
+        "seed": 2,
+        "anchors": {
+          "V_0_1": "SENE",
+          "H_5_2": "QUEMALO"
+        },
+        "success": true,
+        "nodes": 2146,
+        "ms": 68.4
+      },
+      {
+        "mask": 13,
+        "seed": 3,
+        "anchors": {
+          "V_0_10": "PARAGONAR",
+          "H_7_4": "ETAPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 394.9
+      },
+      {
+        "mask": 13,
+        "seed": 4,
+        "anchors": {
+          "H_10_3": "ILOTA",
+          "V_1_8": "PERRONA"
+        },
+        "success": true,
+        "nodes": 79,
+        "ms": 8.3
+      },
+      {
+        "mask": 13,
+        "seed": 5,
+        "anchors": {
+          "V_4_4": "PELE",
+          "H_0_1": "SDAD"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 770.1
+      },
+      {
+        "mask": 14,
+        "seed": 0,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "V_6_10": "IDOS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 505.0
+      },
+      {
+        "mask": 14,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "ACTUAN",
+          "V_2_9": "ALGA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 439.0
+      },
+      {
+        "mask": 14,
+        "seed": 2,
+        "anchors": {
+          "H_10_6": "USAR",
+          "V_3_2": "CHAVETA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 447.9
+      },
+      {
+        "mask": 14,
+        "seed": 3,
+        "anchors": {
+          "H_5_2": "ACTUAN",
+          "H_10_6": "USAR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 18.9
+      },
+      {
+        "mask": 14,
+        "seed": 4,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "V_2_7": "ERAN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 391.0
+      },
+      {
+        "mask": 14,
+        "seed": 5,
+        "anchors": {
+          "V_1_0": "AFIBLAR",
+          "V_0_5": "CINE"
+        },
+        "success": true,
+        "nodes": 75773,
+        "ms": 216.1
+      },
+      {
+        "mask": 15,
+        "seed": 0,
+        "anchors": {
+          "H_3_0": "PURO",
+          "V_3_6": "MADRONA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 482.7
+      },
+      {
+        "mask": 15,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "TAJADO",
+          "H_3_0": "PURO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 355.8
+      },
+      {
+        "mask": 15,
+        "seed": 2,
+        "anchors": {
+          "H_1_0": "REVEJECER",
+          "V_0_0": "CRUP"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 8.4
+      },
+      {
+        "mask": 15,
+        "seed": 3,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "V_3_6": "MADRONA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 568.6
+      },
+      {
+        "mask": 15,
+        "seed": 4,
+        "anchors": {
+          "V_6_8": "MALO",
+          "V_0_0": "CRUP"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 10.4
+      },
+      {
+        "mask": 15,
+        "seed": 5,
+        "anchors": {
+          "V_0_3": "BESO",
+          "V_3_6": "MADRONA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 403.6
+      }
+    ]
+  },
+  "sol1_deg": {
+    "summary": {
+      "condition": "sol1_deg",
+      "runs": 96,
+      "success": 61,
+      "p": 0.6354,
+      "implied_6_attempts": 0.9086,
+      "median_nodes_ok": 20,
+      "mean_ms_ok": 54.6,
+      "median_ms_all": 27.1
+    },
+    "runs": [
+      {
+        "mask": 0,
+        "seed": 0,
+        "anchors": {
+          "H_5_2": "ATOPICO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 443.2
+      },
+      {
+        "mask": 0,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "ATOPICO"
+        },
+        "success": true,
+        "nodes": 28,
+        "ms": 23.4
+      },
+      {
+        "mask": 0,
+        "seed": 2,
+        "anchors": {
+          "H_5_2": "ATOPICO"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 18.5
+      },
+      {
+        "mask": 0,
+        "seed": 3,
+        "anchors": {
+          "H_5_2": "ATOPICO"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 18.8
+      },
+      {
+        "mask": 0,
+        "seed": 4,
+        "anchors": {
+          "H_5_2": "ATOPICO"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 22.7
+      },
+      {
+        "mask": 0,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "ATOPICO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 437.0
+      },
+      {
+        "mask": 1,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "VILORTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 753.6
+      },
+      {
+        "mask": 1,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "VILORTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 563.8
+      },
+      {
+        "mask": 1,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "VILORTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 963.2
+      },
+      {
+        "mask": 1,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "VILORTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 547.8
+      },
+      {
+        "mask": 1,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "VILORTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 472.4
+      },
+      {
+        "mask": 1,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "VILORTA"
+        },
+        "success": true,
+        "nodes": 82959,
+        "ms": 285.3
+      },
+      {
+        "mask": 2,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "LITOSFERA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 602.5
+      },
+      {
+        "mask": 2,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "LITOSFERA"
+        },
+        "success": true,
+        "nodes": 7472,
+        "ms": 83.3
+      },
+      {
+        "mask": 2,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "LITOSFERA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 434.7
+      },
+      {
+        "mask": 2,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "LITOSFERA"
+        },
+        "success": true,
+        "nodes": 10007,
+        "ms": 102.1
+      },
+      {
+        "mask": 2,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "LITOSFERA"
+        },
+        "success": true,
+        "nodes": 70982,
+        "ms": 621.5
+      },
+      {
+        "mask": 2,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "LITOSFERA"
+        },
+        "success": true,
+        "nodes": 54598,
+        "ms": 492.2
+      },
+      {
+        "mask": 3,
+        "seed": 0,
+        "anchors": {
+          "H_5_1": "SALPRESAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 480.6
+      },
+      {
+        "mask": 3,
+        "seed": 1,
+        "anchors": {
+          "H_5_1": "SALPRESAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 532.6
+      },
+      {
+        "mask": 3,
+        "seed": 2,
+        "anchors": {
+          "H_5_1": "SALPRESAR"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 3.2
+      },
+      {
+        "mask": 3,
+        "seed": 3,
+        "anchors": {
+          "H_5_1": "SALPRESAR"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 2.5
+      },
+      {
+        "mask": 3,
+        "seed": 4,
+        "anchors": {
+          "H_5_1": "SALPRESAR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 2.1
+      },
+      {
+        "mask": 3,
+        "seed": 5,
+        "anchors": {
+          "H_5_1": "SALPRESAR"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 2.7
+      },
+      {
+        "mask": 4,
+        "seed": 0,
+        "anchors": {
+          "V_1_8": "CONTACTARE"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 17.1
+      },
+      {
+        "mask": 4,
+        "seed": 1,
+        "anchors": {
+          "V_1_8": "CONTACTARE"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 14.1
+      },
+      {
+        "mask": 4,
+        "seed": 2,
+        "anchors": {
+          "V_1_8": "CONTACTARE"
+        },
+        "success": true,
+        "nodes": 57622,
+        "ms": 205.4
+      },
+      {
+        "mask": 4,
+        "seed": 3,
+        "anchors": {
+          "V_1_8": "CONTACTARE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1257.2
+      },
+      {
+        "mask": 4,
+        "seed": 4,
+        "anchors": {
+          "V_1_8": "CONTACTARE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1268.9
+      },
+      {
+        "mask": 4,
+        "seed": 5,
+        "anchors": {
+          "V_1_8": "CONTACTARE"
+        },
+        "success": true,
+        "nodes": 8131,
+        "ms": 31.9
+      },
+      {
+        "mask": 5,
+        "seed": 0,
+        "anchors": {
+          "H_2_0": "TRAICIONE"
+        },
+        "success": true,
+        "nodes": 4581,
+        "ms": 25.9
+      },
+      {
+        "mask": 5,
+        "seed": 1,
+        "anchors": {
+          "H_2_0": "TRAICIONE"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 16.3
+      },
+      {
+        "mask": 5,
+        "seed": 2,
+        "anchors": {
+          "H_2_0": "TRAICIONE"
+        },
+        "success": true,
+        "nodes": 168,
+        "ms": 17.9
+      },
+      {
+        "mask": 5,
+        "seed": 3,
+        "anchors": {
+          "H_2_0": "TRAICIONE"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 17.1
+      },
+      {
+        "mask": 5,
+        "seed": 4,
+        "anchors": {
+          "H_2_0": "TRAICIONE"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 18.5
+      },
+      {
+        "mask": 5,
+        "seed": 5,
+        "anchors": {
+          "H_2_0": "TRAICIONE"
+        },
+        "success": true,
+        "nodes": 3849,
+        "ms": 34.6
+      },
+      {
+        "mask": 6,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "TORRONTES"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1741.6
+      },
+      {
+        "mask": 6,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "TORRONTES"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 794.4
+      },
+      {
+        "mask": 6,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "TORRONTES"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 651.1
+      },
+      {
+        "mask": 6,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "TORRONTES"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 605.4
+      },
+      {
+        "mask": 6,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "TORRONTES"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1728.0
+      },
+      {
+        "mask": 6,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "TORRONTES"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1906.2
+      },
+      {
+        "mask": 7,
+        "seed": 0,
+        "anchors": {
+          "V_1_7": "MACEDONIO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 611.1
+      },
+      {
+        "mask": 7,
+        "seed": 1,
+        "anchors": {
+          "V_1_7": "MACEDONIO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 12.4
+      },
+      {
+        "mask": 7,
+        "seed": 2,
+        "anchors": {
+          "V_1_7": "MACEDONIO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 610.3
+      },
+      {
+        "mask": 7,
+        "seed": 3,
+        "anchors": {
+          "V_1_7": "MACEDONIO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 10.0
+      },
+      {
+        "mask": 7,
+        "seed": 4,
+        "anchors": {
+          "V_1_7": "MACEDONIO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 12.1
+      },
+      {
+        "mask": 7,
+        "seed": 5,
+        "anchors": {
+          "V_1_7": "MACEDONIO"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 15.2
+      },
+      {
+        "mask": 8,
+        "seed": 0,
+        "anchors": {
+          "V_0_3": "AHIJADOR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 4.5
+      },
+      {
+        "mask": 8,
+        "seed": 1,
+        "anchors": {
+          "V_0_3": "AHIJADOR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 5.5
+      },
+      {
+        "mask": 8,
+        "seed": 2,
+        "anchors": {
+          "V_0_3": "AHIJADOR"
+        },
+        "success": true,
+        "nodes": 6047,
+        "ms": 27.4
+      },
+      {
+        "mask": 8,
+        "seed": 3,
+        "anchors": {
+          "V_0_3": "AHIJADOR"
+        },
+        "success": true,
+        "nodes": 107002,
+        "ms": 618.1
+      },
+      {
+        "mask": 8,
+        "seed": 4,
+        "anchors": {
+          "V_0_3": "AHIJADOR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 4.2
+      },
+      {
+        "mask": 8,
+        "seed": 5,
+        "anchors": {
+          "V_0_3": "AHIJADOR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 3.7
+      },
+      {
+        "mask": 9,
+        "seed": 0,
+        "anchors": {
+          "H_3_4": "RELIEVE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 614.1
+      },
+      {
+        "mask": 9,
+        "seed": 1,
+        "anchors": {
+          "H_3_4": "RELIEVE"
+        },
+        "success": true,
+        "nodes": 42,
+        "ms": 16.8
+      },
+      {
+        "mask": 9,
+        "seed": 2,
+        "anchors": {
+          "H_3_4": "RELIEVE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 502.7
+      },
+      {
+        "mask": 9,
+        "seed": 3,
+        "anchors": {
+          "H_3_4": "RELIEVE"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 13.4
+      },
+      {
+        "mask": 9,
+        "seed": 4,
+        "anchors": {
+          "H_3_4": "RELIEVE"
+        },
+        "success": true,
+        "nodes": 172,
+        "ms": 14.1
+      },
+      {
+        "mask": 9,
+        "seed": 5,
+        "anchors": {
+          "H_3_4": "RELIEVE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 403.6
+      },
+      {
+        "mask": 10,
+        "seed": 0,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO"
+        },
+        "success": true,
+        "nodes": 245,
+        "ms": 3.3
+      },
+      {
+        "mask": 10,
+        "seed": 1,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 601.9
+      },
+      {
+        "mask": 10,
+        "seed": 2,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO"
+        },
+        "success": true,
+        "nodes": 1239,
+        "ms": 6.9
+      },
+      {
+        "mask": 10,
+        "seed": 3,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO"
+        },
+        "success": true,
+        "nodes": 1427,
+        "ms": 7.3
+      },
+      {
+        "mask": 10,
+        "seed": 4,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 2.1
+      },
+      {
+        "mask": 10,
+        "seed": 5,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO"
+        },
+        "success": true,
+        "nodes": 8255,
+        "ms": 26.9
+      },
+      {
+        "mask": 11,
+        "seed": 0,
+        "anchors": {
+          "H_3_0": "PREFERIRIA"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 9.4
+      },
+      {
+        "mask": 11,
+        "seed": 1,
+        "anchors": {
+          "H_3_0": "PREFERIRIA"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 8.9
+      },
+      {
+        "mask": 11,
+        "seed": 2,
+        "anchors": {
+          "H_3_0": "PREFERIRIA"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 7.6
+      },
+      {
+        "mask": 11,
+        "seed": 3,
+        "anchors": {
+          "H_3_0": "PREFERIRIA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 499.6
+      },
+      {
+        "mask": 11,
+        "seed": 4,
+        "anchors": {
+          "H_3_0": "PREFERIRIA"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 10.7
+      },
+      {
+        "mask": 11,
+        "seed": 5,
+        "anchors": {
+          "H_3_0": "PREFERIRIA"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 9.2
+      },
+      {
+        "mask": 12,
+        "seed": 0,
+        "anchors": {
+          "H_3_4": "GRADUAL"
+        },
+        "success": true,
+        "nodes": 54,
+        "ms": 16.2
+      },
+      {
+        "mask": 12,
+        "seed": 1,
+        "anchors": {
+          "H_3_4": "GRADUAL"
+        },
+        "success": true,
+        "nodes": 55,
+        "ms": 19.1
+      },
+      {
+        "mask": 12,
+        "seed": 2,
+        "anchors": {
+          "H_3_4": "GRADUAL"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 20.5
+      },
+      {
+        "mask": 12,
+        "seed": 3,
+        "anchors": {
+          "H_3_4": "GRADUAL"
+        },
+        "success": true,
+        "nodes": 436,
+        "ms": 21.8
+      },
+      {
+        "mask": 12,
+        "seed": 4,
+        "anchors": {
+          "H_3_4": "GRADUAL"
+        },
+        "success": true,
+        "nodes": 11357,
+        "ms": 53.5
+      },
+      {
+        "mask": 12,
+        "seed": 5,
+        "anchors": {
+          "H_3_4": "GRADUAL"
+        },
+        "success": true,
+        "nodes": 35110,
+        "ms": 100.6
+      },
+      {
+        "mask": 13,
+        "seed": 0,
+        "anchors": {
+          "H_7_4": "ETAPA"
+        },
+        "success": true,
+        "nodes": 4498,
+        "ms": 33.7
+      },
+      {
+        "mask": 13,
+        "seed": 1,
+        "anchors": {
+          "H_7_4": "ETAPA"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 20.6
+      },
+      {
+        "mask": 13,
+        "seed": 2,
+        "anchors": {
+          "H_7_4": "ETAPA"
+        },
+        "success": true,
+        "nodes": 35,
+        "ms": 19.9
+      },
+      {
+        "mask": 13,
+        "seed": 3,
+        "anchors": {
+          "H_7_4": "ETAPA"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 21.2
+      },
+      {
+        "mask": 13,
+        "seed": 4,
+        "anchors": {
+          "H_7_4": "ETAPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 410.7
+      },
+      {
+        "mask": 13,
+        "seed": 5,
+        "anchors": {
+          "H_7_4": "ETAPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 422.4
+      },
+      {
+        "mask": 14,
+        "seed": 0,
+        "anchors": {
+          "H_8_2": "TRICORNIO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 566.1
+      },
+      {
+        "mask": 14,
+        "seed": 1,
+        "anchors": {
+          "H_8_2": "TRICORNIO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 19.3
+      },
+      {
+        "mask": 14,
+        "seed": 2,
+        "anchors": {
+          "H_8_2": "TRICORNIO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 449.4
+      },
+      {
+        "mask": 14,
+        "seed": 3,
+        "anchors": {
+          "H_8_2": "TRICORNIO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 408.3
+      },
+      {
+        "mask": 14,
+        "seed": 4,
+        "anchors": {
+          "H_8_2": "TRICORNIO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 22.7
+      },
+      {
+        "mask": 14,
+        "seed": 5,
+        "anchors": {
+          "H_8_2": "TRICORNIO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 408.0
+      },
+      {
+        "mask": 15,
+        "seed": 0,
+        "anchors": {
+          "V_3_2": "RITMICO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 10.9
+      },
+      {
+        "mask": 15,
+        "seed": 1,
+        "anchors": {
+          "V_3_2": "RITMICO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 414.6
+      },
+      {
+        "mask": 15,
+        "seed": 2,
+        "anchors": {
+          "V_3_2": "RITMICO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 14.3
+      },
+      {
+        "mask": 15,
+        "seed": 3,
+        "anchors": {
+          "V_3_2": "RITMICO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.2
+      },
+      {
+        "mask": 15,
+        "seed": 4,
+        "anchors": {
+          "V_3_2": "RITMICO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 367.1
+      },
+      {
+        "mask": 15,
+        "seed": 5,
+        "anchors": {
+          "V_3_2": "RITMICO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 409.1
+      }
+    ]
+  },
+  "sol2_deg": {
+    "summary": {
+      "condition": "sol2_deg",
+      "runs": 96,
+      "success": 68,
+      "p": 0.7083,
+      "implied_6_attempts": 0.965,
+      "median_nodes_ok": 22,
+      "mean_ms_ok": 34.2,
+      "median_ms_all": 11.5
+    },
+    "runs": [
+      {
+        "mask": 0,
+        "seed": 0,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 13.6
+      },
+      {
+        "mask": 0,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 15.3
+      },
+      {
+        "mask": 0,
+        "seed": 2,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 2388.1
+      },
+      {
+        "mask": 0,
+        "seed": 3,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 8.9
+      },
+      {
+        "mask": 0,
+        "seed": 4,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE"
+        },
+        "success": true,
+        "nodes": 7142,
+        "ms": 31.0
+      },
+      {
+        "mask": 0,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 393.0
+      },
+      {
+        "mask": 1,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO"
+        },
+        "success": true,
+        "nodes": 24,
+        "ms": 9.4
+      },
+      {
+        "mask": 1,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 422.8
+      },
+      {
+        "mask": 1,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 9.2
+      },
+      {
+        "mask": 1,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 8.9
+      },
+      {
+        "mask": 1,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 507.6
+      },
+      {
+        "mask": 1,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 509.7
+      },
+      {
+        "mask": 2,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA"
+        },
+        "success": true,
+        "nodes": 276,
+        "ms": 6.6
+      },
+      {
+        "mask": 2,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA"
+        },
+        "success": true,
+        "nodes": 620,
+        "ms": 12.1
+      },
+      {
+        "mask": 2,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA"
+        },
+        "success": true,
+        "nodes": 778,
+        "ms": 11.8
+      },
+      {
+        "mask": 2,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA"
+        },
+        "success": true,
+        "nodes": 20978,
+        "ms": 182.0
+      },
+      {
+        "mask": 2,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA"
+        },
+        "success": true,
+        "nodes": 38605,
+        "ms": 435.1
+      },
+      {
+        "mask": 2,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA"
+        },
+        "success": true,
+        "nodes": 5892,
+        "ms": 83.8
+      },
+      {
+        "mask": 3,
+        "seed": 0,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 4.0
+      },
+      {
+        "mask": 3,
+        "seed": 1,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 490.9
+      },
+      {
+        "mask": 3,
+        "seed": 2,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 2.2
+      },
+      {
+        "mask": 3,
+        "seed": 3,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 476.4
+      },
+      {
+        "mask": 3,
+        "seed": 4,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 560.5
+      },
+      {
+        "mask": 3,
+        "seed": 5,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 2.4
+      },
+      {
+        "mask": 4,
+        "seed": 0,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 5.2
+      },
+      {
+        "mask": 4,
+        "seed": 1,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 806.8
+      },
+      {
+        "mask": 4,
+        "seed": 2,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR"
+        },
+        "success": true,
+        "nodes": 131273,
+        "ms": 440.7
+      },
+      {
+        "mask": 4,
+        "seed": 3,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1243.3
+      },
+      {
+        "mask": 4,
+        "seed": 4,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR"
+        },
+        "success": true,
+        "nodes": 199,
+        "ms": 5.7
+      },
+      {
+        "mask": 4,
+        "seed": 5,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 5.0
+      },
+      {
+        "mask": 5,
+        "seed": 0,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 226,
+        "ms": 9.7
+      },
+      {
+        "mask": 5,
+        "seed": 1,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 8.7
+      },
+      {
+        "mask": 5,
+        "seed": 2,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 8.5
+      },
+      {
+        "mask": 5,
+        "seed": 3,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 8.1
+      },
+      {
+        "mask": 5,
+        "seed": 4,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 8.1
+      },
+      {
+        "mask": 5,
+        "seed": 5,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.3
+      },
+      {
+        "mask": 6,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 7.0
+      },
+      {
+        "mask": 6,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA"
+        },
+        "success": true,
+        "nodes": 1351,
+        "ms": 10.5
+      },
+      {
+        "mask": 6,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA"
+        },
+        "success": true,
+        "nodes": 136,
+        "ms": 7.5
+      },
+      {
+        "mask": 6,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 6.5
+      },
+      {
+        "mask": 6,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 6.2
+      },
+      {
+        "mask": 6,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA"
+        },
+        "success": true,
+        "nodes": 2289,
+        "ms": 12.9
+      },
+      {
+        "mask": 7,
+        "seed": 0,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 422.5
+      },
+      {
+        "mask": 7,
+        "seed": 1,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 447.8
+      },
+      {
+        "mask": 7,
+        "seed": 2,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 491.7
+      },
+      {
+        "mask": 7,
+        "seed": 3,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 556.8
+      },
+      {
+        "mask": 7,
+        "seed": 4,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 1.7
+      },
+      {
+        "mask": 7,
+        "seed": 5,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 1.5
+      },
+      {
+        "mask": 8,
+        "seed": 0,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS"
+        },
+        "success": true,
+        "nodes": 9921,
+        "ms": 33.6
+      },
+      {
+        "mask": 8,
+        "seed": 1,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS"
+        },
+        "success": true,
+        "nodes": 87,
+        "ms": 3.8
+      },
+      {
+        "mask": 8,
+        "seed": 2,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS"
+        },
+        "success": true,
+        "nodes": 34225,
+        "ms": 106.5
+      },
+      {
+        "mask": 8,
+        "seed": 3,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 4.0
+      },
+      {
+        "mask": 8,
+        "seed": 4,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 546.6
+      },
+      {
+        "mask": 8,
+        "seed": 5,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS"
+        },
+        "success": true,
+        "nodes": 1079,
+        "ms": 7.5
+      },
+      {
+        "mask": 9,
+        "seed": 0,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE"
+        },
+        "success": true,
+        "nodes": 50,
+        "ms": 6.3
+      },
+      {
+        "mask": 9,
+        "seed": 1,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE"
+        },
+        "success": true,
+        "nodes": 33,
+        "ms": 8.3
+      },
+      {
+        "mask": 9,
+        "seed": 2,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE"
+        },
+        "success": true,
+        "nodes": 319,
+        "ms": 7.4
+      },
+      {
+        "mask": 9,
+        "seed": 3,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 7.5
+      },
+      {
+        "mask": 9,
+        "seed": 4,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 6.5
+      },
+      {
+        "mask": 9,
+        "seed": 5,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 566.2
+      },
+      {
+        "mask": 10,
+        "seed": 0,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR"
+        },
+        "success": true,
+        "nodes": 1135,
+        "ms": 8.0
+      },
+      {
+        "mask": 10,
+        "seed": 1,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 3.2
+      },
+      {
+        "mask": 10,
+        "seed": 2,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 3.4
+      },
+      {
+        "mask": 10,
+        "seed": 3,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR"
+        },
+        "success": true,
+        "nodes": 24643,
+        "ms": 87.2
+      },
+      {
+        "mask": 10,
+        "seed": 4,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR"
+        },
+        "success": true,
+        "nodes": 6459,
+        "ms": 26.1
+      },
+      {
+        "mask": 10,
+        "seed": 5,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR"
+        },
+        "success": true,
+        "nodes": 134556,
+        "ms": 449.3
+      },
+      {
+        "mask": 11,
+        "seed": 0,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.6
+      },
+      {
+        "mask": 11,
+        "seed": 1,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.9
+      },
+      {
+        "mask": 11,
+        "seed": 2,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.0
+      },
+      {
+        "mask": 11,
+        "seed": 3,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.9
+      },
+      {
+        "mask": 11,
+        "seed": 4,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 2.0
+      },
+      {
+        "mask": 11,
+        "seed": 5,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.3
+      },
+      {
+        "mask": 12,
+        "seed": 0,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA"
+        },
+        "success": true,
+        "nodes": 25,
+        "ms": 8.9
+      },
+      {
+        "mask": 12,
+        "seed": 1,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA"
+        },
+        "success": true,
+        "nodes": 5012,
+        "ms": 22.2
+      },
+      {
+        "mask": 12,
+        "seed": 2,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA"
+        },
+        "success": true,
+        "nodes": 30,
+        "ms": 8.6
+      },
+      {
+        "mask": 12,
+        "seed": 3,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA"
+        },
+        "success": true,
+        "nodes": 891,
+        "ms": 15.6
+      },
+      {
+        "mask": 12,
+        "seed": 4,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA"
+        },
+        "success": true,
+        "nodes": 138,
+        "ms": 10.6
+      },
+      {
+        "mask": 12,
+        "seed": 5,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA"
+        },
+        "success": true,
+        "nodes": 141,
+        "ms": 8.6
+      },
+      {
+        "mask": 13,
+        "seed": 0,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 448.8
+      },
+      {
+        "mask": 13,
+        "seed": 1,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR"
+        },
+        "success": true,
+        "nodes": 70,
+        "ms": 14.5
+      },
+      {
+        "mask": 13,
+        "seed": 2,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 14.7
+      },
+      {
+        "mask": 13,
+        "seed": 3,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 453.6
+      },
+      {
+        "mask": 13,
+        "seed": 4,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 533.2
+      },
+      {
+        "mask": 13,
+        "seed": 5,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 12.6
+      },
+      {
+        "mask": 14,
+        "seed": 0,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 508.3
+      },
+      {
+        "mask": 14,
+        "seed": 1,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 508.8
+      },
+      {
+        "mask": 14,
+        "seed": 2,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 803.4
+      },
+      {
+        "mask": 14,
+        "seed": 3,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 11.0
+      },
+      {
+        "mask": 14,
+        "seed": 4,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 10.9
+      },
+      {
+        "mask": 14,
+        "seed": 5,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 897.7
+      },
+      {
+        "mask": 15,
+        "seed": 0,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 628.4
+      },
+      {
+        "mask": 15,
+        "seed": 1,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 478.4
+      },
+      {
+        "mask": 15,
+        "seed": 2,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 436.3
+      },
+      {
+        "mask": 15,
+        "seed": 3,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 426.3
+      },
+      {
+        "mask": 15,
+        "seed": 4,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 11.2
+      },
+      {
+        "mask": 15,
+        "seed": 5,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 435.9
+      }
+    ]
+  },
+  "sol3_deg": {
+    "summary": {
+      "condition": "sol3_deg",
+      "runs": 96,
+      "success": 63,
+      "p": 0.6562,
+      "implied_6_attempts": 0.9586,
+      "median_nodes_ok": 20,
+      "mean_ms_ok": 7.7,
+      "median_ms_all": 7.3
+    },
+    "runs": [
+      {
+        "mask": 0,
+        "seed": 0,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE",
+          "V_4_8": "VORAZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 540.8
+      },
+      {
+        "mask": 0,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE",
+          "V_4_8": "VORAZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 526.3
+      },
+      {
+        "mask": 0,
+        "seed": 2,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE",
+          "V_4_8": "VORAZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 934.2
+      },
+      {
+        "mask": 0,
+        "seed": 3,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE",
+          "V_4_8": "VORAZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 550.9
+      },
+      {
+        "mask": 0,
+        "seed": 4,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE",
+          "V_4_8": "VORAZ"
+        },
+        "success": true,
+        "nodes": 26,
+        "ms": 14.2
+      },
+      {
+        "mask": 0,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "ATOPICO",
+          "H_1_1": "DESANDARE",
+          "V_4_8": "VORAZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1489.1
+      },
+      {
+        "mask": 1,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO",
+          "V_0_10": "EPISCOPIO"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 3.0
+      },
+      {
+        "mask": 1,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO",
+          "V_0_10": "EPISCOPIO"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 4.0
+      },
+      {
+        "mask": 1,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO",
+          "V_0_10": "EPISCOPIO"
+        },
+        "success": true,
+        "nodes": 30,
+        "ms": 3.3
+      },
+      {
+        "mask": 1,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO",
+          "V_0_10": "EPISCOPIO"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 3.0
+      },
+      {
+        "mask": 1,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO",
+          "V_0_10": "EPISCOPIO"
+        },
+        "success": true,
+        "nodes": 28,
+        "ms": 2.5
+      },
+      {
+        "mask": 1,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "VILORTA",
+          "H_5_2": "ARGANEO",
+          "V_0_10": "EPISCOPIO"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 2.8
+      },
+      {
+        "mask": 2,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA",
+          "V_1_6": "GENIAZO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 491.5
+      },
+      {
+        "mask": 2,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA",
+          "V_1_6": "GENIAZO"
+        },
+        "success": true,
+        "nodes": 320,
+        "ms": 5.6
+      },
+      {
+        "mask": 2,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA",
+          "V_1_6": "GENIAZO"
+        },
+        "success": true,
+        "nodes": 658,
+        "ms": 8.9
+      },
+      {
+        "mask": 2,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA",
+          "V_1_6": "GENIAZO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 435.8
+      },
+      {
+        "mask": 2,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA",
+          "V_1_6": "GENIAZO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 452.7
+      },
+      {
+        "mask": 2,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "LITOSFERA",
+          "H_3_3": "CIENCIA",
+          "V_1_6": "GENIAZO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 454.7
+      },
+      {
+        "mask": 3,
+        "seed": 0,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR",
+          "V_3_9": "JORNADA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 492.3
+      },
+      {
+        "mask": 3,
+        "seed": 1,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR",
+          "V_3_9": "JORNADA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 504.8
+      },
+      {
+        "mask": 3,
+        "seed": 2,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR",
+          "V_3_9": "JORNADA"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 2.4
+      },
+      {
+        "mask": 3,
+        "seed": 3,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR",
+          "V_3_9": "JORNADA"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 2.0
+      },
+      {
+        "mask": 3,
+        "seed": 4,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR",
+          "V_3_9": "JORNADA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 556.9
+      },
+      {
+        "mask": 3,
+        "seed": 5,
+        "anchors": {
+          "H_5_1": "SALPRESAR",
+          "V_2_1": "EPISTOLAR",
+          "V_3_9": "JORNADA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 488.4
+      },
+      {
+        "mask": 4,
+        "seed": 0,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR",
+          "H_5_1": "GIMNASTA"
+        },
+        "success": true,
+        "nodes": 301,
+        "ms": 5.4
+      },
+      {
+        "mask": 4,
+        "seed": 1,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR",
+          "H_5_1": "GIMNASTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 658.4
+      },
+      {
+        "mask": 4,
+        "seed": 2,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR",
+          "H_5_1": "GIMNASTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 619.8
+      },
+      {
+        "mask": 4,
+        "seed": 3,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR",
+          "H_5_1": "GIMNASTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 917.1
+      },
+      {
+        "mask": 4,
+        "seed": 4,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR",
+          "H_5_1": "GIMNASTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 742.9
+      },
+      {
+        "mask": 4,
+        "seed": 5,
+        "anchors": {
+          "V_1_8": "CONTACTARE",
+          "V_0_5": "REGAÑAR",
+          "H_5_1": "GIMNASTA"
+        },
+        "success": true,
+        "nodes": 32,
+        "ms": 4.4
+      },
+      {
+        "mask": 5,
+        "seed": 0,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN",
+          "V_2_2": "APOYO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 12.9
+      },
+      {
+        "mask": 5,
+        "seed": 1,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN",
+          "V_2_2": "APOYO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.9
+      },
+      {
+        "mask": 5,
+        "seed": 2,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN",
+          "V_2_2": "APOYO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.6
+      },
+      {
+        "mask": 5,
+        "seed": 3,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN",
+          "V_2_2": "APOYO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 8.8
+      },
+      {
+        "mask": 5,
+        "seed": 4,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN",
+          "V_2_2": "APOYO"
+        },
+        "success": true,
+        "nodes": 139,
+        "ms": 13.5
+      },
+      {
+        "mask": 5,
+        "seed": 5,
+        "anchors": {
+          "H_2_0": "TRAICIONE",
+          "H_5_2": "YERGUEN",
+          "V_2_2": "APOYO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 12.5
+      },
+      {
+        "mask": 6,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA",
+          "H_3_5": "AFMO"
+        },
+        "success": true,
+        "nodes": 25,
+        "ms": 6.2
+      },
+      {
+        "mask": 6,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA",
+          "H_3_5": "AFMO"
+        },
+        "success": true,
+        "nodes": 21,
+        "ms": 7.3
+      },
+      {
+        "mask": 6,
+        "seed": 2,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA",
+          "H_3_5": "AFMO"
+        },
+        "success": true,
+        "nodes": 7200,
+        "ms": 34.1
+      },
+      {
+        "mask": 6,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA",
+          "H_3_5": "AFMO"
+        },
+        "success": true,
+        "nodes": 36,
+        "ms": 7.1
+      },
+      {
+        "mask": 6,
+        "seed": 4,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA",
+          "H_3_5": "AFMO"
+        },
+        "success": true,
+        "nodes": 629,
+        "ms": 9.7
+      },
+      {
+        "mask": 6,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "TORRONTES",
+          "V_0_10": "COSMORAMA",
+          "H_3_5": "AFMO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 578.0
+      },
+      {
+        "mask": 7,
+        "seed": 0,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR",
+          "H_2_1": "VAGUADA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 469.5
+      },
+      {
+        "mask": 7,
+        "seed": 1,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR",
+          "H_2_1": "VAGUADA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 483.0
+      },
+      {
+        "mask": 7,
+        "seed": 2,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR",
+          "H_2_1": "VAGUADA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 2.5
+      },
+      {
+        "mask": 7,
+        "seed": 3,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR",
+          "H_2_1": "VAGUADA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 538.2
+      },
+      {
+        "mask": 7,
+        "seed": 4,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR",
+          "H_2_1": "VAGUADA"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 1.8
+      },
+      {
+        "mask": 7,
+        "seed": 5,
+        "anchors": {
+          "V_1_7": "MACEDONIO",
+          "V_1_1": "EVAPORIZAR",
+          "H_2_1": "VAGUADA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 1.6
+      },
+      {
+        "mask": 8,
+        "seed": 0,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS",
+          "V_2_6": "ANOMALIAS"
+        },
+        "success": true,
+        "nodes": 81,
+        "ms": 3.4
+      },
+      {
+        "mask": 8,
+        "seed": 1,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS",
+          "V_2_6": "ANOMALIAS"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 3.5
+      },
+      {
+        "mask": 8,
+        "seed": 2,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS",
+          "V_2_6": "ANOMALIAS"
+        },
+        "success": true,
+        "nodes": 75,
+        "ms": 4.5
+      },
+      {
+        "mask": 8,
+        "seed": 3,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS",
+          "V_2_6": "ANOMALIAS"
+        },
+        "success": true,
+        "nodes": 209,
+        "ms": 4.8
+      },
+      {
+        "mask": 8,
+        "seed": 4,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS",
+          "V_2_6": "ANOMALIAS"
+        },
+        "success": true,
+        "nodes": 15323,
+        "ms": 45.2
+      },
+      {
+        "mask": 8,
+        "seed": 5,
+        "anchors": {
+          "V_0_3": "AHIJADOR",
+          "H_2_3": "IRGAMOS",
+          "V_2_6": "ANOMALIAS"
+        },
+        "success": true,
+        "nodes": 4849,
+        "ms": 17.7
+      },
+      {
+        "mask": 9,
+        "seed": 0,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE",
+          "V_0_2": "SALSERA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 485.2
+      },
+      {
+        "mask": 9,
+        "seed": 1,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE",
+          "V_0_2": "SALSERA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1870.0
+      },
+      {
+        "mask": 9,
+        "seed": 2,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE",
+          "V_0_2": "SALSERA"
+        },
+        "success": true,
+        "nodes": 23,
+        "ms": 7.1
+      },
+      {
+        "mask": 9,
+        "seed": 3,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE",
+          "V_0_2": "SALSERA"
+        },
+        "success": true,
+        "nodes": 128,
+        "ms": 7.3
+      },
+      {
+        "mask": 9,
+        "seed": 4,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE",
+          "V_0_2": "SALSERA"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 5.9
+      },
+      {
+        "mask": 9,
+        "seed": 5,
+        "anchors": {
+          "H_3_4": "RELIEVE",
+          "H_0_0": "INSECABLE",
+          "V_0_2": "SALSERA"
+        },
+        "success": true,
+        "nodes": 84,
+        "ms": 8.8
+      },
+      {
+        "mask": 10,
+        "seed": 0,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR",
+          "H_5_2": "MUÑECA"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 2.9
+      },
+      {
+        "mask": 10,
+        "seed": 1,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR",
+          "H_5_2": "MUÑECA"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 3.2
+      },
+      {
+        "mask": 10,
+        "seed": 2,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR",
+          "H_5_2": "MUÑECA"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 4.8
+      },
+      {
+        "mask": 10,
+        "seed": 3,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR",
+          "H_5_2": "MUÑECA"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 4.7
+      },
+      {
+        "mask": 10,
+        "seed": 4,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR",
+          "H_5_2": "MUÑECA"
+        },
+        "success": true,
+        "nodes": 547,
+        "ms": 5.3
+      },
+      {
+        "mask": 10,
+        "seed": 5,
+        "anchors": {
+          "V_1_4": "ENSEÑAMELO",
+          "H_3_3": "ESTUCHAR",
+          "H_5_2": "MUÑECA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 724.8
+      },
+      {
+        "mask": 11,
+        "seed": 0,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR",
+          "V_1_2": "CREANME"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.9
+      },
+      {
+        "mask": 11,
+        "seed": 1,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR",
+          "V_1_2": "CREANME"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.2
+      },
+      {
+        "mask": 11,
+        "seed": 2,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR",
+          "V_1_2": "CREANME"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.8
+      },
+      {
+        "mask": 11,
+        "seed": 3,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR",
+          "V_1_2": "CREANME"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.2
+      },
+      {
+        "mask": 11,
+        "seed": 4,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR",
+          "V_1_2": "CREANME"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.7
+      },
+      {
+        "mask": 11,
+        "seed": 5,
+        "anchors": {
+          "H_3_0": "PREFERIRIA",
+          "H_5_1": "ENCHUMBAR",
+          "V_1_2": "CREANME"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.3
+      },
+      {
+        "mask": 12,
+        "seed": 0,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA",
+          "H_5_2": "LOMBRIZ"
+        },
+        "success": true,
+        "nodes": 62,
+        "ms": 1.3
+      },
+      {
+        "mask": 12,
+        "seed": 1,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA",
+          "H_5_2": "LOMBRIZ"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 1.5
+      },
+      {
+        "mask": 12,
+        "seed": 2,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA",
+          "H_5_2": "LOMBRIZ"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 1.4
+      },
+      {
+        "mask": 12,
+        "seed": 3,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA",
+          "H_5_2": "LOMBRIZ"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 1.1
+      },
+      {
+        "mask": 12,
+        "seed": 4,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA",
+          "H_5_2": "LOMBRIZ"
+        },
+        "success": true,
+        "nodes": 1408,
+        "ms": 6.7
+      },
+      {
+        "mask": 12,
+        "seed": 5,
+        "anchors": {
+          "H_3_4": "GRADUAL",
+          "H_7_2": "ASISTENTA",
+          "H_5_2": "LOMBRIZ"
+        },
+        "success": true,
+        "nodes": 42,
+        "ms": 1.8
+      },
+      {
+        "mask": 13,
+        "seed": 0,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR",
+          "H_5_2": "QUEMALO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 534.6
+      },
+      {
+        "mask": 13,
+        "seed": 1,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR",
+          "H_5_2": "QUEMALO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 6.8
+      },
+      {
+        "mask": 13,
+        "seed": 2,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR",
+          "H_5_2": "QUEMALO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 6.8
+      },
+      {
+        "mask": 13,
+        "seed": 3,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR",
+          "H_5_2": "QUEMALO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 487.7
+      },
+      {
+        "mask": 13,
+        "seed": 4,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR",
+          "H_5_2": "QUEMALO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 655.3
+      },
+      {
+        "mask": 13,
+        "seed": 5,
+        "anchors": {
+          "H_7_4": "ETAPA",
+          "H_2_3": "VOLQUEAR",
+          "H_5_2": "QUEMALO"
+        },
+        "success": true,
+        "nodes": 9167,
+        "ms": 99.7
+      },
+      {
+        "mask": 14,
+        "seed": 0,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR",
+          "H_5_2": "ACTUAN"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 5.6
+      },
+      {
+        "mask": 14,
+        "seed": 1,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR",
+          "H_5_2": "ACTUAN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 558.8
+      },
+      {
+        "mask": 14,
+        "seed": 2,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR",
+          "H_5_2": "ACTUAN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 501.7
+      },
+      {
+        "mask": 14,
+        "seed": 3,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR",
+          "H_5_2": "ACTUAN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 550.4
+      },
+      {
+        "mask": 14,
+        "seed": 4,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR",
+          "H_5_2": "ACTUAN"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 4.5
+      },
+      {
+        "mask": 14,
+        "seed": 5,
+        "anchors": {
+          "H_8_2": "TRICORNIO",
+          "H_2_3": "DINTELAR",
+          "H_5_2": "ACTUAN"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 6.2
+      },
+      {
+        "mask": 15,
+        "seed": 0,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA",
+          "H_1_0": "REVEJECER"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 2.0
+      },
+      {
+        "mask": 15,
+        "seed": 1,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA",
+          "H_1_0": "REVEJECER"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 1.8
+      },
+      {
+        "mask": 15,
+        "seed": 2,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA",
+          "H_1_0": "REVEJECER"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 450.9
+      },
+      {
+        "mask": 15,
+        "seed": 3,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA",
+          "H_1_0": "REVEJECER"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 423.1
+      },
+      {
+        "mask": 15,
+        "seed": 4,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA",
+          "H_1_0": "REVEJECER"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 422.8
+      },
+      {
+        "mask": 15,
+        "seed": 5,
+        "anchors": {
+          "V_3_2": "RITMICO",
+          "H_8_2": "CHARNELA",
+          "H_1_0": "REVEJECER"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 1.3
+      }
+    ]
+  },
+  "com1": {
+    "summary": {
+      "condition": "com1",
+      "runs": 96,
+      "success": 43,
+      "p": 0.4479,
+      "implied_6_attempts": 0.7935,
+      "median_nodes_ok": 39,
+      "mean_ms_ok": 61.1,
+      "median_ms_all": 447.1
+    },
+    "runs": [
+      {
+        "mask": 0,
+        "seed": 0,
+        "anchors": {
+          "V_1_4": "BUENO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1739.1
+      },
+      {
+        "mask": 0,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "PLANTEL"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 2305.9
+      },
+      {
+        "mask": 0,
+        "seed": 2,
+        "anchors": {
+          "V_5_3": "BACULO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 589.1
+      },
+      {
+        "mask": 0,
+        "seed": 3,
+        "anchors": {
+          "H_8_3": "LOOR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1168.4
+      },
+      {
+        "mask": 0,
+        "seed": 4,
+        "anchors": {
+          "V_1_4": "BOTIN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1911.3
+      },
+      {
+        "mask": 0,
+        "seed": 5,
+        "anchors": {
+          "V_5_3": "VIDUAL"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1323.1
+      },
+      {
+        "mask": 1,
+        "seed": 0,
+        "anchors": {
+          "H_7_4": "LASER"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 623.7
+      },
+      {
+        "mask": 1,
+        "seed": 1,
+        "anchors": {
+          "V_0_10": "ARBITRAJE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 563.3
+      },
+      {
+        "mask": 1,
+        "seed": 2,
+        "anchors": {
+          "H_2_7": "MATE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 526.0
+      },
+      {
+        "mask": 1,
+        "seed": 3,
+        "anchors": {
+          "H_1_1": "CLOSET"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 819.7
+      },
+      {
+        "mask": 1,
+        "seed": 4,
+        "anchors": {
+          "H_0_7": "INRI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 747.5
+      },
+      {
+        "mask": 1,
+        "seed": 5,
+        "anchors": {
+          "V_1_5": "FAVOR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 590.6
+      },
+      {
+        "mask": 2,
+        "seed": 0,
+        "anchors": {
+          "V_3_3": "PESO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 2884.0
+      },
+      {
+        "mask": 2,
+        "seed": 1,
+        "anchors": {
+          "H_7_4": "BOCHAS"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 465.5
+      },
+      {
+        "mask": 2,
+        "seed": 2,
+        "anchors": {
+          "H_3_3": "GUAYABA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 541.5
+      },
+      {
+        "mask": 2,
+        "seed": 3,
+        "anchors": {
+          "V_2_8": "ARBITRAJE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 403.3
+      },
+      {
+        "mask": 2,
+        "seed": 4,
+        "anchors": {
+          "H_10_0": "HASTA"
+        },
+        "success": true,
+        "nodes": 50,
+        "ms": 11.4
+      },
+      {
+        "mask": 2,
+        "seed": 5,
+        "anchors": {
+          "H_9_4": "FUTIL"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 3.6
+      },
+      {
+        "mask": 3,
+        "seed": 0,
+        "anchors": {
+          "V_3_9": "LENTEJA"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 1.6
+      },
+      {
+        "mask": 3,
+        "seed": 1,
+        "anchors": {
+          "H_9_7": "IBAN"
+        },
+        "success": true,
+        "nodes": 3554,
+        "ms": 26.4
+      },
+      {
+        "mask": 3,
+        "seed": 2,
+        "anchors": {
+          "H_1_6": "DRIZA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1312.9
+      },
+      {
+        "mask": 3,
+        "seed": 3,
+        "anchors": {
+          "H_7_0": "MOHO"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 10.4
+      },
+      {
+        "mask": 3,
+        "seed": 4,
+        "anchors": {
+          "V_0_10": "BAJE"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 8.6
+      },
+      {
+        "mask": 3,
+        "seed": 5,
+        "anchors": {
+          "H_1_6": "PLATA"
+        },
+        "success": true,
+        "nodes": 80,
+        "ms": 11.7
+      },
+      {
+        "mask": 4,
+        "seed": 0,
+        "anchors": {
+          "H_7_6": "MALTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 467.7
+      },
+      {
+        "mask": 4,
+        "seed": 1,
+        "anchors": {
+          "H_7_0": "LIMON"
+        },
+        "success": true,
+        "nodes": 28777,
+        "ms": 180.8
+      },
+      {
+        "mask": 4,
+        "seed": 2,
+        "anchors": {
+          "V_0_2": "AUGE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 663.9
+      },
+      {
+        "mask": 4,
+        "seed": 3,
+        "anchors": {
+          "V_0_2": "CHIC"
+        },
+        "success": true,
+        "nodes": 109,
+        "ms": 21.2
+      },
+      {
+        "mask": 4,
+        "seed": 4,
+        "anchors": {
+          "V_0_5": "ALFAJOR"
+        },
+        "success": true,
+        "nodes": 30,
+        "ms": 12.1
+      },
+      {
+        "mask": 4,
+        "seed": 5,
+        "anchors": {
+          "V_0_5": "REPELAR"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 13.3
+      },
+      {
+        "mask": 5,
+        "seed": 0,
+        "anchors": {
+          "V_2_4": "GESTOR"
+        },
+        "success": true,
+        "nodes": 105,
+        "ms": 12.1
+      },
+      {
+        "mask": 5,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "LUCROSO"
+        },
+        "success": true,
+        "nodes": 124,
+        "ms": 23.2
+      },
+      {
+        "mask": 5,
+        "seed": 2,
+        "anchors": {
+          "H_8_0": "ALBO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 23.1
+      },
+      {
+        "mask": 5,
+        "seed": 3,
+        "anchors": {
+          "H_0_0": "IDOLO"
+        },
+        "success": true,
+        "nodes": 30,
+        "ms": 33.8
+      },
+      {
+        "mask": 5,
+        "seed": 4,
+        "anchors": {
+          "V_1_6": "BRONCE"
+        },
+        "success": true,
+        "nodes": 60,
+        "ms": 15.1
+      },
+      {
+        "mask": 5,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "ALAMBRE"
+        },
+        "success": true,
+        "nodes": 10443,
+        "ms": 64.8
+      },
+      {
+        "mask": 6,
+        "seed": 0,
+        "anchors": {
+          "H_8_2": "REUNION"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1768.7
+      },
+      {
+        "mask": 6,
+        "seed": 1,
+        "anchors": {
+          "H_5_2": "REPELAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 668.5
+      },
+      {
+        "mask": 6,
+        "seed": 2,
+        "anchors": {
+          "H_5_2": "ALCAHAZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 605.7
+      },
+      {
+        "mask": 6,
+        "seed": 3,
+        "anchors": {
+          "H_2_2": "NIDO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1928.4
+      },
+      {
+        "mask": 6,
+        "seed": 4,
+        "anchors": {
+          "V_0_10": "LACUNARIO"
+        },
+        "success": true,
+        "nodes": 45,
+        "ms": 20.4
+      },
+      {
+        "mask": 6,
+        "seed": 5,
+        "anchors": {
+          "V_0_2": "MORI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 509.8
+      },
+      {
+        "mask": 7,
+        "seed": 0,
+        "anchors": {
+          "H_5_1": "QUELTEHUE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 456.4
+      },
+      {
+        "mask": 7,
+        "seed": 1,
+        "anchors": {
+          "H_5_1": "SOFISTICO"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 2.5
+      },
+      {
+        "mask": 7,
+        "seed": 2,
+        "anchors": {
+          "H_10_0": "SOLAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 400.9
+      },
+      {
+        "mask": 7,
+        "seed": 3,
+        "anchors": {
+          "H_10_0": "OCENA"
+        },
+        "success": false,
+        "nodes": 151,
+        "ms": 8.1
+      },
+      {
+        "mask": 7,
+        "seed": 4,
+        "anchors": {
+          "V_1_1": "FRACCIONAR"
+        },
+        "success": true,
+        "nodes": 22668,
+        "ms": 136.7
+      },
+      {
+        "mask": 7,
+        "seed": 5,
+        "anchors": {
+          "V_0_4": "APOYATE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 555.7
+      },
+      {
+        "mask": 8,
+        "seed": 0,
+        "anchors": {
+          "H_3_0": "EDEN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 444.5
+      },
+      {
+        "mask": 8,
+        "seed": 1,
+        "anchors": {
+          "H_9_2": "MARTILLO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 449.7
+      },
+      {
+        "mask": 8,
+        "seed": 2,
+        "anchors": {
+          "V_7_4": "BAUL"
+        },
+        "success": true,
+        "nodes": 23,
+        "ms": 11.0
+      },
+      {
+        "mask": 8,
+        "seed": 3,
+        "anchors": {
+          "V_7_4": "ENEA"
+        },
+        "success": true,
+        "nodes": 62741,
+        "ms": 117.9
+      },
+      {
+        "mask": 8,
+        "seed": 4,
+        "anchors": {
+          "H_3_0": "YOLA"
+        },
+        "success": true,
+        "nodes": 139219,
+        "ms": 393.1
+      },
+      {
+        "mask": 8,
+        "seed": 5,
+        "anchors": {
+          "V_7_4": "LAVE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 324.1
+      },
+      {
+        "mask": 9,
+        "seed": 0,
+        "anchors": {
+          "V_0_4": "CABALLO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 496.4
+      },
+      {
+        "mask": 9,
+        "seed": 1,
+        "anchors": {
+          "H_8_0": "SABES"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 538.9
+      },
+      {
+        "mask": 9,
+        "seed": 2,
+        "anchors": {
+          "V_0_2": "PEPINAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 455.8
+      },
+      {
+        "mask": 9,
+        "seed": 3,
+        "anchors": {
+          "V_0_4": "COMPOTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 453.9
+      },
+      {
+        "mask": 9,
+        "seed": 4,
+        "anchors": {
+          "V_6_9": "MANDO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 592.2
+      },
+      {
+        "mask": 9,
+        "seed": 5,
+        "anchors": {
+          "V_0_6": "AGIL"
+        },
+        "success": true,
+        "nodes": 334,
+        "ms": 10.2
+      },
+      {
+        "mask": 10,
+        "seed": 0,
+        "anchors": {
+          "H_1_2": "FARO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 4.0
+      },
+      {
+        "mask": 10,
+        "seed": 1,
+        "anchors": {
+          "V_2_0": "IGUAL"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 580.9
+      },
+      {
+        "mask": 10,
+        "seed": 2,
+        "anchors": {
+          "V_1_4": "ASEGURARIA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 607.1
+      },
+      {
+        "mask": 10,
+        "seed": 3,
+        "anchors": {
+          "H_10_1": "PISOTON"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 6.2
+      },
+      {
+        "mask": 10,
+        "seed": 4,
+        "anchors": {
+          "V_5_6": "TIMBRE"
+        },
+        "success": true,
+        "nodes": 113838,
+        "ms": 768.8
+      },
+      {
+        "mask": 10,
+        "seed": 5,
+        "anchors": {
+          "V_0_10": "UNIR"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 13.4
+      },
+      {
+        "mask": 11,
+        "seed": 0,
+        "anchors": {
+          "V_0_5": "ARCE"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 12.3
+      },
+      {
+        "mask": 11,
+        "seed": 1,
+        "anchors": {
+          "H_0_7": "CIMA"
+        },
+        "success": true,
+        "nodes": 22,
+        "ms": 19.1
+      },
+      {
+        "mask": 11,
+        "seed": 2,
+        "anchors": {
+          "V_1_2": "GORRION"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 538.8
+      },
+      {
+        "mask": 11,
+        "seed": 3,
+        "anchors": {
+          "V_6_0": "SUAZI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 472.6
+      },
+      {
+        "mask": 11,
+        "seed": 4,
+        "anchors": {
+          "V_0_5": "REMO"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 9.3
+      },
+      {
+        "mask": 11,
+        "seed": 5,
+        "anchors": {
+          "H_1_2": "ALUDIR"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 15.3
+      },
+      {
+        "mask": 12,
+        "seed": 0,
+        "anchors": {
+          "V_2_8": "CUAL"
+        },
+        "success": true,
+        "nodes": 63,
+        "ms": 11.4
+      },
+      {
+        "mask": 12,
+        "seed": 1,
+        "anchors": {
+          "H_9_3": "FLAN"
+        },
+        "success": true,
+        "nodes": 9249,
+        "ms": 115.2
+      },
+      {
+        "mask": 12,
+        "seed": 2,
+        "anchors": {
+          "V_1_0": "PICAROTE"
+        },
+        "success": true,
+        "nodes": 289,
+        "ms": 26.5
+      },
+      {
+        "mask": 12,
+        "seed": 3,
+        "anchors": {
+          "V_7_9": "OLOR"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 18.4
+      },
+      {
+        "mask": 12,
+        "seed": 4,
+        "anchors": {
+          "V_3_6": "GUITARRA"
+        },
+        "success": true,
+        "nodes": 39,
+        "ms": 4.1
+      },
+      {
+        "mask": 12,
+        "seed": 5,
+        "anchors": {
+          "V_2_10": "REGLAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 481.9
+      },
+      {
+        "mask": 13,
+        "seed": 0,
+        "anchors": {
+          "V_0_6": "CONEJUNA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 733.3
+      },
+      {
+        "mask": 13,
+        "seed": 1,
+        "anchors": {
+          "V_7_7": "PALA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 459.3
+      },
+      {
+        "mask": 13,
+        "seed": 2,
+        "anchors": {
+          "V_5_2": "FLACO"
+        },
+        "success": true,
+        "nodes": 833,
+        "ms": 20.7
+      },
+      {
+        "mask": 13,
+        "seed": 3,
+        "anchors": {
+          "V_0_10": "ARREPENTI"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 486.8
+      },
+      {
+        "mask": 13,
+        "seed": 4,
+        "anchors": {
+          "V_0_6": "DIAGONAL"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 476.6
+      },
+      {
+        "mask": 13,
+        "seed": 5,
+        "anchors": {
+          "H_7_4": "HANZO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 600.3
+      },
+      {
+        "mask": 14,
+        "seed": 0,
+        "anchors": {
+          "H_4_7": "ATEO"
+        },
+        "success": true,
+        "nodes": 57,
+        "ms": 29.0
+      },
+      {
+        "mask": 14,
+        "seed": 1,
+        "anchors": {
+          "V_2_9": "ECHO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 459.6
+      },
+      {
+        "mask": 14,
+        "seed": 2,
+        "anchors": {
+          "V_2_9": "GALO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 548.6
+      },
+      {
+        "mask": 14,
+        "seed": 3,
+        "anchors": {
+          "H_5_2": "ALPACA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 640.4
+      },
+      {
+        "mask": 14,
+        "seed": 4,
+        "anchors": {
+          "H_8_2": "EPICENTRO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 439.0
+      },
+      {
+        "mask": 14,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "ALBEAR"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 19.4
+      },
+      {
+        "mask": 15,
+        "seed": 0,
+        "anchors": {
+          "V_0_0": "PASO"
+        },
+        "success": true,
+        "nodes": 22668,
+        "ms": 330.2
+      },
+      {
+        "mask": 15,
+        "seed": 1,
+        "anchors": {
+          "H_1_0": "RENUENCIA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 450.5
+      },
+      {
+        "mask": 15,
+        "seed": 2,
+        "anchors": {
+          "H_8_2": "ALERGICA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 508.4
+      },
+      {
+        "mask": 15,
+        "seed": 3,
+        "anchors": {
+          "H_8_2": "AZARBETA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 19.7
+      },
+      {
+        "mask": 15,
+        "seed": 4,
+        "anchors": {
+          "V_0_3": "JUAN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1071.4
+      },
+      {
+        "mask": 15,
+        "seed": 5,
+        "anchors": {
+          "V_6_8": "EMIR"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 20.8
+      }
+    ]
+  },
+  "com2": {
+    "summary": {
+      "condition": "com2",
+      "runs": 96,
+      "success": 40,
+      "p": 0.4167,
+      "implied_6_attempts": 0.6704,
+      "median_nodes_ok": 20,
+      "mean_ms_ok": 96.9,
+      "median_ms_all": 392.6
+    },
+    "runs": [
+      {
+        "mask": 0,
+        "seed": 0,
+        "anchors": {
+          "V_4_0": "HUBO",
+          "V_1_2": "MISMA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 488.1
+      },
+      {
+        "mask": 0,
+        "seed": 1,
+        "anchors": {
+          "H_7_0": "TABU",
+          "H_10_0": "MUESTRA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 647.3
+      },
+      {
+        "mask": 0,
+        "seed": 2,
+        "anchors": {
+          "V_4_0": "OPON",
+          "V_5_3": "VOLTEO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 950.3
+      },
+      {
+        "mask": 0,
+        "seed": 3,
+        "anchors": {
+          "V_5_5": "AMAR",
+          "V_5_3": "PINTOR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1660.2
+      },
+      {
+        "mask": 0,
+        "seed": 4,
+        "anchors": {
+          "H_8_3": "AMAR",
+          "H_3_1": "PROTOMO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 2009.4
+      },
+      {
+        "mask": 0,
+        "seed": 5,
+        "anchors": {
+          "V_5_3": "FIESTA",
+          "V_7_1": "FILO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 855.2
+      },
+      {
+        "mask": 1,
+        "seed": 0,
+        "anchors": {
+          "V_0_10": "RESERVARE",
+          "H_1_1": "RONDIZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 281.1
+      },
+      {
+        "mask": 1,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "NEUTRAL",
+          "V_5_6": "COMICA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 515.6
+      },
+      {
+        "mask": 1,
+        "seed": 2,
+        "anchors": {
+          "V_0_10": "ENGARITAR",
+          "H_10_0": "HARA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 545.3
+      },
+      {
+        "mask": 1,
+        "seed": 3,
+        "anchors": {
+          "V_5_6": "JOROBA",
+          "H_3_1": "SURCO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 523.7
+      },
+      {
+        "mask": 1,
+        "seed": 4,
+        "anchors": {
+          "V_5_6": "PASTEL",
+          "V_0_10": "HARINEADA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 400.9
+      },
+      {
+        "mask": 1,
+        "seed": 5,
+        "anchors": {
+          "H_10_0": "NADA",
+          "V_2_8": "ESTIRPE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 544.8
+      },
+      {
+        "mask": 2,
+        "seed": 0,
+        "anchors": {
+          "V_7_2": "ACTA",
+          "V_2_8": "MAHARRANA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 868.9
+      },
+      {
+        "mask": 2,
+        "seed": 1,
+        "anchors": {
+          "H_7_4": "POSTAL",
+          "H_8_1": "VOTO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 350.5
+      },
+      {
+        "mask": 2,
+        "seed": 2,
+        "anchors": {
+          "H_8_1": "GURU",
+          "V_7_2": "AUPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 906.5
+      },
+      {
+        "mask": 2,
+        "seed": 3,
+        "anchors": {
+          "V_7_2": "AGIL",
+          "H_9_4": "FLUOR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 951.5
+      },
+      {
+        "mask": 2,
+        "seed": 4,
+        "anchors": {
+          "V_0_4": "ERIA",
+          "H_10_0": "ARPON"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 380.9
+      },
+      {
+        "mask": 2,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "ARREPENTI",
+          "V_7_4": "LAVE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 712.7
+      },
+      {
+        "mask": 3,
+        "seed": 0,
+        "anchors": {
+          "H_5_1": "ALMIBARAR",
+          "H_3_1": "SUBTE"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 1.8
+      },
+      {
+        "mask": 3,
+        "seed": 1,
+        "anchors": {
+          "H_5_1": "CHIRINOLA",
+          "H_9_7": "CAFE"
+        },
+        "success": false,
+        "nodes": 152,
+        "ms": 0.7
+      },
+      {
+        "mask": 3,
+        "seed": 2,
+        "anchors": {
+          "H_7_5": "BOTIN",
+          "H_9_7": "ODIO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 562.6
+      },
+      {
+        "mask": 3,
+        "seed": 3,
+        "anchors": {
+          "H_7_5": "CLAVO",
+          "H_7_0": "REAL"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 10.0
+      },
+      {
+        "mask": 3,
+        "seed": 4,
+        "anchors": {
+          "V_1_7": "ACEÑA",
+          "V_5_6": "GIRE"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 3.7
+      },
+      {
+        "mask": 3,
+        "seed": 5,
+        "anchors": {
+          "V_7_3": "OPIO",
+          "H_3_1": "RIÑON"
+        },
+        "success": true,
+        "nodes": 16,
+        "ms": 10.0
+      },
+      {
+        "mask": 4,
+        "seed": 0,
+        "anchors": {
+          "H_2_1": "MECHA",
+          "H_7_6": "CARPA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 2119.1
+      },
+      {
+        "mask": 4,
+        "seed": 1,
+        "anchors": {
+          "H_3_5": "TOAR",
+          "V_4_1": "AMANSAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1399.5
+      },
+      {
+        "mask": 4,
+        "seed": 2,
+        "anchors": {
+          "H_9_3": "ALERGICA",
+          "H_3_5": "SISA"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 3.3
+      },
+      {
+        "mask": 4,
+        "seed": 3,
+        "anchors": {
+          "H_9_3": "TRATARAS",
+          "H_3_5": "HABA"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 4.4
+      },
+      {
+        "mask": 4,
+        "seed": 4,
+        "anchors": {
+          "H_7_6": "COGIA",
+          "V_0_2": "MUSA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 700.3
+      },
+      {
+        "mask": 4,
+        "seed": 5,
+        "anchors": {
+          "H_9_3": "ALERGICA",
+          "V_4_3": "JUGO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1143.5
+      },
+      {
+        "mask": 5,
+        "seed": 0,
+        "anchors": {
+          "H_8_5": "IRANI",
+          "V_1_6": "REPOSO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 16.4
+      },
+      {
+        "mask": 5,
+        "seed": 1,
+        "anchors": {
+          "V_2_2": "CANOA",
+          "V_2_10": "ESPEJO"
+        },
+        "success": true,
+        "nodes": 1322,
+        "ms": 18.2
+      },
+      {
+        "mask": 5,
+        "seed": 2,
+        "anchors": {
+          "V_4_0": "CABALLO",
+          "V_2_8": "ATACARE"
+        },
+        "success": false,
+        "nodes": 151,
+        "ms": 2.5
+      },
+      {
+        "mask": 5,
+        "seed": 3,
+        "anchors": {
+          "H_10_0": "EMPERCHAR",
+          "H_8_5": "ESMOG"
+        },
+        "success": true,
+        "nodes": 168,
+        "ms": 21.9
+      },
+      {
+        "mask": 5,
+        "seed": 4,
+        "anchors": {
+          "H_2_0": "SUFRIDERO",
+          "V_4_0": "RIGIDOS"
+        },
+        "success": true,
+        "nodes": 113,
+        "ms": 10.8
+      },
+      {
+        "mask": 5,
+        "seed": 5,
+        "anchors": {
+          "V_2_8": "GROSERO",
+          "V_2_2": "CORAL"
+        },
+        "success": false,
+        "nodes": 1,
+        "ms": 0.0
+      },
+      {
+        "mask": 6,
+        "seed": 0,
+        "anchors": {
+          "V_0_2": "GALO",
+          "V_0_0": "PALO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 610.4
+      },
+      {
+        "mask": 6,
+        "seed": 1,
+        "anchors": {
+          "V_2_8": "ALMIBARAR",
+          "V_0_2": "UTIL"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 12.5
+      },
+      {
+        "mask": 6,
+        "seed": 2,
+        "anchors": {
+          "H_3_5": "ZONA",
+          "V_0_10": "FILIFORME"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 965.5
+      },
+      {
+        "mask": 6,
+        "seed": 3,
+        "anchors": {
+          "H_0_0": "GOCHA",
+          "H_8_2": "PEPINAR"
+        },
+        "success": true,
+        "nodes": 18,
+        "ms": 14.5
+      },
+      {
+        "mask": 6,
+        "seed": 4,
+        "anchors": {
+          "V_4_3": "VOMICA",
+          "H_0_0": "FORJA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1146.5
+      },
+      {
+        "mask": 6,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "RUQUETA",
+          "H_0_0": "EXODO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 663.3
+      },
+      {
+        "mask": 7,
+        "seed": 0,
+        "anchors": {
+          "H_3_7": "ASIR",
+          "H_10_0": "NOCHE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 252.0
+      },
+      {
+        "mask": 7,
+        "seed": 1,
+        "anchors": {
+          "H_0_3": "TAZA",
+          "H_2_1": "REUNION"
+        },
+        "success": true,
+        "nodes": 22668,
+        "ms": 674.2
+      },
+      {
+        "mask": 7,
+        "seed": 2,
+        "anchors": {
+          "H_7_0": "ALBO",
+          "H_0_3": "ARPA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 10.4
+      },
+      {
+        "mask": 7,
+        "seed": 3,
+        "anchors": {
+          "H_9_5": "TOALLA",
+          "V_7_3": "TOVA"
+        },
+        "success": true,
+        "nodes": 168,
+        "ms": 18.1
+      },
+      {
+        "mask": 7,
+        "seed": 4,
+        "anchors": {
+          "V_1_7": "SOFISTICO",
+          "H_0_3": "NUEZ"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 779.1
+      },
+      {
+        "mask": 7,
+        "seed": 5,
+        "anchors": {
+          "H_2_1": "TERNERO",
+          "H_0_3": "CAZO"
+        },
+        "success": true,
+        "nodes": 22669,
+        "ms": 503.1
+      },
+      {
+        "mask": 8,
+        "seed": 0,
+        "anchors": {
+          "V_1_9": "AGIL",
+          "V_0_3": "LOGOPEDA"
+        },
+        "success": false,
+        "nodes": 2,
+        "ms": 0.0
+      },
+      {
+        "mask": 8,
+        "seed": 1,
+        "anchors": {
+          "V_4_10": "PEON",
+          "H_0_2": "LISTA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 618.5
+      },
+      {
+        "mask": 8,
+        "seed": 2,
+        "anchors": {
+          "V_2_6": "SUFRIDERO",
+          "V_7_4": "CAIA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 12.2
+      },
+      {
+        "mask": 8,
+        "seed": 3,
+        "anchors": {
+          "V_7_4": "LORO",
+          "H_2_3": "CANARIO"
+        },
+        "success": true,
+        "nodes": 751,
+        "ms": 9.7
+      },
+      {
+        "mask": 8,
+        "seed": 4,
+        "anchors": {
+          "H_5_2": "MEDICO",
+          "H_3_0": "LAGO"
+        },
+        "success": true,
+        "nodes": 7527,
+        "ms": 26.3
+      },
+      {
+        "mask": 8,
+        "seed": 5,
+        "anchors": {
+          "H_2_3": "SAXOFON",
+          "V_7_4": "AUPA"
+        },
+        "success": true,
+        "nodes": 104077,
+        "ms": 259.4
+      },
+      {
+        "mask": 9,
+        "seed": 0,
+        "anchors": {
+          "H_8_0": "HECHO",
+          "V_0_4": "ZAPALLO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 1394.0
+      },
+      {
+        "mask": 9,
+        "seed": 1,
+        "anchors": {
+          "V_6_9": "LARDO",
+          "V_4_0": "REPISA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 550.7
+      },
+      {
+        "mask": 9,
+        "seed": 2,
+        "anchors": {
+          "V_0_8": "ICOR",
+          "H_7_5": "AZOTE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 529.3
+      },
+      {
+        "mask": 9,
+        "seed": 3,
+        "anchors": {
+          "H_8_0": "CINTA",
+          "V_0_10": "ALUDIR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 963.5
+      },
+      {
+        "mask": 9,
+        "seed": 4,
+        "anchors": {
+          "V_3_7": "RETRANCA",
+          "V_0_4": "NOTICIA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 539.7
+      },
+      {
+        "mask": 9,
+        "seed": 5,
+        "anchors": {
+          "V_6_9": "OVEJA",
+          "V_0_2": "ANCORAR"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 462.3
+      },
+      {
+        "mask": 10,
+        "seed": 0,
+        "anchors": {
+          "V_7_1": "MATE",
+          "V_2_0": "TRAJE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 453.9
+      },
+      {
+        "mask": 10,
+        "seed": 1,
+        "anchors": {
+          "H_8_0": "ENANO",
+          "H_1_2": "MAZA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 485.8
+      },
+      {
+        "mask": 10,
+        "seed": 2,
+        "anchors": {
+          "H_1_7": "TOVA",
+          "H_8_0": "PUNTO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 7.6
+      },
+      {
+        "mask": 10,
+        "seed": 3,
+        "anchors": {
+          "V_5_6": "SIERVO",
+          "H_3_3": "COTILLEO"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 4.7
+      },
+      {
+        "mask": 10,
+        "seed": 4,
+        "anchors": {
+          "H_8_0": "SIMON",
+          "H_1_7": "SOTA"
+        },
+        "success": true,
+        "nodes": 16310,
+        "ms": 137.5
+      },
+      {
+        "mask": 10,
+        "seed": 5,
+        "anchors": {
+          "V_1_7": "POLEN",
+          "H_1_2": "IOTA"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 2.6
+      },
+      {
+        "mask": 11,
+        "seed": 0,
+        "anchors": {
+          "V_0_5": "MOHO",
+          "H_10_2": "ESTAS"
+        },
+        "success": true,
+        "nodes": 149539,
+        "ms": 1772.5
+      },
+      {
+        "mask": 11,
+        "seed": 1,
+        "anchors": {
+          "V_1_0": "OBUS",
+          "V_7_10": "LEME"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 469.8
+      },
+      {
+        "mask": 11,
+        "seed": 2,
+        "anchors": {
+          "V_6_0": "BROTE",
+          "V_3_6": "CINQUERO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 474.9
+      },
+      {
+        "mask": 11,
+        "seed": 3,
+        "anchors": {
+          "V_1_0": "VIDA",
+          "V_3_9": "ATERI"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 2.5
+      },
+      {
+        "mask": 11,
+        "seed": 4,
+        "anchors": {
+          "H_0_7": "PAJO",
+          "V_1_2": "RORCUAL"
+        },
+        "success": true,
+        "nodes": 30,
+        "ms": 2.8
+      },
+      {
+        "mask": 11,
+        "seed": 5,
+        "anchors": {
+          "V_1_2": "ISOTOPO",
+          "V_1_0": "BOTA"
+        },
+        "success": true,
+        "nodes": 20,
+        "ms": 1.7
+      },
+      {
+        "mask": 12,
+        "seed": 0,
+        "anchors": {
+          "H_0_2": "SIMON",
+          "V_7_9": "CHAL"
+        },
+        "success": true,
+        "nodes": 8325,
+        "ms": 141.0
+      },
+      {
+        "mask": 12,
+        "seed": 1,
+        "anchors": {
+          "H_0_2": "CARPO",
+          "H_3_4": "SONREIR"
+        },
+        "success": true,
+        "nodes": 735,
+        "ms": 35.1
+      },
+      {
+        "mask": 12,
+        "seed": 2,
+        "anchors": {
+          "V_3_4": "PEPINAR",
+          "V_1_0": "IMPLORAR"
+        },
+        "success": true,
+        "nodes": 37,
+        "ms": 3.3
+      },
+      {
+        "mask": 12,
+        "seed": 3,
+        "anchors": {
+          "V_1_0": "RECECHAR",
+          "V_2_10": "VOMICA"
+        },
+        "success": true,
+        "nodes": 1003,
+        "ms": 26.7
+      },
+      {
+        "mask": 12,
+        "seed": 4,
+        "anchors": {
+          "V_7_9": "PINO",
+          "V_1_0": "DESPEZAR"
+        },
+        "success": true,
+        "nodes": 53,
+        "ms": 19.1
+      },
+      {
+        "mask": 12,
+        "seed": 5,
+        "anchors": {
+          "V_3_2": "VOMICA",
+          "V_3_4": "PEPTONA"
+        },
+        "success": true,
+        "nodes": 172,
+        "ms": 1.9
+      },
+      {
+        "mask": 13,
+        "seed": 0,
+        "anchors": {
+          "H_5_2": "RAYUELA",
+          "V_7_7": "AMEN"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 598.0
+      },
+      {
+        "mask": 13,
+        "seed": 1,
+        "anchors": {
+          "V_3_0": "ARRECIFE",
+          "V_5_2": "COMIC"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 488.8
+      },
+      {
+        "mask": 13,
+        "seed": 2,
+        "anchors": {
+          "H_2_3": "LEGITIMA",
+          "H_5_2": "PAJAROS"
+        },
+        "success": true,
+        "nodes": 19,
+        "ms": 9.9
+      },
+      {
+        "mask": 13,
+        "seed": 3,
+        "anchors": {
+          "V_0_1": "ZONA",
+          "H_2_3": "COTILLEO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 458.2
+      },
+      {
+        "mask": 13,
+        "seed": 4,
+        "anchors": {
+          "H_5_2": "TERNERO",
+          "H_7_4": "SOPAS"
+        },
+        "success": false,
+        "nodes": 385,
+        "ms": 15.9
+      },
+      {
+        "mask": 13,
+        "seed": 5,
+        "anchors": {
+          "H_5_2": "TOPARCA",
+          "V_4_4": "OPON"
+        },
+        "success": true,
+        "nodes": 170,
+        "ms": 22.9
+      },
+      {
+        "mask": 14,
+        "seed": 0,
+        "anchors": {
+          "V_5_6": "AZOR",
+          "V_2_9": "YOLA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 506.9
+      },
+      {
+        "mask": 14,
+        "seed": 1,
+        "anchors": {
+          "H_8_2": "RENUENCIA",
+          "H_0_5": "TRAJE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 384.4
+      },
+      {
+        "mask": 14,
+        "seed": 2,
+        "anchors": {
+          "V_5_6": "NIDO",
+          "H_0_5": "ZARJA"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 411.2
+      },
+      {
+        "mask": 14,
+        "seed": 3,
+        "anchors": {
+          "V_2_7": "OBUS",
+          "V_2_9": "SISA"
+        },
+        "success": false,
+        "nodes": 151,
+        "ms": 16.0
+      },
+      {
+        "mask": 14,
+        "seed": 4,
+        "anchors": {
+          "V_6_10": "NAZI",
+          "H_4_7": "HIEL"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 511.2
+      },
+      {
+        "mask": 14,
+        "seed": 5,
+        "anchors": {
+          "H_2_3": "PROPICIO",
+          "V_4_4": "EMPEZO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 413.6
+      },
+      {
+        "mask": 15,
+        "seed": 0,
+        "anchors": {
+          "H_3_0": "UNTO",
+          "V_4_4": "TRENZA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 8.9
+      },
+      {
+        "mask": 15,
+        "seed": 1,
+        "anchors": {
+          "V_4_4": "ROSBIF",
+          "H_1_0": "HIRVIENTE"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 490.4
+      },
+      {
+        "mask": 15,
+        "seed": 2,
+        "anchors": {
+          "V_4_4": "CONEJO",
+          "V_0_3": "SIEN"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 9.2
+      },
+      {
+        "mask": 15,
+        "seed": 3,
+        "anchors": {
+          "V_3_6": "CALIDAS",
+          "V_3_9": "OREA"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 15.4
+      },
+      {
+        "mask": 15,
+        "seed": 4,
+        "anchors": {
+          "V_3_6": "ARROZAL",
+          "V_4_4": "LOGICO"
+        },
+        "success": false,
+        "nodes": 150000,
+        "ms": 619.2
+      },
+      {
+        "mask": 15,
+        "seed": 5,
+        "anchors": {
+          "V_3_2": "GEMINAR",
+          "V_6_8": "ROZO"
+        },
+        "success": true,
+        "nodes": 17,
+        "ms": 8.2
+      }
+    ]
+  }
+}

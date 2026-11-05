@@ -10,7 +10,7 @@ from app.features.sso.schemas import (
 )
 from app.features.sso.service import canjear_ticket_en_autenticador, crear_ticket_retorno
 
-router = APIRouter(prefix="/api/auth/sso", tags=["Single Sign-On (SSO)"])
+router = APIRouter(prefix="/api/auth/sso", tags=["Autenticación - SSO"])
 
 
 @router.post(

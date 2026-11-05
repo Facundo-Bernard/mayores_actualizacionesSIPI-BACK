@@ -10,8 +10,6 @@ from pymongo import ReturnDocument
 from app.core.database import get_database
 from app.features.economy.config import get_economy_config
 from app.features.economy.schemas import (
-    BuyLivesRequest,
-    BuyLivesResponse,
     ConsumeLifeResponse,
     RefillLivesResponse,
     UserEconomyResponse,
@@ -108,81 +106,6 @@ async def consume_life(
         vidas_restantes=nuevas_vidas,
         consumidas=1,
         message="Vida consumida exitosamente.",
-    )
-
-
-async def buy_lives(user_id: int, req: BuyLivesRequest) -> BuyLivesResponse:
-    """
-    Canjea puntos acumulados por vidas según la tasa del catálogo o paquete elegido.
-    Operación atómica fail-safe: decrementa puntos e incrementa vidas en un solo paso.
-    """
-    config = await get_economy_config()
-    db = get_database()
-
-    vidas_a_sumar = 1
-    costo_puntos = config.costo_vida_puntos
-
-    if req.package_id:
-        paquete = next((p for p in config.paquetes_tienda if p.id == req.package_id), None)
-        if not paquete:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Paquete de tienda '{req.package_id}' no encontrado.",
-            )
-        vidas_a_sumar = paquete.vidas
-        costo_puntos = paquete.puntos
-
-    max_vidas = config.vidas_maximas
-    if max_vidas is not None:
-        update_query: Any = [
-            {
-                "$set": {
-                    "puntos": {"$subtract": ["$puntos", costo_puntos]},
-                    "vidas": {
-                        "$min": [
-                            {"$add": [{"$ifNull": ["$vidas", 0]}, vidas_a_sumar]},
-                            max_vidas,
-                        ]
-                    },
-                    "updated_at": datetime.now(timezone.utc),
-                }
-            }
-        ]
-    else:
-        update_query = {
-            "$inc": {"puntos": -costo_puntos, "vidas": vidas_a_sumar},
-            "$set": {"updated_at": datetime.now(timezone.utc)},
-        }
-
-    result = await db["usuarios"].find_one_and_update(
-        {"id": user_id, "puntos": {"$gte": costo_puntos}},
-        update_query,
-        return_document=ReturnDocument.AFTER,
-    )
-
-    if not result:
-        user_actual = await db["usuarios"].find_one({"id": user_id})
-        puntos_actuales = user_actual.get("puntos", 0) if user_actual else 0
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Puntos insuficientes. Necesitás {costo_puntos} pts y tenés {puntos_actuales} pts.",
-        )
-
-    nuevas_vidas = int(result.get("vidas", 0))
-    nuevos_puntos = int(result.get("puntos", 0))
-
-    logger.info(
-        f"[ECONOMIA] Canje exitoso para usuario {user_id}: +{vidas_a_sumar} vidas por {costo_puntos} pts. "
-        f"Saldo final: {nuevas_vidas} vidas, {nuevos_puntos} pts."
-    )
-
-    return BuyLivesResponse(
-        success=True,
-        vidas=nuevas_vidas,
-        puntos=nuevos_puntos,
-        compradas=vidas_a_sumar,
-        costo=costo_puntos,
-        message=f"¡Canje exitoso! Sumaste {vidas_a_sumar} {'vida' if vidas_a_sumar == 1 else 'vidas'}.",
     )
 
 

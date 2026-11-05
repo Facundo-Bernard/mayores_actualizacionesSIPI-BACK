@@ -10,7 +10,6 @@ from app.features.economy.schemas import (
     EconomyConfigResponse,
     EconomyConfigUpdateRequest,
     EscalaCalificacionTiempo,
-    TiendaPaquete,
 )
 
 logger = logging.getLogger("EconomyService")
@@ -20,7 +19,6 @@ COLL_CONFIG = "configuracion_economia"
 DEFAULT_ECONOMY_CONFIG: Dict[str, Any] = {
     "_id": "global_economy",
     "vidas_iniciales": 5,
-    "costo_vida_puntos": 50,
     "costo_desbloqueo_dia_puntos": 100,
     "costo_pista_puntos": 20,
     "puntos_por_calificacion": {
@@ -30,7 +28,6 @@ DEFAULT_ECONOMY_CONFIG: Dict[str, Any] = {
         "C": 50,
         "F": 0,
     },
-    "vidas_maximas": None,
     "guest_migration_max_points": 1000,
     "escalas_tiempo_por_juego": DEFAULT_ESCALAS_TIEMPO,
     "paquetes_tienda": [
@@ -67,7 +64,6 @@ async def get_economy_config() -> EconomyConfigResponse:
         )
         doc = await db[COLL_CONFIG].find_one({"_id": "global_economy"}) or initial
 
-    paquetes = [TiendaPaquete(**p) for p in doc.get("paquetes_tienda", [])]
     raw_escalas = doc.get("escalas_tiempo_por_juego") or DEFAULT_ESCALAS_TIEMPO
     escalas_map: Dict[str, List[EscalaCalificacionTiempo]] = {}
     for gid, items in raw_escalas.items():
@@ -75,14 +71,11 @@ async def get_economy_config() -> EconomyConfigResponse:
 
     return EconomyConfigResponse(
         vidas_iniciales=int(doc.get("vidas_iniciales", 5)),
-        costo_vida_puntos=int(doc.get("costo_vida_puntos", 50)),
         costo_desbloqueo_dia_puntos=int(doc.get("costo_desbloqueo_dia_puntos", 100)),
         costo_pista_puntos=int(doc.get("costo_pista_puntos", 20)),
         puntos_por_calificacion=doc.get("puntos_por_calificacion", DEFAULT_ECONOMY_CONFIG["puntos_por_calificacion"]),
         escalas_tiempo_por_juego=escalas_map,
-        paquetes_tienda=paquetes,
         puntos_por_juego=doc.get("puntos_por_juego", DEFAULT_ECONOMY_CONFIG["puntos_por_juego"]),
-        vidas_maximas=doc.get("vidas_maximas"),
         guest_migration_max_points=int(
             doc.get("guest_migration_max_points", DEFAULT_ECONOMY_CONFIG["guest_migration_max_points"])
         ),
@@ -99,12 +92,8 @@ async def update_economy_config(req: EconomyConfigUpdateRequest) -> EconomyConfi
 
     if req.vidas_iniciales is not None:
         update_fields["vidas_iniciales"] = max(1, req.vidas_iniciales)
-    if req.costo_vida_puntos is not None:
-        update_fields["costo_vida_puntos"] = max(1, req.costo_vida_puntos)
     if req.costo_desbloqueo_dia_puntos is not None:
         update_fields["costo_desbloqueo_dia_puntos"] = max(0, req.costo_desbloqueo_dia_puntos)
-    if req.paquetes_tienda is not None:
-        update_fields["paquetes_tienda"] = [p.model_dump() for p in req.paquetes_tienda]
     if req.costo_pista_puntos is not None:
         update_fields["costo_pista_puntos"] = max(0, req.costo_pista_puntos)
     if req.puntos_por_calificacion is not None:
@@ -116,8 +105,6 @@ async def update_economy_config(req: EconomyConfigUpdateRequest) -> EconomyConfi
         }
     if req.puntos_por_juego is not None:
         update_fields["puntos_por_juego"] = req.puntos_por_juego
-    if req.vidas_maximas is not None:
-        update_fields["vidas_maximas"] = req.vidas_maximas
     if req.guest_migration_max_points is not None:
         update_fields["guest_migration_max_points"] = max(0, req.guest_migration_max_points)
 

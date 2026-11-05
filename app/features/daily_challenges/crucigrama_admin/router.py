@@ -22,7 +22,7 @@ from app.features.daily_challenges.crucigrama_admin.schemas import (
 
 router = APIRouter(
     prefix="/api/challenges/admin/crucigrama/templates",
-    tags=["Crucigrama Admin"],
+    tags=["Desafíos Diarios - Administración de Crucigramas"],
     dependencies=[Depends(get_current_admin)],
 )
 

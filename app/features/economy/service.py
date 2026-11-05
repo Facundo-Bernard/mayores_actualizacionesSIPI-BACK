@@ -27,7 +27,6 @@ from app.features.economy.hints import (  # noqa: F401
 )
 from app.features.economy.lives import (  # noqa: F401
     REFILL_LIVES_COST,
-    buy_lives,
     consume_life,
     get_user_economy,
     refill_lives,

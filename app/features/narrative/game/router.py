@@ -94,12 +94,12 @@ def _get_current_user_id(authorization: Optional[str] = Header(None)) -> int:
 
 router_v2 = APIRouter(
     prefix="/api/narrative/v2/partida",
-    tags=["Juego Narrativo - Partidas (V2 Ligero)"],
     dependencies=[Depends(cargar_guest_id)],
 )
 
 @router_v2.post(
     "/iniciar",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=IniciarPartidaV2Response,
     summary="[V2] Fase 0: Iniciar partida devolviendo solo recursos iniciales y las 3 cartas de draft del Mes 1"
 )
@@ -112,6 +112,7 @@ async def endpoint_v2_iniciar_partida(
 
 @router_v2.post(
     "/elegir-carta-mes",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=ElegirCartaMesV2Response,
     summary="[V2] Fase 1: Elegir carta de draft mensual devolviendo solo el evento sorteado"
 )
@@ -126,6 +127,7 @@ async def endpoint_v2_elegir_carta_mes(
     "/decidir-evento",
     response_model=DecidirEventoV2Response,
     summary="[V1 Plano, deprecado] Fase 2: Decidir opción en evento (usar /avanzar-nodo en motor V2)",
+    tags=["Narrativo - Legacy V1 (Deprecado)"],
     deprecated=True
 )
 async def endpoint_v2_decidir_evento(
@@ -139,6 +141,7 @@ async def endpoint_v2_decidir_evento(
     "/responder-conversacion",
     response_model=ResponderConversacionV2Response,
     summary="[V1 Plano, deprecado] Fase 3: Responder diálogo de corte (usar /avanzar-nodo en motor V2)",
+    tags=["Narrativo - Legacy V1 (Deprecado)"],
     deprecated=True
 )
 async def endpoint_v2_responder_conversacion(
@@ -150,6 +153,7 @@ async def endpoint_v2_responder_conversacion(
 
 @router_v2.post(
     "/avanzar-mes",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=AvanzarMesV2Response,
     summary="[V2] Fase 4: Avanzar mes devolviendo recursos post-pasivos y las 3 nuevas cartas de draft"
 )
@@ -162,6 +166,7 @@ async def endpoint_v2_avanzar_mes(
 
 @router_v2.get(
     "/estado",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=EstadoTurnoResponse,
     summary="[V2] Consultar estado reactivo del turno actual para sincronización / F5"
 )
@@ -174,6 +179,7 @@ async def endpoint_v2_obtener_estado_turno(
 
 @router_v2.post(
     "/avanzar-nodo",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=EstadoGrafoV2Response,
     summary="[V2 Grafos] Avanzar un paso en el grafo activo (evento o conversación) sin spoilers"
 )
@@ -190,6 +196,7 @@ async def endpoint_v2_avanzar_nodo(
 
 @router_v2.get(
     "/grafo-actual",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=Optional[EstadoGrafoV2Response],
     summary="[V2 Grafos] Consultar el estado del grafo activo (evento o conversación) para recargas/F5"
 )
@@ -202,6 +209,7 @@ async def endpoint_v2_obtener_grafo_actual(
 
 @router_v2.post(
     "/iniciar-evento-grafo",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=EstadoGrafoV2Response,
     summary="[V2 Grafos] Iniciar un evento basado en grafos para el mes actual"
 )
@@ -214,6 +222,7 @@ async def endpoint_v2_iniciar_evento_grafo(
 
 @router_v2.post(
     "/iniciar-conversacion-grafo",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=Optional[EstadoGrafoV2Response],
     summary="[V2 Grafos] Iniciar una conversación basada en grafos para el mes actual"
 )
@@ -230,12 +239,12 @@ async def endpoint_v2_iniciar_conversacion_grafo(
 
 router = APIRouter(
     prefix="/api/narrative/partida",
-    tags=["Juego Narrativo - Consultas"],
     dependencies=[Depends(cargar_guest_id)],
 )
 
 @router.get(
     "/setup",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=SetupDesafioResponse,
     summary="Fase 0: Obtener los 5 personajes y 5 cartas ofrecidas para iniciar el día"
 )
@@ -248,7 +257,8 @@ async def endpoint_obtener_setup(
 
 @router.post(
     "/reiniciar",
-    summary="Reiniciar partida de hoy para volver a Fase 0 (Setup limpio)"
+    summary="Reiniciar partida de hoy para volver a Fase 0 (Setup limpio)",
+    tags=["Narrativo - Flujo de Juego"]
 )
 async def endpoint_reiniciar_partida(
     req: ReiniciarPartidaRequest,
@@ -259,6 +269,7 @@ async def endpoint_reiniciar_partida(
 
 @router.post(
     "/conversaciones-posibles",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=List[ConversacionResponse],
     summary="Obtener conversaciones habilitadas según una mano de personajes (vía POST)"
 )
@@ -271,6 +282,7 @@ async def endpoint_conversaciones_posibles_post(req: ConversacionesPosiblesReque
 
 @router.get(
     "/conversaciones-posibles",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=List[ConversacionResponse],
     summary="Obtener conversaciones habilitadas según una mano de personajes (vía GET)"
 )
@@ -287,6 +299,7 @@ async def endpoint_conversaciones_posibles_get(
 
 @router.get(
     "/historial",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=HistorialPartidaResponse,
     summary="Consultar historial mensual acumulado de la partida (modal historial)"
 )
@@ -299,6 +312,7 @@ async def endpoint_obtener_historial_partida(
 
 @router.get(
     "/inventario",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=InventarioPartidaResponse,
     summary="Consultar cartas en mano y tags activos del jugador (modal inventario)"
 )
@@ -311,6 +325,7 @@ async def endpoint_obtener_inventario_partida(
 
 @router.get(
     "/corte",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=CortePartidaResponse,
     summary="Consultar integrantes de la corte y sus afinidades actuales (modal corte)"
 )
@@ -323,6 +338,7 @@ async def endpoint_obtener_corte_partida(
 
 @router.get(
     "/finalizacion",
+    tags=["Narrativo - Flujo de Juego"],
     response_model=FinalizacionPartidaResponse,
     summary="Consultar desenlace / finalización detallada de la partida (modal fin de juego)"
 )
@@ -337,6 +353,7 @@ async def endpoint_obtener_finalizacion_partida(
     "/evento-actual",
     response_model=Optional[EventoTurnoResponse],
     summary="[V1 Plano, deprecado] Consultar únicamente el evento activo del mes (usar /estado)",
+    tags=["Narrativo - Legacy V1 (Deprecado)"],
     deprecated=True
 )
 async def endpoint_obtener_evento_actual(
@@ -350,6 +367,7 @@ async def endpoint_obtener_evento_actual(
     "/conversacion-actual",
     response_model=Optional[ConversacionResponse],
     summary="[V1 Plano, deprecado] Consultar únicamente la conversación activa del mes (usar /estado)",
+    tags=["Narrativo - Legacy V1 (Deprecado)"],
     deprecated=True
 )
 async def endpoint_obtener_conversacion_actual(
@@ -363,6 +381,7 @@ async def endpoint_obtener_conversacion_actual(
     "/resultado-actual",
     response_model=Optional[ResultadoResponse],
     summary="[V1 Plano, deprecado] Consultar únicamente el resultado del evento recién resuelto (usar /estado)",
+    tags=["Narrativo - Legacy V1 (Deprecado)"],
     deprecated=True
 )
 async def endpoint_obtener_resultado_actual(
@@ -376,6 +395,7 @@ async def endpoint_obtener_resultado_actual(
     "/draft-actual",
     response_model=List[CartaResponse],
     summary="[V1 Plano, deprecado] Consultar únicamente las cartas ofrecidas en el draft del mes actual (usar /estado)",
+    tags=["Narrativo - Legacy V1 (Deprecado)"],
     deprecated=True
 )
 async def endpoint_obtener_draft_actual(

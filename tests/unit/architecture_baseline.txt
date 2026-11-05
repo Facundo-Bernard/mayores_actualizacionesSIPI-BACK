@@ -4,5 +4,3 @@
 app/features/daily_challenges/service.py -> narrative
 app/features/sso/service.py -> auth
 app/features/user_attempts/service.py -> economy
-app/features/usuario/router.py -> auth
-app/features/usuario/service.py -> auth

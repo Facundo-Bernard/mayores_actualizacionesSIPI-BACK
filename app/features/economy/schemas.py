@@ -2,17 +2,6 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any
 
 
-class TiendaPaquete(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-
-    id: str = Field(..., description="Identificador único del paquete")
-    vidas: int = Field(..., ge=1, description="Cantidad de vidas otorgadas")
-    puntos: int = Field(..., ge=1, description="Costo en puntos del paquete")
-    popular: bool = Field(False, description="Destacar como paquete popular")
-    badge: Optional[str] = Field(None, description="Etiqueta visible ej: 'Popular', 'Mejor Ahorro'")
-    descuento: Optional[str] = Field(None, description="Leyenda de ahorro ej: 'Ahorrá 30 pts'")
-
-
 class EscalaCalificacionTiempo(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -53,7 +42,6 @@ class EconomyConfigResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     vidas_iniciales: int = Field(5, ge=1, description="Vidas con las que arranca cada cuenta nueva (deprecado/local)")
-    costo_vida_puntos: int = Field(50, ge=1, description="Costo base de 1 vida en puntos")
     costo_desbloqueo_dia_puntos: int = Field(100, ge=0, description="Costo en puntos para desbloquear un día histórico")
     costo_pista_puntos: int = Field(20, ge=0, description="Costo en puntos para solicitar una pista")
     puntos_por_calificacion: Dict[str, int] = Field(
@@ -73,7 +61,6 @@ class EconomyConfigResponse(BaseModel):
         },
         description="Escalas de calificación por tiempo configuradas por juego",
     )
-    paquetes_tienda: List[TiendaPaquete] = Field(default_factory=list, description="Opciones de canje en la mini-tienda")
     puntos_por_juego: Dict[str, int] = Field(
         default_factory=lambda: {
             "wordle": 50,
@@ -84,7 +71,6 @@ class EconomyConfigResponse(BaseModel):
         },
         description="Puntos que otorga cada juego al completar un desafío",
     )
-    vidas_maximas: Optional[int] = Field(None, description="Tope de vidas acumulables (null para ilimitado)")
     guest_migration_max_points: int = Field(
         1000, ge=0, description="Tope de puntos de invitado que una cuenta puede reclamar al registrarse"
     )
@@ -95,16 +81,13 @@ class EconomyConfigUpdateRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     vidas_iniciales: Optional[int] = Field(None, ge=1, description="Vidas iniciales para cuentas nuevas")
-    costo_vida_puntos: Optional[int] = Field(None, ge=1, description="Costo base de 1 vida en puntos")
     costo_desbloqueo_dia_puntos: Optional[int] = Field(None, ge=0, description="Costo en puntos para desbloquear un día histórico")
     costo_pista_puntos: Optional[int] = Field(None, ge=0, description="Costo en puntos para solicitar una pista")
     puntos_por_calificacion: Optional[Dict[str, int]] = Field(None, description="Puntos otorgados según calificación S, A, B, C, F")
     escalas_tiempo_por_juego: Optional[Dict[str, List[EscalaCalificacionTiempo]]] = Field(
         None, description="Escalas de calificación por tiempo por juego (sudoku, crucigrama, sopa_letras)"
     )
-    paquetes_tienda: Optional[List[TiendaPaquete]] = None
     puntos_por_juego: Optional[Dict[str, int]] = None
-    vidas_maximas: Optional[int] = None
     guest_migration_max_points: Optional[int] = Field(
         None, ge=0, description="Tope de puntos de invitado reclamables por cuenta"
     )
@@ -139,24 +122,6 @@ class ConsumeLifeResponse(BaseModel):
     vidas_restantes: int
     consumidas: int = 1
     message: Optional[str] = None
-
-
-class BuyLivesRequest(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-
-    package_id: Optional[str] = Field(None, description="ID del paquete de tienda seleccionado (ej: pack_1, pack_3)")
-    vidas: Optional[int] = Field(None, ge=1, description="Cantidad directa de vidas a comprar si no se usa paquete")
-
-
-class BuyLivesResponse(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-
-    success: bool
-    vidas: int
-    puntos: int
-    compradas: int
-    costo: int
-    message: str
 
 
 class RefillLivesResponse(BaseModel):

@@ -1,0 +1,28 @@
+{
+  "colls_to_drop": [
+    {
+      "collection": "estados_usuario",
+      "count": 4,
+      "motivo": "Dominio delegado a Autenticador"
+    }
+  ],
+  "usuarios_unset_fields": {
+    "progresos": 15,
+    "date_start": 15,
+    "date_end": 15,
+    "estado_id": 15,
+    "estado_codigo": 15,
+    "black": 15
+  },
+  "v1_catalogs": [
+    {
+      "narrative_events": 12
+    },
+    {
+      "narrative_conversations": 16
+    },
+    {
+      "narrative_results": 15
+    }
+  ]
+}

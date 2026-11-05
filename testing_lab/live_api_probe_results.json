@@ -1,0 +1,822 @@
+{
+  "endpoints_by_tag": {
+    "Autenticaci\u00f3n": [
+      {
+        "method": "POST",
+        "path": "/api/auth/login-sistemas",
+        "summary": "Iniciar sesi\u00f3n como Operador de Sistemas (Con Rate Limiting)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/ingresar-codigo",
+        "summary": "Ingreso de alumnos mediante PIN de 6 d\u00edgitos (Con Rate Limiting anti-fuerza bruta)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/verificar-token",
+        "summary": "Verificar validez de token JWT y estado activo",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "summary": "Registrar nuevo usuario alumno delegando al Autenticador Central",
+        "deprecated": false
+      }
+    ],
+    "Usuarios y Torre de Control": [
+      {
+        "method": "GET",
+        "path": "/usuario",
+        "summary": "Listar usuarios centralizados",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/usuario",
+        "summary": "Crear un nuevo usuario desde la torre de control (Solo Admin)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/usuario/estados",
+        "summary": "Listar cat\u00e1logo de estados de usuario",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/usuario/estados",
+        "summary": "Crear un nuevo estado en el cat\u00e1logo (Solo Admin)",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/usuario/estados/{estado_id}/toggle-habilitado",
+        "summary": "Habilitar o inhabilitar un estado del cat\u00e1logo (Solo Admin)",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/usuario/{user_id}/cambiar-estado",
+        "summary": "Cambiar estado del usuario",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/usuario/{user_id}",
+        "summary": "Obtener usuario por ID",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/usuario/{user_id}/toggle-activo",
+        "summary": "Activar o desactivar cuenta de usuario",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/usuario/{user_id}/suscribirse",
+        "summary": "Alias para alternar suscripci\u00f3n Black (Solo Admin)",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/usuario/{user_id}/toggle-black",
+        "summary": "Activar o desactivar suscripci\u00f3n Black (Solo Admin)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/usuario/{user_id}/magic-link",
+        "summary": "Generar enlace de acceso directo para un alumno (Solo Admin)",
+        "deprecated": false
+      }
+    ],
+    "Progreso de Cursos": [
+      {
+        "method": "POST",
+        "path": "/progreso/crear",
+        "summary": "Crear registro de progreso",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/progreso/actualizar/{usuario_id}/{curso_id}",
+        "summary": "Actualizar progreso de un curso (con Upsert)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/progreso/obtenerUsuario/{usuario_id}",
+        "summary": "Obtener todos los cursos y progresos de un usuario",
+        "deprecated": false
+      }
+    ],
+    "Desaf\u00edos Diarios": [
+      {
+        "method": "GET",
+        "path": "/api/challenges/today",
+        "summary": "Obtener el desaf\u00edo de hoy",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/month",
+        "summary": "Obtener los desaf\u00edos del mes (con tope estricto de d\u00edas del mes)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/range",
+        "summary": "Obtener el rango de fechas disponibles para un juego",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/date/{date}",
+        "summary": "Obtener el desaf\u00edo de una fecha espec\u00edfica",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/challenges",
+        "summary": "Crear o actualizar un desaf\u00edo diario",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/admin/status-year",
+        "summary": "Obtener el estado de cobertura de desaf\u00edos por mes para administraci\u00f3n (alias)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/admin/status",
+        "summary": "Obtener el estado de cobertura de desaf\u00edos por mes para administraci\u00f3n",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/challenges/admin/generate-month",
+        "summary": "Generar o regenerar los desaf\u00edos de un mes completo desde la Torre de Control",
+        "deprecated": false
+      }
+    ],
+    "Crucigrama Admin": [
+      {
+        "method": "POST",
+        "path": "/api/challenges/admin/crucigrama/templates/validate",
+        "summary": "Validar una m\u00e1scara (estructura y solubilidad) sin guardarla",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/admin/crucigrama/templates/global-bans",
+        "summary": "Vetos globales de palabras (aplican a todos los tableros)",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/api/challenges/admin/crucigrama/templates/global-bans",
+        "summary": "Reemplazar los vetos globales de palabras",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/admin/crucigrama/templates/dictionary/{word}",
+        "summary": "Consultar la definici\u00f3n RAE de una palabra (pista)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/challenges/admin/crucigrama/templates/dictionary",
+        "summary": "Consultar definiciones RAE en lote para autocompletar pistas",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/admin/crucigrama/templates",
+        "summary": "Listar plantillas",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/challenges/admin/crucigrama/templates",
+        "summary": "Crear una plantilla en borrador",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/challenges/admin/crucigrama/templates/{template_id}",
+        "summary": "Obtener una plantilla",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/api/challenges/admin/crucigrama/templates/{template_id}",
+        "summary": "Editar una plantilla en borrador o archivada",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/challenges/admin/crucigrama/templates/{template_id}",
+        "summary": "Eliminar una plantilla no publicada",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/challenges/admin/crucigrama/templates/{template_id}/publish",
+        "summary": "Resolver, publicar y agendar una plantilla",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/challenges/admin/crucigrama/templates/{template_id}/archive",
+        "summary": "Archivar una plantilla",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/challenges/admin/crucigrama/templates/{template_id}/apply",
+        "summary": "Aplicar una plantilla publicada a una fecha concreta",
+        "deprecated": false
+      }
+    ],
+    "Partidas e Intentos de Usuarios": [
+      {
+        "method": "POST",
+        "path": "/api/games/attempts",
+        "summary": "Guardar o actualizar el progreso de una partida",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/games/attempts",
+        "summary": "Obtener intentos del usuario en un mes espec\u00edfico",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/games/attempts/date/{date}",
+        "summary": "Obtener intento de un usuario para una fecha espec\u00edfica",
+        "deprecated": false
+      }
+    ],
+    "Econom\u00eda, Vidas y Mini-Tienda": [
+      {
+        "method": "GET",
+        "path": "/api/economy/config",
+        "summary": "Obtener cat\u00e1logo de precios de la mini-tienda y puntos por juego (P\u00fablico)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/economy/me",
+        "summary": "Obtener saldo de vidas, puntos y racha del usuario autenticado",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/economy/consume-life",
+        "summary": "Consumir 1 vida global (Al cometer un error o reiniciar desaf\u00edo)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/economy/buy-lives",
+        "summary": "Canjear puntos por vidas en la mini-tienda",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/economy/refill-lives",
+        "summary": "Recargar las vidas de la partida actual a cambio de puntos (precio fijo del servidor)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/economy/unlock-day",
+        "summary": "Desbloquear un d\u00eda hist\u00f3rico con puntos o acceso Premium",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/economy/use-hint",
+        "summary": "Solicitar una pista en un juego a cambio de 1 vida (B\u00e1sica y Premium)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/economy/guest-migration",
+        "summary": "Migrar por \u00fanica vez los puntos acumulados como invitado a la cuenta autenticada",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/economy/config",
+        "summary": "Consultar cat\u00e1logo de econom\u00eda y vidas para el panel administrador (Solo Admin)",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/api/admin/economy/config",
+        "summary": "Actualizar valores iniciales, costos de vidas y puntos por juego (Solo Admin)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/economy/user/search",
+        "summary": "Buscar saldo de vidas y puntos de un usuario por email o PIN (Solo Admin)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/economy/user/adjust",
+        "summary": "Asignar o ajustar vidas y puntos a un usuario (Solo Admin / Testeo)",
+        "deprecated": false
+      },
+      {
+        "method": "PUT",
+        "path": "/api/admin/usuario/{usuario_id}/suscripcion",
+        "summary": "Cambiar la suscripci\u00f3n del usuario entre 'basica' y 'premium' (Solo Admin)",
+        "deprecated": false
+      }
+    ],
+    "Juego Narrativo - Consultas": [
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/setup",
+        "summary": "Fase 0: Obtener los 5 personajes y 5 cartas ofrecidas para iniciar el d\u00eda",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/partida/reiniciar",
+        "summary": "Reiniciar partida de hoy para volver a Fase 0 (Setup limpio)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/partida/conversaciones-posibles",
+        "summary": "Obtener conversaciones habilitadas seg\u00fan una mano de personajes (v\u00eda POST)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/conversaciones-posibles",
+        "summary": "Obtener conversaciones habilitadas seg\u00fan una mano de personajes (v\u00eda GET)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/historial",
+        "summary": "Consultar historial mensual acumulado de la partida (modal historial)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/inventario",
+        "summary": "Consultar cartas en mano y tags activos del jugador (modal inventario)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/corte",
+        "summary": "Consultar integrantes de la corte y sus afinidades actuales (modal corte)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/finalizacion",
+        "summary": "Consultar desenlace / finalizaci\u00f3n detallada de la partida (modal fin de juego)",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/evento-actual",
+        "summary": "[V1 Plano, deprecado] Consultar \u00fanicamente el evento activo del mes (usar /estado)",
+        "deprecated": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/conversacion-actual",
+        "summary": "[V1 Plano, deprecado] Consultar \u00fanicamente la conversaci\u00f3n activa del mes (usar /estado)",
+        "deprecated": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/resultado-actual",
+        "summary": "[V1 Plano, deprecado] Consultar \u00fanicamente el resultado del evento reci\u00e9n resuelto (usar /estado)",
+        "deprecated": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/partida/draft-actual",
+        "summary": "[V1 Plano, deprecado] Consultar \u00fanicamente las cartas ofrecidas en el draft del mes actual (usar /estado)",
+        "deprecated": true
+      }
+    ],
+    "Juego Narrativo - Partidas (V2 Ligero)": [
+      {
+        "method": "POST",
+        "path": "/api/narrative/v2/partida/iniciar",
+        "summary": "[V2] Fase 0: Iniciar partida devolviendo solo recursos iniciales y las 3 cartas de draft del Mes 1",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/v2/partida/elegir-carta-mes",
+        "summary": "[V2] Fase 1: Elegir carta de draft mensual devolviendo solo el evento sorteado",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/v2/partida/decidir-evento",
+        "summary": "[V1 Plano, deprecado] Fase 2: Decidir opci\u00f3n en evento (usar /avanzar-nodo en motor V2)",
+        "deprecated": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/v2/partida/responder-conversacion",
+        "summary": "[V1 Plano, deprecado] Fase 3: Responder di\u00e1logo de corte (usar /avanzar-nodo en motor V2)",
+        "deprecated": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/v2/partida/avanzar-mes",
+        "summary": "[V2] Fase 4: Avanzar mes devolviendo recursos post-pasivos y las 3 nuevas cartas de draft",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/v2/partida/estado",
+        "summary": "[V2] Consultar estado reactivo del turno actual para sincronizaci\u00f3n / F5",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/v2/partida/avanzar-nodo",
+        "summary": "[V2 Grafos] Avanzar un paso en el grafo activo (evento o conversaci\u00f3n) sin spoilers",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/v2/partida/grafo-actual",
+        "summary": "[V2 Grafos] Consultar el estado del grafo activo (evento o conversaci\u00f3n) para recargas/F5",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/v2/partida/iniciar-evento-grafo",
+        "summary": "[V2 Grafos] Iniciar un evento basado en grafos para el mes actual",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/v2/partida/iniciar-conversacion-grafo",
+        "summary": "[V2 Grafos] Iniciar una conversaci\u00f3n basada en grafos para el mes actual",
+        "deprecated": false
+      }
+    ],
+    "Juego Narrativo - Torre de Control": [
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/catalogo-reglas",
+        "summary": "Obtener el cat\u00e1logo formal de disparadores, operadores y acciones",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/upload-imagen",
+        "summary": "Subir y optimizar imagen a WebP para cualquier categor\u00eda del juego narrativo",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/universos",
+        "summary": "Listar todos los universos",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/universos",
+        "summary": "Crear o actualizar un universo",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/universos/{universo_id}",
+        "summary": "Obtener universo por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/universos/{universo_id}",
+        "summary": "Eliminar un universo",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/personajes",
+        "summary": "Listar personajes",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/personajes",
+        "summary": "Crear o actualizar personaje",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/personajes/{personaje_id}",
+        "summary": "Obtener personaje por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/personajes/{personaje_id}",
+        "summary": "Eliminar personaje",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/cartas",
+        "summary": "Listar cartas",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/cartas",
+        "summary": "Crear o actualizar carta",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/cartas/{carta_id}",
+        "summary": "Obtener carta por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/cartas/{carta_id}",
+        "summary": "Eliminar carta",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/resultados",
+        "summary": "Listar resultados",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/resultados",
+        "summary": "Crear o actualizar resultado",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/resultados/{resultado_id}",
+        "summary": "Obtener resultado por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/resultados/{resultado_id}",
+        "summary": "Eliminar resultado",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/eventos",
+        "summary": "Listar eventos",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/eventos",
+        "summary": "Crear o actualizar evento",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/eventos/{evento_id}",
+        "summary": "Obtener evento por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/eventos/{evento_id}",
+        "summary": "Eliminar evento",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/conversaciones",
+        "summary": "Listar conversaciones",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/conversaciones",
+        "summary": "Crear o actualizar conversaci\u00f3n",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/conversaciones/{conversacion_id}",
+        "summary": "Obtener conversaci\u00f3n por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/conversaciones/{conversacion_id}",
+        "summary": "Eliminar conversaci\u00f3n",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/finalizaciones",
+        "summary": "Listar finalizaciones",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/finalizaciones",
+        "summary": "Crear o actualizar finalizaci\u00f3n",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/finalizaciones/{finalizacion_id}",
+        "summary": "Obtener finalizaci\u00f3n por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/finalizaciones/{finalizacion_id}",
+        "summary": "Eliminar finalizaci\u00f3n",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/universos/{universo_id}/sembrar-finalizaciones",
+        "summary": "Sembrar autom\u00e1ticamente las finalizaciones de derrota base (<= 0) para cada recurso del universo",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/generar-mes",
+        "summary": "Generar masivamente los 28-31 desaf\u00edos diarios del mes para el juego narrativo",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/v2/eventos",
+        "summary": "Listar eventos de grafos V2",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/v2/eventos",
+        "summary": "Crear o actualizar evento V2",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/v2/eventos/{evento_id}",
+        "summary": "Obtener evento V2 por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/v2/eventos/{evento_id}",
+        "summary": "Eliminar evento V2",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/v2/conversaciones",
+        "summary": "Listar conversaciones de grafos V2",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/v2/conversaciones",
+        "summary": "Crear o actualizar conversaci\u00f3n V2",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/v2/conversaciones/{conversacion_id}",
+        "summary": "Obtener conversaci\u00f3n V2 por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/v2/conversaciones/{conversacion_id}",
+        "summary": "Eliminar conversaci\u00f3n V2",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/v2/eventos-especiales",
+        "summary": "Listar eventos especiales de afinidad (lealtad/traici\u00f3n)",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/v2/eventos-especiales",
+        "summary": "Crear o actualizar evento especial V2",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/narrative/admin/v2/eventos-especiales/{evento_id}",
+        "summary": "Obtener evento especial V2 por ID",
+        "deprecated": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/narrative/admin/v2/eventos-especiales/{evento_id}",
+        "summary": "Eliminar evento especial V2",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/narrative/admin/v2/validar",
+        "summary": "Validar grafos V2 (referencias, hojas, pesos y ciclos)",
+        "deprecated": false
+      }
+    ],
+    "Single Sign-On (SSO)": [
+      {
+        "method": "POST",
+        "path": "/api/auth/sso/canjear-ticket",
+        "summary": "Canjear un ticket descartable de entrada emitido por el Autenticador para iniciar sesi\u00f3n en la Torre de Control",
+        "deprecated": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/sso/crear-ticket-retorno",
+        "summary": "Generar un ticket descartable de retorno para saltar de regreso a otro panel (Solo Admin autenticado)",
+        "deprecated": false
+      }
+    ],
+    "Estado": [
+      {
+        "method": "GET",
+        "path": "/",
+        "summary": "Root",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/actuator/health",
+        "summary": "Health Check",
+        "deprecated": false
+      },
+      {
+        "method": "GET",
+        "path": "/health",
+        "summary": "Health Check",
+        "deprecated": false
+      }
+    ]
+  },
+  "deprecated_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/narrative/partida/evento-actual",
+      "summary": "[V1 Plano, deprecado] Consultar \u00fanicamente el evento activo del mes (usar /estado)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/narrative/partida/conversacion-actual",
+      "summary": "[V1 Plano, deprecado] Consultar \u00fanicamente la conversaci\u00f3n activa del mes (usar /estado)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/narrative/partida/resultado-actual",
+      "summary": "[V1 Plano, deprecado] Consultar \u00fanicamente el resultado del evento reci\u00e9n resuelto (usar /estado)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/narrative/partida/draft-actual",
+      "summary": "[V1 Plano, deprecado] Consultar \u00fanicamente las cartas ofrecidas en el draft del mes actual (usar /estado)"
+    },
+    {
+      "method": "POST",
+      "path": "/api/narrative/v2/partida/decidir-evento",
+      "summary": "[V1 Plano, deprecado] Fase 2: Decidir opci\u00f3n en evento (usar /avanzar-nodo en motor V2)"
+    },
+    {
+      "method": "POST",
+      "path": "/api/narrative/v2/partida/responder-conversacion",
+      "summary": "[V1 Plano, deprecado] Fase 3: Responder di\u00e1logo de corte (usar /avanzar-nodo en motor V2)"
+    }
+  ]
+}

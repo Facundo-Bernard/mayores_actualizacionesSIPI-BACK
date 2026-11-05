@@ -1,0 +1,1170 @@
+{
+  "/usuario": [
+    {
+      "endpoint": "/usuario",
+      "file": "vite.config.ts",
+      "line": 64,
+      "code": "'/usuario': {"
+    },
+    {
+      "endpoint": "/usuario",
+      "file": "admin_src\\authService.js",
+      "line": 10,
+      "code": "'/usuario',"
+    }
+  ],
+  "/api/narrative/admin": [
+    {
+      "endpoint": "/api/narrative/admin",
+      "file": "admin_src\\authService.js",
+      "line": 6,
+      "code": "'/api/narrative/admin',"
+    }
+  ],
+  "/api/challenges/admin": [
+    {
+      "endpoint": "/api/challenges/admin",
+      "file": "admin_src\\authService.js",
+      "line": 7,
+      "code": "'/api/challenges/admin',"
+    }
+  ],
+  "/api/economy": [
+    {
+      "endpoint": "/api/economy",
+      "file": "admin_src\\authService.js",
+      "line": 8,
+      "code": "'/api/economy',"
+    }
+  ],
+  "/api/admin": [
+    {
+      "endpoint": "/api/admin",
+      "file": "admin_src\\authService.js",
+      "line": 9,
+      "code": "'/api/admin',"
+    }
+  ],
+  "/api/auth/login-sistemas": [
+    {
+      "endpoint": "/api/auth/login-sistemas",
+      "file": "admin_src\\authService.js",
+      "line": 107,
+      "code": "const response = await fetch('/api/auth/login-sistemas', {"
+    },
+    {
+      "endpoint": "/api/auth/login-sistemas",
+      "file": "src\\VISTAS\\COMPONENTS\\MODALS\\AuthModal.tsx",
+      "line": 141,
+      "code": "const res = await fetch(`${API_URL}/api/auth/login-sistemas`, {"
+    }
+  ],
+  "/api/auth/sso/canjear-ticket": [
+    {
+      "endpoint": "/api/auth/sso/canjear-ticket",
+      "file": "admin_src\\authService.js",
+      "line": 136,
+      "code": "const response = await fetch('/api/auth/sso/canjear-ticket', {"
+    }
+  ],
+  "/api/auth/sso/crear-ticket-retorno": [
+    {
+      "endpoint": "/api/auth/sso/crear-ticket-retorno",
+      "file": "admin_src\\authService.js",
+      "line": 158,
+      "code": "const response = await fetch('/api/auth/sso/crear-ticket-retorno', {"
+    }
+  ],
+  "/api/admin/economy/user/search": [
+    {
+      "endpoint": "/api/admin/economy/user/search",
+      "file": "admin_src\\ModalAsignarEconomia.jsx",
+      "line": 84,
+      "code": "const res = await fetch(`/api/admin/economy/user/search?identificador=${encodeURIComponent(identificador.trim())}`, {"
+    },
+    {
+      "endpoint": "/api/admin/economy/user/search",
+      "file": "admin_src\\PanelJuegosAdmin.jsx",
+      "line": 135,
+      "code": "`/api/admin/economy/user/search?identificador=${encodeURIComponent(query)}`,"
+    }
+  ],
+  "/api/admin/usuario/": [
+    {
+      "endpoint": "/api/admin/usuario/",
+      "file": "admin_src\\ModalAsignarEconomia.jsx",
+      "line": 113,
+      "code": "const res = await fetch(`/api/admin/usuario/${usuarioEncontrado.id}/suscripcion`, {"
+    }
+  ],
+  "/api/admin/economy/user/adjust": [
+    {
+      "endpoint": "/api/admin/economy/user/adjust",
+      "file": "admin_src\\ModalAsignarEconomia.jsx",
+      "line": 170,
+      "code": "const res = await fetch('/api/admin/economy/user/adjust', {"
+    },
+    {
+      "endpoint": "/api/admin/economy/user/adjust",
+      "file": "admin_src\\PanelJuegosAdmin.jsx",
+      "line": 165,
+      "code": "const res = await fetch('/api/admin/economy/user/adjust', {"
+    },
+    {
+      "endpoint": "/api/admin/economy/user/adjust",
+      "file": "src\\context\\PlayerEconomyContext.tsx",
+      "line": 276,
+      "code": "const res = await fetch(API_URL + '/api/admin/economy/user/adjust', {"
+    }
+  ],
+  "/api/challenges/admin/status": [
+    {
+      "endpoint": "/api/challenges/admin/status",
+      "file": "admin_src\\ModalDesafios.jsx",
+      "line": 37,
+      "code": "const res = await fetch(`/api/challenges/admin/status?year=${anio}&game_id=${juego}`, {"
+    },
+    {
+      "endpoint": "/api/challenges/admin/status",
+      "file": "admin_src\\narrative\\CalendarioTab.jsx",
+      "line": 38,
+      "code": "const res = await fetch(`/api/challenges/admin/status?year=${targetAnio}&game_id=narrativo`);"
+    }
+  ],
+  "/api/challenges/admin/generate-month": [
+    {
+      "endpoint": "/api/challenges/admin/generate-month",
+      "file": "admin_src\\ModalDesafios.jsx",
+      "line": 59,
+      "code": "`/api/challenges/admin/generate-month?year=${desafiosAnio}&month=${mesNumero}&game_id=${desafiosJuego}`,"
+    }
+  ],
+  "/api/challenges/admin/crucigrama/templates": [
+    {
+      "endpoint": "/api/challenges/admin/crucigrama/templates",
+      "file": "admin_src\\ModalDisenadorCrucigrama.jsx",
+      "line": 17,
+      "code": "const API = '/api/challenges/admin/crucigrama/templates';"
+    }
+  ],
+  "/api/admin/economy/config": [
+    {
+      "endpoint": "/api/admin/economy/config",
+      "file": "admin_src\\ModalEconomia.jsx",
+      "line": 211,
+      "code": "const res = await fetch('/api/admin/economy/config', {"
+    },
+    {
+      "endpoint": "/api/admin/economy/config",
+      "file": "admin_src\\ModalEconomia.jsx",
+      "line": 385,
+      "code": "const res = await fetch('/api/admin/economy/config', {"
+    }
+  ],
+  "/api/narrative/admin/generar-mes": [
+    {
+      "endpoint": "/api/narrative/admin/generar-mes",
+      "file": "admin_src\\narrative\\CalendarioTab.jsx",
+      "line": 64,
+      "code": "`/api/narrative/admin/generar-mes?year=${anio}&month=${numMes}&universo_id=${encodeURIComponent("
+    },
+    {
+      "endpoint": "/api/narrative/admin/generar-mes",
+      "file": "admin_src\\narrative\\CalendarioTab.jsx",
+      "line": 111,
+      "code": "`/api/narrative/admin/generar-mes?year=${anio}&month=${m}&universo_id=${encodeURIComponent("
+    }
+  ],
+  "/api/narrative/admin/cartas": [
+    {
+      "endpoint": "/api/narrative/admin/cartas",
+      "file": "admin_src\\narrative\\CartasTab.jsx",
+      "line": 50,
+      "code": "? `/api/narrative/admin/cartas?universo_id=${encodeURIComponent(uId)}`"
+    },
+    {
+      "endpoint": "/api/narrative/admin/cartas",
+      "file": "admin_src\\narrative\\CartasTab.jsx",
+      "line": 51,
+      "code": ": '/api/narrative/admin/cartas';"
+    },
+    {
+      "endpoint": "/api/narrative/admin/cartas",
+      "file": "admin_src\\narrative\\CartasTab.jsx",
+      "line": 170,
+      "code": "const res = await fetch('/api/narrative/admin/cartas', {"
+    }
+  ],
+  "/api/narrative/admin/cartas/": [
+    {
+      "endpoint": "/api/narrative/admin/cartas/",
+      "file": "admin_src\\narrative\\CartasTab.jsx",
+      "line": 198,
+      "code": "const res = await fetch(`/api/narrative/admin/cartas/${cId}`, {"
+    }
+  ],
+  "/api/narrative/admin/conversaciones": [
+    {
+      "endpoint": "/api/narrative/admin/conversaciones",
+      "file": "admin_src\\narrative\\ConversacionesTab.jsx",
+      "line": 49,
+      "code": "? `/api/narrative/admin/conversaciones?universo_id=${encodeURIComponent(uId)}`"
+    },
+    {
+      "endpoint": "/api/narrative/admin/conversaciones",
+      "file": "admin_src\\narrative\\ConversacionesTab.jsx",
+      "line": 50,
+      "code": ": '/api/narrative/admin/conversaciones';"
+    },
+    {
+      "endpoint": "/api/narrative/admin/conversaciones",
+      "file": "admin_src\\narrative\\ConversacionesTab.jsx",
+      "line": 305,
+      "code": "const res = await fetch('/api/narrative/admin/conversaciones', {"
+    }
+  ],
+  "/api/narrative/admin/conversaciones/": [
+    {
+      "endpoint": "/api/narrative/admin/conversaciones/",
+      "file": "admin_src\\narrative\\ConversacionesTab.jsx",
+      "line": 334,
+      "code": "const res = await fetch(`/api/narrative/admin/conversaciones/${encodeURIComponent(convId)}`, {"
+    }
+  ],
+  "/api/narrative/admin/eventos": [
+    {
+      "endpoint": "/api/narrative/admin/eventos",
+      "file": "admin_src\\narrative\\EventosTab.jsx",
+      "line": 52,
+      "code": "? `/api/narrative/admin/eventos?universo_id=${encodeURIComponent(uId)}`"
+    },
+    {
+      "endpoint": "/api/narrative/admin/eventos",
+      "file": "admin_src\\narrative\\EventosTab.jsx",
+      "line": 53,
+      "code": ": '/api/narrative/admin/eventos';"
+    },
+    {
+      "endpoint": "/api/narrative/admin/eventos",
+      "file": "admin_src\\narrative\\EventosTab.jsx",
+      "line": 402,
+      "code": "const res = await fetch('/api/narrative/admin/eventos', {"
+    }
+  ],
+  "/api/narrative/admin/resultados": [
+    {
+      "endpoint": "/api/narrative/admin/resultados",
+      "file": "admin_src\\narrative\\EventosTab.jsx",
+      "line": 72,
+      "code": "const res = await fetch('/api/narrative/admin/resultados');"
+    },
+    {
+      "endpoint": "/api/narrative/admin/resultados",
+      "file": "admin_src\\narrative\\ResultadosTab.jsx",
+      "line": 50,
+      "code": "? `/api/narrative/admin/resultados?universo_id=${encodeURIComponent(uId)}`"
+    },
+    {
+      "endpoint": "/api/narrative/admin/resultados",
+      "file": "admin_src\\narrative\\ResultadosTab.jsx",
+      "line": 51,
+      "code": ": '/api/narrative/admin/resultados';"
+    },
+    {
+      "endpoint": "/api/narrative/admin/resultados",
+      "file": "admin_src\\narrative\\ResultadosTab.jsx",
+      "line": 187,
+      "code": "const res = await fetch('/api/narrative/admin/resultados', {"
+    }
+  ],
+  "/api/narrative/admin/eventos/": [
+    {
+      "endpoint": "/api/narrative/admin/eventos/",
+      "file": "admin_src\\narrative\\EventosTab.jsx",
+      "line": 431,
+      "code": "const res = await fetch(`/api/narrative/admin/eventos/${encodeURIComponent(evtId)}`, {"
+    }
+  ],
+  "/api/narrative/admin/finalizaciones": [
+    {
+      "endpoint": "/api/narrative/admin/finalizaciones",
+      "file": "admin_src\\narrative\\FinalizacionesTab.jsx",
+      "line": 76,
+      "code": "const res = await fetch(`/api/narrative/admin/finalizaciones${qs}`);"
+    },
+    {
+      "endpoint": "/api/narrative/admin/finalizaciones",
+      "file": "admin_src\\narrative\\FinalizacionesTab.jsx",
+      "line": 204,
+      "code": "const res = await fetch('/api/narrative/admin/finalizaciones', {"
+    }
+  ],
+  "/api/narrative/admin/universos/": [
+    {
+      "endpoint": "/api/narrative/admin/universos/",
+      "file": "admin_src\\narrative\\FinalizacionesTab.jsx",
+      "line": 161,
+      "code": "const res = await fetch(`/api/narrative/admin/universos/${encodeURIComponent(targetUniverso)}/sembrar-finalizaciones`, {"
+    },
+    {
+      "endpoint": "/api/narrative/admin/universos/",
+      "file": "admin_src\\narrative\\UniversosTab.jsx",
+      "line": 182,
+      "code": "const res = await fetch(`/api/narrative/admin/universos/${uId}`, {"
+    }
+  ],
+  "/api/narrative/admin/finalizaciones/": [
+    {
+      "endpoint": "/api/narrative/admin/finalizaciones/",
+      "file": "admin_src\\narrative\\FinalizacionesTab.jsx",
+      "line": 232,
+      "code": "const res = await fetch(`/api/narrative/admin/finalizaciones/${encodeURIComponent(finId)}`, {"
+    }
+  ],
+  "/api/narrative/admin/v2/eventos": [
+    {
+      "endpoint": "/api/narrative/admin/v2/eventos",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 63,
+      "code": "fetch('/api/narrative/admin/v2/eventos'),"
+    },
+    {
+      "endpoint": "/api/narrative/admin/v2/eventos",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 247,
+      "code": "? '/api/narrative/admin/v2/eventos'"
+    }
+  ],
+  "/api/narrative/admin/v2/conversaciones": [
+    {
+      "endpoint": "/api/narrative/admin/v2/conversaciones",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 64,
+      "code": "fetch('/api/narrative/admin/v2/conversaciones'),"
+    },
+    {
+      "endpoint": "/api/narrative/admin/v2/conversaciones",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 250,
+      "code": ": '/api/narrative/admin/v2/conversaciones';"
+    }
+  ],
+  "/api/narrative/admin/v2/eventos-especiales": [
+    {
+      "endpoint": "/api/narrative/admin/v2/eventos-especiales",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 65,
+      "code": "fetch('/api/narrative/admin/v2/eventos-especiales')"
+    },
+    {
+      "endpoint": "/api/narrative/admin/v2/eventos-especiales",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 249,
+      "code": "? '/api/narrative/admin/v2/eventos-especiales'"
+    }
+  ],
+  "/api/narrative/admin/v2/eventos/": [
+    {
+      "endpoint": "/api/narrative/admin/v2/eventos/",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 172,
+      "code": "? `/api/narrative/admin/v2/eventos/${id}`"
+    }
+  ],
+  "/api/narrative/admin/v2/eventos-especiales/": [
+    {
+      "endpoint": "/api/narrative/admin/v2/eventos-especiales/",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 174,
+      "code": "? `/api/narrative/admin/v2/eventos-especiales/${id}`"
+    }
+  ],
+  "/api/narrative/admin/v2/conversaciones/": [
+    {
+      "endpoint": "/api/narrative/admin/v2/conversaciones/",
+      "file": "admin_src\\narrative\\GrafosV2Tab.jsx",
+      "line": 175,
+      "code": ": `/api/narrative/admin/v2/conversaciones/${id}`;"
+    }
+  ],
+  "/api/narrative/admin/upload-imagen": [
+    {
+      "endpoint": "/api/narrative/admin/upload-imagen",
+      "file": "admin_src\\narrative\\ImageUploadField.jsx",
+      "line": 58,
+      "code": "const res = await fetch(`/api/narrative/admin/upload-imagen?categoria=${encodeURIComponent(categoria)}`, {"
+    }
+  ],
+  "/api/narrative/admin/universos": [
+    {
+      "endpoint": "/api/narrative/admin/universos",
+      "file": "admin_src\\narrative\\NarrativeAdminModal.jsx",
+      "line": 35,
+      "code": "const res = await fetch('/api/narrative/admin/universos');"
+    },
+    {
+      "endpoint": "/api/narrative/admin/universos",
+      "file": "admin_src\\narrative\\UniversosTab.jsx",
+      "line": 46,
+      "code": "const res = await fetch('/api/narrative/admin/universos');"
+    },
+    {
+      "endpoint": "/api/narrative/admin/universos",
+      "file": "admin_src\\narrative\\UniversosTab.jsx",
+      "line": 152,
+      "code": "const res = await fetch('/api/narrative/admin/universos', {"
+    }
+  ],
+  "/api/narrative/admin/personajes": [
+    {
+      "endpoint": "/api/narrative/admin/personajes",
+      "file": "admin_src\\narrative\\NarrativeAdminModal.jsx",
+      "line": 48,
+      "code": "const res = await fetch('/api/narrative/admin/personajes');"
+    },
+    {
+      "endpoint": "/api/narrative/admin/personajes",
+      "file": "admin_src\\narrative\\PersonajesTab.jsx",
+      "line": 52,
+      "code": "? `/api/narrative/admin/personajes?universo_id=${encodeURIComponent(uId)}`"
+    },
+    {
+      "endpoint": "/api/narrative/admin/personajes",
+      "file": "admin_src\\narrative\\PersonajesTab.jsx",
+      "line": 53,
+      "code": ": '/api/narrative/admin/personajes';"
+    },
+    {
+      "endpoint": "/api/narrative/admin/personajes",
+      "file": "admin_src\\narrative\\PersonajesTab.jsx",
+      "line": 192,
+      "code": "const res = await fetch('/api/narrative/admin/personajes', {"
+    }
+  ],
+  "/api/narrative/admin/personajes/": [
+    {
+      "endpoint": "/api/narrative/admin/personajes/",
+      "file": "admin_src\\narrative\\PersonajesTab.jsx",
+      "line": 220,
+      "code": "const res = await fetch(`/api/narrative/admin/personajes/${pId}`, {"
+    }
+  ],
+  "/api/narrative/admin/resultados/": [
+    {
+      "endpoint": "/api/narrative/admin/resultados/",
+      "file": "admin_src\\narrative\\ResultadosTab.jsx",
+      "line": 215,
+      "code": "const res = await fetch(`/api/narrative/admin/resultados/${rId}`, {"
+    }
+  ],
+  "/api/games/attempts/date/": [
+    {
+      "endpoint": "/api/games/attempts/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts/date/",
+      "file": "src\\VISTAS\\JUEGOS\\attemptsService.ts",
+      "line": 217,
+      "code": "const url = `/api/games/attempts/date/${date}?user_id=${uid}&game_id=${gameId}`;"
+    }
+  ],
+  "/api/games/attempts": [
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "src\\VISTAS\\COMPONENTS\\CALENDAR\\calendarService.ts",
+      "line": 105,
+      "code": "`/api/games/attempts?game_id=${gameId}&year=${year}&month=${month}&user_id=${userId}`,"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "src\\VISTAS\\JUEGOS\\attemptsService.test.ts",
+      "line": 23,
+      "code": "for (const [url] of vi.mocked(fetch).mock.calls) expect(String(url)).toContain('/api/games/attempts');"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "src\\VISTAS\\JUEGOS\\attemptsService.ts",
+      "line": 327,
+      "code": "await guardarEnOrden(storageKey, /* Completa este paso con los datos recibidos por la operaci\u00f3n. */ () => sendBackend(`$"
+    },
+    {
+      "endpoint": "/api/games/attempts",
+      "file": "src\\VISTAS\\JUEGOS\\attemptsService.ts",
+      "line": 352,
+      "code": "const res = await fetch(API_URL + '/api/games/attempts', {"
+    }
+  ],
+  "/api/auth/register": [
+    {
+      "endpoint": "/api/auth/register",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/register",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/register",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/register",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/register",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/register",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/register",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/register",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/register",
+      "file": "src\\VISTAS\\COMPONENTS\\MODALS\\AuthModal.tsx",
+      "line": 214,
+      "code": "const data = await tryRegister(`${API_URL}/api/auth/register`);"
+    }
+  ],
+  "/api/auth/verificar-codigo-registro": [
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/verificar-codigo-registro",
+      "file": "src\\VISTAS\\COMPONENTS\\MODALS\\AuthModal.tsx",
+      "line": 269,
+      "code": "const data = await tryVerify(`${API_URL}/api/auth/verificar-codigo-registro`);"
+    }
+  ],
+  "/api/auth/reenviar-codigo-registro": [
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/reenviar-codigo-registro",
+      "file": "src\\VISTAS\\COMPONENTS\\MODALS\\AuthModal.tsx",
+      "line": 316,
+      "code": "const data = await tryResend(`${API_URL}/api/auth/reenviar-codigo-registro`);"
+    }
+  ],
+  "/api/auth/ingresar-codigo": [
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 12,
+      "code": "`).replace(dd,``)}function pd(e,t){return t=fd(t),fd(e)===t}function md(){}function Q(e,t,n,r,a,o){switch(n){case`childr"
+    },
+    {
+      "endpoint": "/api/auth/ingresar-codigo",
+      "file": "src\\VISTAS\\COMPONENTS\\MODALS\\AuthModal.tsx",
+      "line": 100,
+      "code": "const data = await tryFetch(`${API_URL}/api/auth/ingresar-codigo`);"
+    }
+  ],
+  "/api/challenges/today": [
+    {
+      "endpoint": "/api/challenges/today",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/today",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/today",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/today",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/today",
+      "file": "src\\VISTAS\\COMPONENTS\\CALENDAR\\calendarService.ts",
+      "line": 48,
+      "code": "const data = await apiFetch<any>(`/api/challenges/today?game_id=${gameId}&difficulty=${difficulty}`);"
+    }
+  ],
+  "/api/challenges/range": [
+    {
+      "endpoint": "/api/challenges/range",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/range",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/range",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/range",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/range",
+      "file": "src\\VISTAS\\COMPONENTS\\CALENDAR\\calendarService.ts",
+      "line": 77,
+      "code": "const data = await apiFetch<any>(`/api/challenges/range?game_id=${gameId}`);"
+    }
+  ],
+  "/api/challenges/month": [
+    {
+      "endpoint": "/api/challenges/month",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/month",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/month",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 12,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=Vm(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/month",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 3,
+      "code": "Please change the parent <Route path=\"${e}\"> to <Route path=\"${e===`/`?`*`:`${e}/*`}\">.`)}let u=dy(),d;if(t){let e=typeo"
+    },
+    {
+      "endpoint": "/api/challenges/month",
+      "file": "src\\VISTAS\\COMPONENTS\\CALENDAR\\calendarService.ts",
+      "line": 88,
+      "code": "return await apiFetch<any>(`/api/challenges/month?year=${year}&month=${month}&game_id=${gameId}&difficulty=${difficulty}"
+    }
+  ],
+  "/api/challenges/date/": [
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "src\\VISTAS\\JUEGOS\\CRUCIGRAMA\\CrucigramaGame.tsx",
+      "line": 121,
+      "code": "const res = await fetch(`${API_URL}/api/challenges/date/${targetDate}?game_id=crucigrama&difficulty=${difficulty}`);"
+    },
+    {
+      "endpoint": "/api/challenges/date/",
+      "file": "src\\VISTAS\\JUEGOS\\SOPA_LETRAS\\SopaLetrasGame.tsx",
+      "line": 134,
+      "code": "const res = await fetch(`${API_URL}/api/challenges/date/${dateStrKey}?game_id=sopa_letras`);"
+    }
+  ],
+  "/api/narrative": [
+    {
+      "endpoint": "/api/narrative",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/narrative",
+      "file": "android\\app\\build\\intermediates\\assets\\debug\\mergeDebugAssets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/narrative",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-BCPOjSKS.js",
+      "line": 241,
+      "code": "`}),(0,L.jsx)(E_,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,L.jsxs)(Cf,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/narrative",
+      "file": "android\\app\\src\\main\\assets\\public\\assets\\index-legacy-Cm8E6655.js",
+      "line": 241,
+      "code": "`}),(0,R.jsx)(Vm,{title:`Palabra del d\u00eda`,backRoute:`/menu`,backLabel:`Men\u00fa`})]}),(0,R.jsxs)(Qd,{fullscreen:!0,scrollY:!"
+    },
+    {
+      "endpoint": "/api/narrative",
+      "file": "src\\VISTAS\\JUEGOS\\NARRATIVO\\narrativeService.ts",
+      "line": 6,
+      "code": "const API = `${API_URL}/api/narrative`;"
+    }
+  ],
+  "/api/economy/config": [
+    {
+      "endpoint": "/api/economy/config",
+      "file": "src\\context\\PlayerEconomyContext.tsx",
+      "line": 112,
+      "code": "const configRes = await fetch(`${API_URL}/api/economy/config`);"
+    }
+  ],
+  "/api/economy/me": [
+    {
+      "endpoint": "/api/economy/me",
+      "file": "src\\context\\PlayerEconomyContext.tsx",
+      "line": 135,
+      "code": "const userRes = await fetch(`${API_URL}/api/economy/me`, {"
+    }
+  ],
+  "/api/economy/consume-life": [
+    {
+      "endpoint": "/api/economy/consume-life",
+      "file": "src\\context\\PlayerEconomyContext.tsx",
+      "line": 211,
+      "code": "const res = await fetch(`${API_URL}/api/economy/consume-life`, {"
+    }
+  ],
+  "/api/economy/buy-lives": [
+    {
+      "endpoint": "/api/economy/buy-lives",
+      "file": "src\\context\\PlayerEconomyContext.tsx",
+      "line": 292,
+      "code": "const res = await fetch(`${API_URL}/api/economy/buy-lives`, {"
+    }
+  ],
+  "/api/economy/unlock-day": [
+    {
+      "endpoint": "/api/economy/unlock-day",
+      "file": "src\\context\\PlayerEconomyContext.tsx",
+      "line": 364,
+      "code": "const res = await fetch(`${API_URL}/api/economy/unlock-day`, {"
+    }
+  ],
+  "/api/economy/use-hint": [
+    {
+      "endpoint": "/api/economy/use-hint",
+      "file": "src\\services\\pistasService.test.ts",
+      "line": 22,
+      "code": "expect(fetch).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('/api/economy/use-hint'), expect.objectContaining("
+    },
+    {
+      "endpoint": "/api/economy/use-hint",
+      "file": "src\\services\\pistasService.ts",
+      "line": 30,
+      "code": "const respuesta = await fetch(`${API_URL}/api/economy/use-hint`, {"
+    }
+  ],
+  "/api/narrative/admin/": [
+    {
+      "endpoint": "/api/narrative/admin/",
+      "file": "src\\VISTAS\\JUEGOS\\NARRATIVO\\recursos\\precargaNarrativa.ts",
+      "line": 55,
+      "code": "const respuesta = await fetch(`${API_URL}/api/narrative/admin/${nombre}?${parametros}`, {"
+    }
+  ],
+  "/api/auth/verificar-token": [
+    {
+      "endpoint": "/api/auth/verificar-token",
+      "file": "src\\VISTAS\\LOGIN\\AccesoToken.tsx",
+      "line": 45,
+      "code": "const response = await fetch(`${API_URL}/api/auth/verificar-token`, {"
+    }
+  ]
+}

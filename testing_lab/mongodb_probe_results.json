@@ -1,0 +1,40 @@
+{
+  "db_name": "mayores_actualizaciones_dev",
+  "collections": {
+    "configuracion_economia": 1,
+    "counters": 2,
+    "crucigrama_settings": 1,
+    "crucigrama_templates": 3,
+    "daily_challenges": 1041,
+    "economy_ledger": 8,
+    "narrative_cards": 10,
+    "narrative_characters": 6,
+    "narrative_conversations": 16,
+    "narrative_endings": 4,
+    "narrative_events": 12,
+    "narrative_results": 15,
+    "narrative_runs": 10,
+    "narrative_settings": 2,
+    "narrative_v2_conversations": 6,
+    "narrative_v2_eventos_especiales": 10,
+    "narrative_v2_events": 7,
+    "user_attempts": 24,
+    "user_hints": 0,
+    "usuarios": 15
+  },
+  "user_sample_keys": [
+    "_id",
+    "id",
+    "name",
+    "email",
+    "codigo_acceso",
+    "tipo_usuario",
+    "activo",
+    "puntos",
+    "updated_at",
+    "password",
+    "vidas",
+    "dias_desbloqueados",
+    "suscripcion"
+  ]
+}

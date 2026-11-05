@@ -1,0 +1,2597 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Contrato objetivo Narrativo V3",
+    "version": "3.0.0-contract",
+    "x-contract-status": "target-not-published"
+  },
+  "paths": {
+    "/api/narrative/v3/runs": {
+      "post": {
+        "tags": [
+          "Narrativo - Contrato V3 (no publicado)"
+        ],
+        "summary": "Crear una run V2 de forma idempotente por principal y fecha",
+        "operationId": "crear_run_v3_api_narrative_v3_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IniciarPartidaCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReciboComandoV3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente o inválida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La run no pertenece al principal autenticado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Run o recibo no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto de versión, generación, fase o commandId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload o selección inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReciboComandoV3"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/narrative/v3/runs/{runId}": {
+      "get": {
+        "tags": [
+          "Narrativo - Contrato V3 (no publicado)"
+        ],
+        "summary": "Leer un snapshot completo sin ejecutar negocio",
+        "operationId": "obtener_snapshot_v3_api_narrative_v3_runs__runId__get",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Runid"
+            }
+          },
+          {
+            "name": "generation",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Generation"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SnapshotRunV3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente o inválida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La run no pertenece al principal autenticado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Run o recibo no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto de versión, generación, fase o commandId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload o selección inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/narrative/v3/runs/{runId}/commands": {
+      "post": {
+        "tags": [
+          "Narrativo - Contrato V3 (no publicado)"
+        ],
+        "summary": "Confirmar exactamente una transición de una generación de run",
+        "operationId": "ejecutar_comando_v3_api_narrative_v3_runs__runId__commands_post",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Runid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ElegirCartaMensualCommand"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AvanzarNodoCommand"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ContinuarResultadoCommand"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AvanzarMesCommand"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ReiniciarPartidaCommand"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "ELEGIR_CARTA_MENSUAL": "#/components/schemas/ElegirCartaMensualCommand",
+                    "AVANZAR_NODO": "#/components/schemas/AvanzarNodoCommand",
+                    "CONTINUAR_RESULTADO": "#/components/schemas/ContinuarResultadoCommand",
+                    "AVANZAR_MES": "#/components/schemas/AvanzarMesCommand",
+                    "REINICIAR_PARTIDA": "#/components/schemas/ReiniciarPartidaCommand"
+                  }
+                },
+                "title": "Command"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReciboComandoV3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente o inválida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La run no pertenece al principal autenticado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Run o recibo no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto de versión, generación, fase o commandId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload o selección inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Resultado del commit incierto; recuperar o reintentar con la misma clave y payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/narrative/v3/runs/{runId}/receipts/{commandId}": {
+      "get": {
+        "tags": [
+          "Narrativo - Contrato V3 (no publicado)"
+        ],
+        "summary": "Recuperar un recibo confirmado sin repetir efectos ni azar",
+        "operationId": "obtener_recibo_v3_api_narrative_v3_runs__runId__receipts__commandId__get",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Runid"
+            }
+          },
+          {
+            "name": "commandId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Commandid"
+            }
+          },
+          {
+            "name": "generation",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Generation"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReciboComandoV3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente o inválida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La run no pertenece al principal autenticado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Run o recibo no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto de versión, generación, fase o commandId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload o selección inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccionSchema": {
+        "properties": {
+          "tipo": {
+            "$ref": "#/components/schemas/TipoAccionEnum"
+          },
+          "clave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clave"
+          },
+          "tipo_calculo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TipoCalculoEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "fijo"
+          },
+          "valor": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor",
+            "default": 0.0
+          },
+          "personaje_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Personaje Id"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tag"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo"
+        ],
+        "title": "AccionSchema"
+      },
+      "AvanzarMesCommand": {
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Commandid"
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Generation"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expectedversion"
+          },
+          "type": {
+            "type": "string",
+            "const": "AVANZAR_MES",
+            "title": "Type"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/PayloadVacio"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "commandId",
+          "generation",
+          "expectedVersion",
+          "type",
+          "payload"
+        ],
+        "title": "AvanzarMesCommand"
+      },
+      "AvanzarNodoCommand": {
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Commandid"
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Generation"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expectedversion"
+          },
+          "type": {
+            "type": "string",
+            "const": "AVANZAR_NODO",
+            "title": "Type"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/AvanzarNodoPayload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "commandId",
+          "generation",
+          "expectedVersion",
+          "type",
+          "payload"
+        ],
+        "title": "AvanzarNodoCommand"
+      },
+      "AvanzarNodoPayload": {
+        "properties": {
+          "opcionId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Opcionid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "opcionId"
+        ],
+        "title": "AvanzarNodoPayload"
+      },
+      "CartaEnInventario": {
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Instanceid"
+          },
+          "carta": {
+            "$ref": "#/components/schemas/CartaJugador"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instanceId",
+          "carta"
+        ],
+        "title": "CartaEnInventario"
+      },
+      "CartaJugador": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "categoria": {
+            "$ref": "#/components/schemas/CategoriaCartaEnum"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          },
+          "imagen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imagen"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "efectos": {
+            "items": {
+              "$ref": "#/components/schemas/EfectoSchema"
+            },
+            "type": "array",
+            "title": "Efectos"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "categoria",
+          "nombre",
+          "descripcion"
+        ],
+        "title": "CartaJugador"
+      },
+      "CategoriaCartaEnum": {
+        "type": "string",
+        "enum": [
+          "item",
+          "bonus",
+          "personaje"
+        ],
+        "title": "CategoriaCartaEnum"
+      },
+      "CommandType": {
+        "type": "string",
+        "enum": [
+          "INICIAR_PARTIDA",
+          "ELEGIR_CARTA_MENSUAL",
+          "AVANZAR_NODO",
+          "CONTINUAR_RESULTADO",
+          "AVANZAR_MES",
+          "REINICIAR_PARTIDA"
+        ],
+        "title": "CommandType"
+      },
+      "CondicionSchema": {
+        "properties": {
+          "tipo": {
+            "$ref": "#/components/schemas/TipoCondicionEnum"
+          },
+          "clave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clave"
+          },
+          "operador": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OperadorEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor"
+          },
+          "personaje_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Personaje Id"
+          },
+          "carta_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carta Id"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tag"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo"
+        ],
+        "title": "CondicionSchema"
+      },
+      "ConsecuenciaInventario": {
+        "properties": {
+          "consecuenciaId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Consecuenciaid"
+          },
+          "origen": {
+            "$ref": "#/components/schemas/OrigenConsecuencia"
+          },
+          "tipo": {
+            "type": "string",
+            "const": "inventario",
+            "title": "Tipo"
+          },
+          "cartaId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Cartaid"
+          },
+          "instanceId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Instanceid"
+          },
+          "operacion": {
+            "type": "string",
+            "const": "adquirir",
+            "title": "Operacion",
+            "default": "adquirir"
+          },
+          "cantidadAntes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cantidadantes"
+          },
+          "cantidadDespues": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cantidaddespues"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "consecuenciaId",
+          "origen",
+          "tipo",
+          "cartaId",
+          "instanceId",
+          "cantidadAntes",
+          "cantidadDespues"
+        ],
+        "title": "ConsecuenciaInventario"
+      },
+      "ConsecuenciaNumerica": {
+        "properties": {
+          "consecuenciaId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Consecuenciaid"
+          },
+          "origen": {
+            "$ref": "#/components/schemas/OrigenConsecuencia"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "recurso",
+              "afinidad"
+            ],
+            "title": "Tipo"
+          },
+          "atributo": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Atributo"
+          },
+          "antes": {
+            "type": "integer",
+            "title": "Antes"
+          },
+          "deltaSolicitado": {
+            "type": "integer",
+            "title": "Deltasolicitado"
+          },
+          "deltaAplicado": {
+            "type": "integer",
+            "title": "Deltaaplicado"
+          },
+          "despues": {
+            "type": "integer",
+            "title": "Despues"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "consecuenciaId",
+          "origen",
+          "tipo",
+          "atributo",
+          "antes",
+          "deltaSolicitado",
+          "deltaAplicado",
+          "despues"
+        ],
+        "title": "ConsecuenciaNumerica"
+      },
+      "ConsecuenciaTag": {
+        "properties": {
+          "consecuenciaId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Consecuenciaid"
+          },
+          "origen": {
+            "$ref": "#/components/schemas/OrigenConsecuencia"
+          },
+          "tipo": {
+            "type": "string",
+            "const": "tag",
+            "title": "Tipo"
+          },
+          "tag": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Tag"
+          },
+          "operacion": {
+            "type": "string",
+            "const": "otorgar",
+            "title": "Operacion",
+            "default": "otorgar"
+          },
+          "presenteAntes": {
+            "type": "boolean",
+            "title": "Presenteantes"
+          },
+          "presenteDespues": {
+            "type": "boolean",
+            "title": "Presentedespues"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "consecuenciaId",
+          "origen",
+          "tipo",
+          "tag",
+          "presenteAntes",
+          "presenteDespues"
+        ],
+        "title": "ConsecuenciaTag"
+      },
+      "ContenidoDraft": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "const": "draft",
+            "title": "Tipo",
+            "default": "draft"
+          },
+          "cartasOfrecidas": {
+            "items": {
+              "$ref": "#/components/schemas/CartaJugador"
+            },
+            "type": "array",
+            "title": "Cartasofrecidas"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cartasOfrecidas"
+        ],
+        "title": "ContenidoDraft"
+      },
+      "ContenidoFinal": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "const": "final",
+            "title": "Tipo",
+            "default": "final"
+          },
+          "finalizacion": {
+            "$ref": "#/components/schemas/FinalizacionJugador"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "finalizacion"
+        ],
+        "title": "ContenidoFinal"
+      },
+      "ContenidoNodoV2": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "const": "nodo_v2",
+            "title": "Tipo",
+            "default": "nodo_v2"
+          },
+          "grafoId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Grafoid"
+          },
+          "tipoGrafo": {
+            "type": "string",
+            "enum": [
+              "evento",
+              "conversacion",
+              "evento_especial"
+            ],
+            "title": "Tipografo"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "imagen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imagen"
+          },
+          "nodoActual": {
+            "$ref": "#/components/schemas/NodoClienteSchema"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "grafoId",
+          "tipoGrafo",
+          "titulo",
+          "nodoActual"
+        ],
+        "title": "ContenidoNodoV2"
+      },
+      "ContinuacionPendiente": {
+        "properties": {
+          "resultadoId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Resultadoid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resultadoId"
+        ],
+        "title": "ContinuacionPendiente"
+      },
+      "ContinuarResultadoCommand": {
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Commandid"
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Generation"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expectedversion"
+          },
+          "type": {
+            "type": "string",
+            "const": "CONTINUAR_RESULTADO",
+            "title": "Type"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/ContinuarResultadoPayload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "commandId",
+          "generation",
+          "expectedVersion",
+          "type",
+          "payload"
+        ],
+        "title": "ContinuarResultadoCommand"
+      },
+      "ContinuarResultadoPayload": {
+        "properties": {
+          "resultadoId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Resultadoid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resultadoId"
+        ],
+        "title": "ContinuarResultadoPayload"
+      },
+      "DisparadorEnum": {
+        "type": "string",
+        "enum": [
+          "al_obtener",
+          "cada_mes",
+          "en_evento_positivo",
+          "en_evento_negativo",
+          "al_final_partida"
+        ],
+        "title": "DisparadorEnum"
+      },
+      "EfectoSchema": {
+        "properties": {
+          "disparador": {
+            "$ref": "#/components/schemas/DisparadorEnum"
+          },
+          "condiciones": {
+            "items": {
+              "$ref": "#/components/schemas/CondicionSchema"
+            },
+            "type": "array",
+            "title": "Condiciones",
+            "default": []
+          },
+          "accion": {
+            "$ref": "#/components/schemas/AccionSchema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "disparador",
+          "accion"
+        ],
+        "title": "EfectoSchema"
+      },
+      "ElegirCartaMensualCommand": {
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Commandid"
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Generation"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expectedversion"
+          },
+          "type": {
+            "type": "string",
+            "const": "ELEGIR_CARTA_MENSUAL",
+            "title": "Type"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/ElegirCartaMensualPayload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "commandId",
+          "generation",
+          "expectedVersion",
+          "type",
+          "payload"
+        ],
+        "title": "ElegirCartaMensualCommand"
+      },
+      "ElegirCartaMensualPayload": {
+        "properties": {
+          "cartaId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Cartaid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cartaId"
+        ],
+        "title": "ElegirCartaMensualPayload"
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "validation_error",
+          "unauthenticated",
+          "forbidden",
+          "run_not_found",
+          "run_already_exists",
+          "receipt_not_found",
+          "version_conflict",
+          "generation_conflict",
+          "command_reused",
+          "phase_conflict",
+          "content_unavailable",
+          "command_outcome_unknown"
+        ],
+        "title": "ErrorCode"
+      },
+      "ErrorDetails": {
+        "properties": {
+          "commandId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commandid"
+          },
+          "currentVersion": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currentversion"
+          },
+          "currentGeneration": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currentgeneration"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ErrorDetails"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Message"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable",
+            "default": false
+          },
+          "details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorDetails"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorResponse"
+      },
+      "EscenaHistorial": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "evento",
+              "conversacion",
+              "evento_especial"
+            ],
+            "title": "Tipo"
+          },
+          "grafoId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Grafoid"
+          },
+          "opcionesElegidasIds": {
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Opcioneselegidasids"
+          },
+          "resultadoId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resultadoid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tipo",
+          "grafoId"
+        ],
+        "title": "EscenaHistorial"
+      },
+      "FinalizacionJugador": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/TipoFinalizacionEnum"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "texto": {
+            "type": "string",
+            "title": "Texto"
+          },
+          "imagen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imagen"
+          },
+          "rango": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rango"
+          },
+          "recurso_clave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurso Clave"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "titulo",
+          "texto"
+        ],
+        "title": "FinalizacionJugador"
+      },
+      "HistorialMensualV3": {
+        "properties": {
+          "mes": {
+            "type": "integer",
+            "maximum": 12.0,
+            "minimum": 1.0,
+            "title": "Mes"
+          },
+          "cartaElegidaId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cartaelegidaid"
+          },
+          "recursosFinMes": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Recursosfinmes"
+          },
+          "escenas": {
+            "items": {
+              "$ref": "#/components/schemas/EscenaHistorial"
+            },
+            "type": "array",
+            "title": "Escenas"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mes",
+          "recursosFinMes"
+        ],
+        "title": "HistorialMensualV3"
+      },
+      "ImpactoAfinidadSchema": {
+        "properties": {
+          "personaje_id": {
+            "type": "string",
+            "title": "Personaje Id",
+            "description": "ID del personaje de corte afectado (ej: pj_canciller_elena)"
+          },
+          "delta": {
+            "type": "integer",
+            "title": "Delta",
+            "description": "Variación entera de afinidad (+15, -10)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "personaje_id",
+          "delta"
+        ],
+        "title": "ImpactoAfinidadSchema"
+      },
+      "ImpactoRecursoSchema": {
+        "properties": {
+          "recurso": {
+            "type": "string",
+            "title": "Recurso",
+            "description": "Clave del recurso modificado (oro, pueblo, ejercito, fe)"
+          },
+          "delta": {
+            "type": "integer",
+            "title": "Delta",
+            "description": "Variación entera positiva o negativa"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recurso",
+          "delta"
+        ],
+        "title": "ImpactoRecursoSchema"
+      },
+      "IniciarPartidaCommand": {
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Commandid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "type": {
+            "type": "string",
+            "const": "INICIAR_PARTIDA",
+            "title": "Type"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/IniciarPartidaPayload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "commandId",
+          "date",
+          "type",
+          "payload"
+        ],
+        "title": "IniciarPartidaCommand"
+      },
+      "IniciarPartidaPayload": {
+        "properties": {
+          "corteElegidaIds": {
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Corteelegidaids"
+          },
+          "cartasInicialesIds": {
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Cartasinicialesids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "corteElegidaIds",
+          "cartasInicialesIds"
+        ],
+        "title": "IniciarPartidaPayload"
+      },
+      "LiquidacionEconomica": {
+        "properties": {
+          "estado": {
+            "type": "string",
+            "enum": [
+              "pendiente",
+              "liquidada",
+              "fallida"
+            ],
+            "title": "Estado"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "estado"
+        ],
+        "title": "LiquidacionEconomica"
+      },
+      "NodoClienteSchema": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "hablante_id": {
+            "type": "string",
+            "title": "Hablante Id"
+          },
+          "texto": {
+            "type": "string",
+            "title": "Texto"
+          },
+          "imagen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imagen"
+          },
+          "es_final": {
+            "type": "boolean",
+            "title": "Es Final",
+            "default": false
+          },
+          "opciones": {
+            "items": {
+              "$ref": "#/components/schemas/OpcionClienteSchema"
+            },
+            "type": "array",
+            "title": "Opciones"
+          },
+          "resultado_texto": {
+            "type": "string",
+            "title": "Resultado Texto",
+            "default": ""
+          },
+          "impactos_recursos": {
+            "items": {
+              "$ref": "#/components/schemas/ImpactoRecursoSchema"
+            },
+            "type": "array",
+            "title": "Impactos Recursos"
+          },
+          "impactos_afinidad": {
+            "items": {
+              "$ref": "#/components/schemas/ImpactoAfinidadSchema"
+            },
+            "type": "array",
+            "title": "Impactos Afinidad"
+          },
+          "impactos_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Impactos Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "hablante_id",
+          "texto"
+        ],
+        "title": "NodoClienteSchema"
+      },
+      "OpcionClienteSchema": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Identificador de la opción seleccionable"
+          },
+          "texto": {
+            "type": "string",
+            "title": "Texto",
+            "description": "Texto que el usuario lee en el botón"
+          },
+          "disponible": {
+            "type": "boolean",
+            "title": "Disponible",
+            "description": "True si cumple todos los requisitos para ser seleccionada",
+            "default": true
+          },
+          "motivo_bloqueo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo Bloqueo",
+            "description": "Texto explicativo para el jugador si la opción está bloqueada"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "texto"
+        ],
+        "title": "OpcionClienteSchema"
+      },
+      "OperadorEnum": {
+        "type": "string",
+        "enum": [
+          ">=",
+          "<=",
+          ">",
+          "<",
+          "==",
+          "!="
+        ],
+        "title": "OperadorEnum"
+      },
+      "OrigenConsecuencia": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "carta",
+              "personaje",
+              "nodo",
+              "sistema"
+            ],
+            "title": "Tipo"
+          },
+          "origenId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Origenid"
+          },
+          "instanceId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instanceid"
+          },
+          "grafoId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grafoid"
+          },
+          "nodoId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nodoid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tipo",
+          "origenId"
+        ],
+        "title": "OrigenConsecuencia"
+      },
+      "PayloadVacio": {
+        "properties": {},
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PayloadVacio"
+      },
+      "PersonajeJugador": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "imagen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imagen"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          },
+          "pros": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pros"
+          },
+          "cons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cons"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "efectos": {
+            "items": {
+              "$ref": "#/components/schemas/EfectoSchema"
+            },
+            "type": "array",
+            "title": "Efectos"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "titulo",
+          "descripcion"
+        ],
+        "title": "PersonajeJugador"
+      },
+      "ReciboComandoV3": {
+        "properties": {
+          "runId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Runid",
+            "description": "Run destino del comando; en reinicio es la generación anterior."
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Generation",
+            "description": "Generación destino del comando."
+          },
+          "commandId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Commandid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CommandType"
+          },
+          "commandHash": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Commandhash",
+            "description": "Hash del servidor sobre tipo, payload y expectedVersion; en creación incluye date."
+          },
+          "previousVersion": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previousversion"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/SnapshotRunV3"
+          },
+          "consecuencias": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ConsecuenciaNumerica"
+                },
+                {
+                  "$ref": "#/components/schemas/ConsecuenciaTag"
+                },
+                {
+                  "$ref": "#/components/schemas/ConsecuenciaInventario"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "tipo",
+                "mapping": {
+                  "afinidad": "#/components/schemas/ConsecuenciaNumerica",
+                  "inventario": "#/components/schemas/ConsecuenciaInventario",
+                  "recurso": "#/components/schemas/ConsecuenciaNumerica",
+                  "tag": "#/components/schemas/ConsecuenciaTag"
+                }
+              }
+            },
+            "type": "array",
+            "title": "Consecuencias"
+          },
+          "resultado": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResultadoNarrativo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recompensa": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecompensaRecuperable"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "runId",
+          "generation",
+          "commandId",
+          "type",
+          "commandHash",
+          "version",
+          "snapshot"
+        ],
+        "title": "ReciboComandoV3"
+      },
+      "RecompensaRecuperable": {
+        "properties": {
+          "rewardId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Rewardid"
+          },
+          "puntos": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Puntos"
+          },
+          "canal": {
+            "type": "string",
+            "enum": [
+              "ledger",
+              "local"
+            ],
+            "title": "Canal"
+          },
+          "liquidacion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LiquidacionEconomica"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Estado del ledger para cuentas; null para economía local de invitados."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rewardId",
+          "puntos",
+          "canal"
+        ],
+        "title": "RecompensaRecuperable"
+      },
+      "RecursoDefinicionSchema": {
+        "properties": {
+          "clave": {
+            "type": "string",
+            "title": "Clave"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "icono": {
+            "type": "string",
+            "title": "Icono",
+            "default": "coins"
+          },
+          "min": {
+            "type": "integer",
+            "title": "Min",
+            "default": 0
+          },
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": 100
+          },
+          "inicial": {
+            "type": "integer",
+            "title": "Inicial",
+            "default": 50
+          }
+        },
+        "type": "object",
+        "required": [
+          "clave",
+          "nombre"
+        ],
+        "title": "RecursoDefinicionSchema"
+      },
+      "RecursoJugador": {
+        "properties": {
+          "definicion": {
+            "$ref": "#/components/schemas/RecursoDefinicionSchema"
+          },
+          "valor": {
+            "type": "integer",
+            "title": "Valor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "definicion",
+          "valor"
+        ],
+        "title": "RecursoJugador"
+      },
+      "ReiniciarPartidaCommand": {
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Commandid"
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Generation"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expectedversion"
+          },
+          "type": {
+            "type": "string",
+            "const": "REINICIAR_PARTIDA",
+            "title": "Type"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/PayloadVacio"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "commandId",
+          "generation",
+          "expectedVersion",
+          "type",
+          "payload"
+        ],
+        "title": "ReiniciarPartidaCommand"
+      },
+      "ResultadoNarrativo": {
+        "properties": {
+          "resultadoId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Resultadoid"
+          },
+          "alcance": {
+            "type": "string",
+            "enum": [
+              "escena",
+              "final"
+            ],
+            "title": "Alcance"
+          },
+          "titulo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Titulo"
+          },
+          "texto": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Texto"
+          },
+          "imagen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imagen"
+          },
+          "tipoResultado": {
+            "$ref": "#/components/schemas/TipoResultadoEnum",
+            "default": "neutro"
+          },
+          "grafoId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grafoid"
+          },
+          "nodoId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nodoid"
+          },
+          "finalizacionId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finalizacionid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resultadoId",
+          "alcance",
+          "texto"
+        ],
+        "title": "ResultadoNarrativo"
+      },
+      "ResultadoPendiente": {
+        "properties": {
+          "resultadoId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Resultadoid"
+          },
+          "alcance": {
+            "type": "string",
+            "enum": [
+              "escena",
+              "final"
+            ],
+            "title": "Alcance"
+          },
+          "titulo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Titulo"
+          },
+          "texto": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Texto"
+          },
+          "imagen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imagen"
+          },
+          "tipoResultado": {
+            "$ref": "#/components/schemas/TipoResultadoEnum",
+            "default": "neutro"
+          },
+          "grafoId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grafoid"
+          },
+          "nodoId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nodoid"
+          },
+          "finalizacionId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finalizacionid"
+          },
+          "consecuencias": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ConsecuenciaNumerica"
+                },
+                {
+                  "$ref": "#/components/schemas/ConsecuenciaTag"
+                },
+                {
+                  "$ref": "#/components/schemas/ConsecuenciaInventario"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "tipo",
+                "mapping": {
+                  "afinidad": "#/components/schemas/ConsecuenciaNumerica",
+                  "inventario": "#/components/schemas/ConsecuenciaInventario",
+                  "recurso": "#/components/schemas/ConsecuenciaNumerica",
+                  "tag": "#/components/schemas/ConsecuenciaTag"
+                }
+              }
+            },
+            "type": "array",
+            "title": "Consecuencias"
+          },
+          "recompensa": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecompensaRecuperable"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resultadoId",
+          "alcance",
+          "texto"
+        ],
+        "title": "ResultadoPendiente"
+      },
+      "RunCommandType": {
+        "type": "string",
+        "enum": [
+          "ELEGIR_CARTA_MENSUAL",
+          "AVANZAR_NODO",
+          "CONTINUAR_RESULTADO",
+          "AVANZAR_MES",
+          "REINICIAR_PARTIDA"
+        ],
+        "title": "RunCommandType"
+      },
+      "RunPhaseV3": {
+        "type": "string",
+        "enum": [
+          "DRAFT_MENSUAL",
+          "TOMA_DECISION_EVENTO",
+          "RESOLVER_CONVERSACION",
+          "BALANCE_MES",
+          "FINALIZADA"
+        ],
+        "title": "RunPhaseV3"
+      },
+      "RunStatus": {
+        "type": "string",
+        "enum": [
+          "in_progress",
+          "completed",
+          "game_over"
+        ],
+        "title": "RunStatus"
+      },
+      "SnapshotRunV3": {
+        "properties": {
+          "runId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Runid"
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Generation"
+          },
+          "schemaVersion": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Schemaversion"
+          },
+          "rulesVersion": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Rulesversion"
+          },
+          "contentVersion": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Contentversion"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          },
+          "motor": {
+            "type": "string",
+            "const": "v2",
+            "title": "Motor",
+            "default": "v2"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "mesActual": {
+            "type": "integer",
+            "maximum": 12.0,
+            "minimum": 1.0,
+            "title": "Mesactual"
+          },
+          "faseActual": {
+            "$ref": "#/components/schemas/RunPhaseV3"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RunStatus"
+          },
+          "gamePolicyVersion": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Gamepolicyversion"
+          },
+          "ageAdaptation": {
+            "type": "string",
+            "const": "none",
+            "title": "Ageadaptation",
+            "default": "none"
+          },
+          "corte": {
+            "items": {
+              "$ref": "#/components/schemas/PersonajeJugador"
+            },
+            "type": "array",
+            "title": "Corte"
+          },
+          "afinidad": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Afinidad"
+          },
+          "inventario": {
+            "items": {
+              "$ref": "#/components/schemas/CartaEnInventario"
+            },
+            "type": "array",
+            "title": "Inventario"
+          },
+          "tagsActivos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tagsactivos"
+          },
+          "recursos": {
+            "items": {
+              "$ref": "#/components/schemas/RecursoJugador"
+            },
+            "type": "array",
+            "title": "Recursos"
+          },
+          "contenidoActual": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ContenidoDraft"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ContenidoNodoV2"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ContenidoFinal"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "tipo",
+                  "mapping": {
+                    "draft": "#/components/schemas/ContenidoDraft",
+                    "final": "#/components/schemas/ContenidoFinal",
+                    "nodo_v2": "#/components/schemas/ContenidoNodoV2"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contenidoactual"
+          },
+          "comandosPermitidos": {
+            "items": {
+              "$ref": "#/components/schemas/RunCommandType"
+            },
+            "type": "array",
+            "title": "Comandospermitidos"
+          },
+          "resultadoPendiente": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResultadoPendiente"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "continuacionPendiente": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ContinuacionPendiente"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "historialMensual": {
+            "items": {
+              "$ref": "#/components/schemas/HistorialMensualV3"
+            },
+            "type": "array",
+            "title": "Historialmensual"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "runId",
+          "generation",
+          "schemaVersion",
+          "rulesVersion",
+          "contentVersion",
+          "version",
+          "date",
+          "mesActual",
+          "faseActual",
+          "status",
+          "gamePolicyVersion",
+          "corte",
+          "afinidad",
+          "inventario",
+          "tagsActivos",
+          "recursos"
+        ],
+        "title": "SnapshotRunV3"
+      },
+      "TipoAccionEnum": {
+        "type": "string",
+        "enum": [
+          "modificar_recurso",
+          "modificar_afinidad",
+          "otorgar_tag",
+          "amortiguar_danio"
+        ],
+        "title": "TipoAccionEnum"
+      },
+      "TipoCalculoEnum": {
+        "type": "string",
+        "enum": [
+          "fijo",
+          "porcentual"
+        ],
+        "title": "TipoCalculoEnum"
+      },
+      "TipoCondicionEnum": {
+        "type": "string",
+        "enum": [
+          "comparar_recurso",
+          "tiene_personaje",
+          "afinidad_personaje",
+          "tiene_tag",
+          "tiene_carta"
+        ],
+        "title": "TipoCondicionEnum"
+      },
+      "TipoFinalizacionEnum": {
+        "type": "string",
+        "enum": [
+          "derrota_recurso",
+          "victoria_tiempo",
+          "derrota_general"
+        ],
+        "title": "TipoFinalizacionEnum"
+      },
+      "TipoResultadoEnum": {
+        "type": "string",
+        "enum": [
+          "positivo",
+          "negativo",
+          "neutro"
+        ],
+        "title": "TipoResultadoEnum"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "guestCredential": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Guest-Credential",
+        "description": "Credencial de invitado firmada y verificada por el backend."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Narrativo - Contrato V3 (no publicado)"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {
+      "guestCredential": []
+    }
+  ]
+}

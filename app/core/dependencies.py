@@ -87,11 +87,8 @@ async def get_current_user(
             "tipo_usuario": tipo_usuario,
             "black": bool(payload.get("black", False)),
             "activo": bool(payload.get("activo", True)),
-            "estado_id": 2,
-            "estado_codigo": "ACTIVO",
             "date_start": datetime.now(timezone.utc),
             "date_end": None,
-            "progresos": []
         }
         await db["usuarios"].update_one(
             {"id": user_id_int},

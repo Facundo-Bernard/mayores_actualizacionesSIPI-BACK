@@ -8,8 +8,6 @@ from app.features.economy.schemas import (
     UserEconomyResponse,
     ConsumeLifeRequest,
     ConsumeLifeResponse,
-    BuyLivesRequest,
-    BuyLivesResponse,
     RefillLivesResponse,
     SearchUserEconomyResponse,
     AdjustUserEconomyRequest,
@@ -27,7 +25,6 @@ from app.features.economy.service import (
     update_economy_config,
     get_user_economy,
     consume_life,
-    buy_lives,
     refill_lives,
     find_user_by_identifier,
     adjust_user_economy,
@@ -75,19 +72,6 @@ async def endpoint_consume_life(
 ):
     user_id = int(current_user["id"])
     return await consume_life(user_id=user_id, game_id=req.game_id, motivo=req.motivo)
-
-
-@router.post(
-    "/api/economy/buy-lives",
-    response_model=BuyLivesResponse,
-    summary="Canjear puntos por vidas en la mini-tienda",
-)
-async def endpoint_buy_lives(
-    req: BuyLivesRequest,
-    current_user: Dict[str, Any] = Depends(get_current_user),
-):
-    user_id = int(current_user["id"])
-    return await buy_lives(user_id=user_id, req=req)
 
 
 @router.post(
