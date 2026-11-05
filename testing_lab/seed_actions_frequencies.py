@@ -78,6 +78,17 @@ async def seed():
             "version": 1,
             "updated_at": datetime.now(timezone.utc).isoformat(),
         },
+        {
+            "_id": "mutar_estado",
+            "universo_id": universo_id,
+            "nombre": "Mutar estado genérico",
+            "descripcion": "Mutación matemática avanzada (sumar, restar, multiplicar, dividir, porcentual o fijar) sobre recursos, límites o variables.",
+            "primitiva": "mutar_estado",
+            "permitido_en": ["carta", "personaje"],
+            "activo": True,
+            "version": 1,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        },
     ]
 
     for acc in acciones:

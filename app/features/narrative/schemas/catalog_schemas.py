@@ -69,6 +69,7 @@ class PersonajeCreateRequest(BaseModel):
     cons: List[str] = []
     tags: List[str] = []
     afinidad_inicial: int = 50
+    condiciones_aparicion: List[CondicionSchema] = []
     efectos: List[EfectoSchema] = []
     conversaciones: List[PersonajeConversacionProbabilidad] = []
 
@@ -89,6 +90,7 @@ class CartaCreateRequest(BaseModel):
     descripcion: str
     imagen: str = "/assets/narrative/cartas/default.webp"
     tags: List[str] = []
+    condiciones_aparicion: List[CondicionSchema] = []
     efectos: List[EfectoSchema] = []
 
     model_config = {"populate_by_name": True}

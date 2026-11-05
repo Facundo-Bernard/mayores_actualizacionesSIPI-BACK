@@ -7,7 +7,8 @@ from app.features.narrative.enums import (
     OperadorEnum,
     TipoCondicionEnum,
     TipoAccionEnum,
-    TipoCalculoEnum
+    TipoCalculoEnum,
+    OperacionMatematicaEnum
 )
 
 # ============================================================================
@@ -20,6 +21,7 @@ class PrimitivaOperacionEnum(str, Enum):
     OTORGAR_TAG = "otorgar_tag"
     REMOVER_TAG = "remover_tag"
     AMORTIGUAR_DANIO = "amortiguar_danio"
+    MUTAR_ESTADO = "mutar_estado"
 
 class DestinoAfinidadEnum(str, Enum):
     PORTADOR = "portador"
@@ -50,6 +52,8 @@ class AccionSchema(BaseModel):
 
 class ParametrosAccionSchema(BaseModel):
     clave: Optional[str] = None
+    ruta: Optional[str] = None
+    operacion_matematica: Optional[OperacionMatematicaEnum] = OperacionMatematicaEnum.SUMAR
     valor: Optional[float] = 0.0
     tipo_calculo: Optional[TipoCalculoEnum] = TipoCalculoEnum.FIJO
     destino: Optional[str] = "portador"   # "portador" | "personaje"

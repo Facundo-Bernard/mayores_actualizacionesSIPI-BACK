@@ -7,6 +7,7 @@ from app.features.narrative.enums import (
     TipoCondicionEnum,
     TipoAccionEnum,
     TipoCalculoEnum,
+    OperacionMatematicaEnum,
 )
 from app.features.narrative.schemas.rules_schemas import (
     CondicionSchema,
@@ -96,6 +97,39 @@ def _comparar_valores(actual: float, operador: Optional[OperadorEnum], objetivo:
     return False
 
 
+
+def _aplicar_operacion_matematica(
+    actual: float,
+    operacion: Optional[Union[OperacionMatematicaEnum, str]],
+    valor: float,
+) -> float:
+    """
+    Aplica una operación matemática configurada sobre un valor numérico:
+    - sumar: actual + valor
+    - restar: actual - valor
+    - multiplicar: actual * valor
+    - dividir: actual / valor (con salvaguarda por división entre 0)
+    - porcentual: actual + (actual * (valor / 100))
+    - fijar: valor
+    """
+    op = operacion.value if hasattr(operacion, "value") else str(operacion or "sumar").lower()
+    if op == "sumar":
+        return actual + valor
+    elif op == "restar":
+        return actual - valor
+    elif op == "multiplicar":
+        return actual * valor
+    elif op == "dividir":
+        if valor == 0:
+            logger.warning("División por cero detectada en mutar_estado; se mantiene el valor actual.")
+            return actual
+        return actual / valor
+    elif op == "porcentual":
+        return actual + (actual * (valor / 100.0))
+    elif op == "fijar":
+        return valor
+    return actual + valor
+
 def _extraer_primitiva_y_params(
     accion: Any,
     catalogo_acciones: Optional[Dict[str, Any]] = None,
@@ -182,11 +216,20 @@ def ejecutar_accion(
 
         nuevo_valor = round(valor_actual + delta)
 
-        # Clamping de límites min / max según el universo
-        if recursos_definicion and clave in recursos_definicion:
-            limite_min = recursos_definicion[clave].get("min", 0)
-            limite_max = recursos_definicion[clave].get("max", 100)
-            nuevo_valor = max(limite_min, min(limite_max, nuevo_valor))
+        # Clamping de límites dinámicos de partida o definición del universo
+        limite_min = None
+        limite_max = None
+        if run_data.get("limites") and clave in run_data["limites"]:
+            limite_min = run_data["limites"][clave].get("min")
+            limite_max = run_data["limites"][clave].get("max")
+        elif recursos_definicion and clave in recursos_definicion:
+            limite_min = recursos_definicion[clave].get("min")
+            limite_max = recursos_definicion[clave].get("max")
+
+        if limite_min is not None:
+            nuevo_valor = max(float(limite_min), nuevo_valor)
+        if limite_max is not None:
+            nuevo_valor = min(float(limite_max), nuevo_valor)
 
         recursos[clave] = int(nuevo_valor)
 
@@ -228,6 +271,92 @@ def ejecutar_accion(
             "reduccion_porcentual": reduccion,
             "fuente": duenio_id,
         })
+
+    # 6. Mutar Estado Genérico y Dinámico
+    elif primitiva == PrimitivaOperacionEnum.MUTAR_ESTADO.value:
+        ruta = params.get("ruta") or params.get("clave")
+        if not ruta:
+            return
+
+        op_mat = params.get("operacion_matematica", OperacionMatematicaEnum.SUMAR.value)
+        valor_num = float(params.get("valor") or 0.0)
+
+        # A) Recursos: ruta 'recursos.<clave>' o clave directa de recurso
+        if ruta.startswith("recursos.") or (recursos_definicion and ruta in recursos_definicion):
+            clave_rec = ruta.split(".", 1)[1] if ruta.startswith("recursos.") else ruta
+            recursos = run_data.setdefault("recursos", {})
+            actual = float(recursos.get(clave_rec, 0))
+            nuevo_num = _aplicar_operacion_matematica(actual, op_mat, valor_num)
+            delta = nuevo_num - actual
+
+            # Amortiguación si es pérdida
+            if delta < 0:
+                for mod in run_data.get("modificadores_pasivos", []):
+                    if mod.get("tipo") == "amortiguar_danio" and (not mod.get("clave") or mod.get("clave") == clave_rec):
+                        reduccion = float(mod.get("reduccion_porcentual", 0))
+                        if 0 < reduccion <= 100:
+                            delta *= (1.0 - (reduccion / 100.0))
+                nuevo_num = actual + delta
+
+            limite_min = None
+            limite_max = None
+            if run_data.get("limites") and clave_rec in run_data["limites"]:
+                limite_min = run_data["limites"][clave_rec].get("min")
+                limite_max = run_data["limites"][clave_rec].get("max")
+            elif recursos_definicion and clave_rec in recursos_definicion:
+                limite_min = recursos_definicion[clave_rec].get("min")
+                limite_max = recursos_definicion[clave_rec].get("max")
+
+            if limite_min is not None:
+                nuevo_num = max(float(limite_min), nuevo_num)
+            if limite_max is not None:
+                nuevo_num = min(float(limite_max), nuevo_num)
+
+            recursos[clave_rec] = int(round(nuevo_num))
+
+        # B) Límites dinámicos: 'limites.<clave>.min' o 'limites.<clave>.max'
+        elif ruta.startswith("limites."):
+            partes = ruta.split(".")
+            if len(partes) >= 3:
+                clave_rec = partes[1]
+                sub_lim = partes[2]  # 'min' | 'max'
+                lim_dict = run_data.setdefault("limites", {}).setdefault(clave_rec, {})
+
+                default_lim = 0 if sub_lim == "min" else 100
+                if recursos_definicion and clave_rec in recursos_definicion:
+                    default_lim = recursos_definicion[clave_rec].get(sub_lim, default_lim)
+
+                actual_lim = float(lim_dict.get(sub_lim, default_lim))
+                nuevo_lim = int(round(_aplicar_operacion_matematica(actual_lim, op_mat, valor_num)))
+                lim_dict[sub_lim] = nuevo_lim
+
+                # Reclamping inmediato del recurso si quedó fuera del rango
+                recursos = run_data.setdefault("recursos", {})
+                if clave_rec in recursos:
+                    res_val = float(recursos[clave_rec])
+                    cur_min = float(lim_dict.get("min", recursos_definicion.get(clave_rec, {}).get("min", 0) if recursos_definicion else 0))
+                    cur_max = float(lim_dict.get("max", recursos_definicion.get(clave_rec, {}).get("max", 100) if recursos_definicion else 100))
+                    recursos[clave_rec] = int(max(cur_min, min(cur_max, res_val)))
+
+        # C) Afinidad: 'afinidad.<target>'
+        elif ruta.startswith("afinidad."):
+            target = ruta.split(".", 1)[1]
+            if target in ("portador", "self", "me") and duenio_id:
+                target = duenio_id
+            if target:
+                afinidades = run_data.setdefault("afinidad", {})
+                actual_af = float(afinidades.get(target, 50))
+                nueva_af = _aplicar_operacion_matematica(actual_af, op_mat, valor_num)
+                afinidades[target] = max(0, min(100, int(round(nueva_af))))
+
+        # D) Variables arbitrarias del universo: 'variables.<clave>'
+        elif ruta.startswith("variables."):
+            var_clave = ruta.split(".", 1)[1]
+            variables = run_data.setdefault("variables", {})
+            actual_var = float(variables.get(var_clave, 0.0))
+            nueva_var = _aplicar_operacion_matematica(actual_var, op_mat, valor_num)
+            variables[var_clave] = round(nueva_var, 4)
+
 
 
 def _frecuencia_coincide(

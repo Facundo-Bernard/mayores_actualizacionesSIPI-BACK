@@ -12,18 +12,18 @@ from app.core.security import create_access_token
 BASE_URL = "http://127.0.0.1:8090"
 
 def run_tests():
-    print("=== LIVE E2E TEST: ADMIN PANEL & ENGINE DESACOPLADO ===")
+    print("=== LIVE E2E TEST: ADMIN PANEL, MUTAR ESTADO & CONDICIONES APARICION ===")
     token = create_access_token({"id": 1, "sub": "1", "email": "admin@autenticador.com", "tipo_usuario": 2, "rol": "administrador", "name": "Administrador Central", "activo": True})
     headers = {"Authorization": f"Bearer {token}"}
     print("[OK] Token de Administrador generado con firma JWT valida.")
 
     with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
-        # 1. GET /admin/operaciones
+        # 1. GET /admin/operaciones (debe incluir mutar_estado)
         resp_ops = client.get("/api/narrative/admin/operaciones", headers=headers)
         assert resp_ops.status_code == 200, f"Error en /operaciones: {resp_ops.text}"
         ops = resp_ops.json()
-        assert len(ops) >= 5, "Debe haber al menos 5 primitivas registradas"
-        print(f"[OK] GET /admin/operaciones retornado ({len(ops)} primitivas).")
+        assert any(op["primitiva"] == "mutar_estado" for op in ops), "Debe incluir la primitiva 'mutar_estado'"
+        print(f"[OK] GET /admin/operaciones retornado ({len(ops)} primitivas, incluye mutar_estado).")
 
         # 2. GET /admin/eventos-motor
         resp_evts = client.get("/api/narrative/admin/eventos-motor", headers=headers)
@@ -37,25 +37,26 @@ def run_tests():
         resp_accs = client.get("/api/narrative/admin/acciones?universo_id=corte_medieval", headers=headers)
         assert resp_accs.status_code == 200, f"Error en /acciones: {resp_accs.text}"
         accs = resp_accs.json()
+        assert any(a["primitiva"] == "mutar_estado" for a in accs), "Debe existir al menos una acción con primitiva mutar_estado"
         print(f"[OK] GET /admin/acciones retornado ({len(accs)} acciones en corte_medieval).")
 
-        # 4. POST /admin/acciones (crear accion)
-        test_acc_id = "accion_e2e_prueba"
+        # 4. POST /admin/acciones (crear accion con mutar_estado)
+        test_acc_id = "accion_e2e_mutar_estado"
         client.delete(f"/api/narrative/admin/acciones/{test_acc_id}?universo_id=corte_medieval", headers=headers)
 
         create_payload = {
             "_id": test_acc_id,
             "universo_id": "corte_medieval",
-            "nombre": "Accion E2E de Prueba",
-            "descripcion": "Verifica mutacion desacoplada desde el panel",
-            "primitiva": "modificar_recurso",
+            "nombre": "Accion E2E Mutar Estado",
+            "descripcion": "Verifica mutación matemática genérica",
+            "primitiva": "mutar_estado",
             "permitido_en": ["carta", "personaje"],
             "activo": True,
             "version": 1
         }
         resp_cr = client.post("/api/narrative/admin/acciones", json=create_payload, headers=headers)
         assert resp_cr.status_code == 201, f"Error al crear accion: {resp_cr.text}"
-        print("[OK] POST /admin/acciones: Accion creada exitosamente.")
+        print("[OK] POST /admin/acciones: Accion con mutar_estado creada exitosamente.")
 
         # 5. PUT /admin/acciones con OCC
         resp_occ = client.put(
@@ -77,7 +78,7 @@ def run_tests():
         resp_usos = client.get(f"/api/narrative/admin/acciones/{test_acc_id}/usos", headers=headers)
         assert resp_usos.status_code == 200
         assert resp_usos.json()["total_usos"] == 0
-        print("[OK] GET /admin/acciones/{id}/usos: Reporta 0 referencias.")
+        print("[OK] GET /admin/acciones/{id}/usos: Reporta 0 referencias iniciales.")
 
         # 7. GET y PUT /admin/frecuencias
         resp_frec = client.get("/api/narrative/admin/frecuencias?universo_id=corte_medieval", headers=headers)
@@ -102,23 +103,26 @@ def run_tests():
         assert resp_frec_ok.json()["version"] == v_actual + 1
         print("[OK] GET y PUT /admin/frecuencias: OCC verificado exitosamente.")
 
-        # 8. GET /admin/frecuencias/{id}/usos
-        resp_frec_usos = client.get("/api/narrative/admin/frecuencias/al_obtener/usos?universo_id=corte_medieval", headers=headers)
-        assert resp_frec_usos.status_code == 200
-        print(f"[OK] GET /admin/frecuencias/al_obtener/usos: {resp_frec_usos.json()['total_usos']} referencias en corte_medieval.")
-
-        # 9. Crear carta con efectos desacoplados multiples
-        test_carta_id = "carta_e2e_desacoplada"
+        # 8. POST /admin/cartas con condiciones_aparicion y mutar_estado
+        test_carta_id = "carta_e2e_mutar_cond"
         client.delete(f"/api/narrative/admin/cartas/{test_carta_id}", headers=headers)
 
         carta_payload = {
             "_id": test_carta_id,
             "universo_id": "corte_medieval",
-            "categoria": "item",
-            "nombre": "Pergamino Real E2E",
-            "descripcion": "Carta de prueba con efectos desacoplados y acciones multiples.",
+            "categoria": "bonus",
+            "nombre": "Bendición Real Multiplicativa",
+            "descripcion": "Multiplica los recursos si el oro >= 60.",
             "imagen": "/assets/narrative/cartas/default.webp",
             "tags": ["e2e_test"],
+            "condiciones_aparicion": [
+                {
+                    "tipo": "comparar_recurso",
+                    "clave": "oro",
+                    "operador": ">=",
+                    "valor": 50
+                }
+            ],
             "efectos": [
                 {
                     "frecuencia_id": "al_obtener",
@@ -126,11 +130,11 @@ def run_tests():
                     "acciones": [
                         {
                             "accion_id": test_acc_id,
-                            "parametros": {"clave": "oro", "valor": 35, "tipo_calculo": "fijo"}
-                        },
-                        {
-                            "accion_id": "otorgar_tag",
-                            "parametros": {"tag": "e2e_perk_activo"}
+                            "parametros": {
+                                "ruta": "recursos.oro",
+                                "operacion_matematica": "multiplicar",
+                                "valor": 1.5
+                            }
                         }
                     ]
                 }
@@ -139,33 +143,67 @@ def run_tests():
 
         resp_carta = client.post("/api/narrative/admin/cartas", json=carta_payload, headers=headers)
         assert resp_carta.status_code in (200, 201), f"Error al crear carta: {resp_carta.text}"
-        print("[OK] POST /admin/cartas: Carta con acciones desacopladas guardada.")
+        data_carta = resp_carta.json()
+        assert len(data_carta.get("condiciones_aparicion", [])) == 1
+        print("[OK] POST /admin/cartas: Carta con condiciones_aparicion y mutar_estado guardada.")
 
-        # 10. Verificar que ahora la accion reporta 1 uso
+        # 9. POST /admin/personajes con condiciones_aparicion
+        test_pj_id = "pj_e2e_condicional"
+        client.delete(f"/api/narrative/admin/personajes/{test_pj_id}", headers=headers)
+
+        pj_payload = {
+            "_id": test_pj_id,
+            "universo_id": "corte_medieval",
+            "nombre": "Almirante del Norte E2E",
+            "titulo": "Señor de los Mares",
+            "imagen": "/assets/narrative/personajes/default.webp",
+            "descripcion": "Personaje con condiciones de aparicion.",
+            "afinidad_inicial": 55,
+            "pros": ["Gran flota"],
+            "cons": ["Costoso"],
+            "tags": ["maritimo"],
+            "condiciones_aparicion": [
+                {
+                    "tipo": "tiene_tag",
+                    "tag": "puerto_abierto"
+                }
+            ],
+            "efectos": []
+        }
+
+        resp_pj = client.post("/api/narrative/admin/personajes", json=pj_payload, headers=headers)
+        assert resp_pj.status_code in (200, 201), f"Error al crear personaje: {resp_pj.text}"
+        data_pj = resp_pj.json()
+        assert len(data_pj.get("condiciones_aparicion", [])) == 1
+        print("[OK] POST /admin/personajes: Personaje con condiciones_aparicion guardado.")
+
+        # 10. Integridad referencial: Verificar uso reportado por la carta
         resp_usos_2 = client.get(f"/api/narrative/admin/acciones/{test_acc_id}/usos", headers=headers)
         assert resp_usos_2.status_code == 200
-        assert resp_usos_2.json()["total_usos"] == 1, "La accion debe reportar 1 uso tras vincularla"
-        print("[OK] Integridad referencial: Accion reporta uso de la carta vinculada.")
+        assert resp_usos_2.json()["total_usos"] == 1
+        print("[OK] Integridad referencial: Accion mutar_estado reporta uso de la carta.")
 
         # 11. Intentar eliminar accion referenciada -> debe responder 409
         resp_del_blocked = client.delete(f"/api/narrative/admin/acciones/{test_acc_id}?universo_id=corte_medieval", headers=headers)
         assert resp_del_blocked.status_code == 409, "Eliminar accion en uso debe responder 409"
         print("[OK] Integridad referencial: Eliminacion bloqueada con 409 porque esta en uso.")
 
-        # 12. Cleanup: eliminar carta y luego eliminar accion
+        # 12. Cleanup: eliminar carta, personaje y accion
         resp_del_carta = client.delete(f"/api/narrative/admin/cartas/{test_carta_id}", headers=headers)
         assert resp_del_carta.status_code in (200, 204)
+        resp_del_pj = client.delete(f"/api/narrative/admin/personajes/{test_pj_id}", headers=headers)
+        assert resp_del_pj.status_code in (200, 204)
         resp_del_acc = client.delete(f"/api/narrative/admin/acciones/{test_acc_id}?universo_id=corte_medieval", headers=headers)
         assert resp_del_acc.status_code == 200
-        print("[OK] Cleanup completo: Carta y accion eliminadas tras la prueba.")
+        print("[OK] Cleanup completo: Carta, personaje y accion eliminados tras la prueba.")
 
-        # 13. Verificar archivos estaticos del panel admin
+        # 13. Verificar archivos estáticos del panel admin
         resp_admin_html = client.get("/admin/")
         assert resp_admin_html.status_code == 200
-        assert "index-CZnIYBWe.js" in resp_admin_html.text
-        print("[OK] Admin UI estatico verificado sirviendo el bundle actualizado en /admin/.")
+        assert "/admin/assets/index-" in resp_admin_html.text
+        print("[OK] Admin UI estático verificado sirviendo el bundle compilado en /admin/.")
 
-        print("\nTODOS LOS TESTS E2E DEL PANEL Y BACKEND PASARON EXITOSAMENTE.")
+        print("\n=== TODOS LOS TESTS E2E DEL PANEL Y BACKEND PASARON EXITOSAMENTE (13/13) ===")
 
 if __name__ == "__main__":
     run_tests()

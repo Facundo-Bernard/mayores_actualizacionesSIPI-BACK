@@ -7595,6 +7595,14 @@
             "title": "Tags",
             "default": []
           },
+          "condiciones_aparicion": {
+            "items": {
+              "$ref": "#/components/schemas/CondicionSchema"
+            },
+            "type": "array",
+            "title": "Condiciones Aparicion",
+            "default": []
+          },
           "efectos": {
             "items": {
               "$ref": "#/components/schemas/EfectoSchema"
@@ -7646,6 +7654,14 @@
             },
             "type": "array",
             "title": "Tags",
+            "default": []
+          },
+          "condiciones_aparicion": {
+            "items": {
+              "$ref": "#/components/schemas/CondicionSchema"
+            },
+            "type": "array",
+            "title": "Condiciones Aparicion",
             "default": []
           },
           "efectos": {
@@ -11359,6 +11375,18 @@
         ],
         "title": "OpcionNodoSchema"
       },
+      "OperacionMatematicaEnum": {
+        "type": "string",
+        "enum": [
+          "sumar",
+          "restar",
+          "multiplicar",
+          "dividir",
+          "porcentual",
+          "fijar"
+        ],
+        "title": "OperacionMatematicaEnum"
+      },
       "OperadorEnum": {
         "type": "string",
         "enum": [
@@ -11383,6 +11411,28 @@
               }
             ],
             "title": "Clave"
+          },
+          "ruta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ruta"
+          },
+          "operacion_matematica": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OperacionMatematicaEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "sumar"
           },
           "valor": {
             "anyOf": [
@@ -11547,6 +11597,14 @@
             "title": "Afinidad Inicial",
             "default": 50
           },
+          "condiciones_aparicion": {
+            "items": {
+              "$ref": "#/components/schemas/CondicionSchema"
+            },
+            "type": "array",
+            "title": "Condiciones Aparicion",
+            "default": []
+          },
           "efectos": {
             "items": {
               "$ref": "#/components/schemas/EfectoSchema"
@@ -11630,6 +11688,14 @@
             "title": "Afinidad Inicial",
             "default": 50
           },
+          "condiciones_aparicion": {
+            "items": {
+              "$ref": "#/components/schemas/CondicionSchema"
+            },
+            "type": "array",
+            "title": "Condiciones Aparicion",
+            "default": []
+          },
           "efectos": {
             "items": {
               "$ref": "#/components/schemas/EfectoSchema"
@@ -11664,7 +11730,8 @@
           "modificar_afinidad",
           "otorgar_tag",
           "remover_tag",
-          "amortiguar_danio"
+          "amortiguar_danio",
+          "mutar_estado"
         ],
         "title": "PrimitivaOperacionEnum"
       },

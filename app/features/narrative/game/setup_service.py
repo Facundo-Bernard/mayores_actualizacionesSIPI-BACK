@@ -34,7 +34,7 @@ from app.features.narrative.schemas.game_schemas import (
     SetupDesafioResponse,
 )
 from app.features.narrative.schemas.rules_schemas import EfectoSchema
-from app.features.narrative.engine.rule_engine import despachar_efectos
+from app.features.narrative.engine.rule_engine import despachar_efectos, evaluar_condiciones
 from app.features.narrative.engine.catalog_loader import obtener_catalogos_universo
 from app.features.narrative.game.endings_service import (
     verificar_colapso_recursos,
@@ -109,6 +109,23 @@ async def obtener_setup_desafio(user_id: int, date: str) -> SetupDesafioResponse
     cartas_docs = await db[COLL_CARDS].find({"_id": {"$in": c_ids}}).to_list(length=10)
 
     run_activa = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
+
+    estado_eval = run_activa or {
+        "recursos": cfg.get("atributos_iniciales", {}),
+        "afinidad": {},
+        "corte_activa": [],
+        "tags_activos": [],
+        "cartas_en_mano": [],
+    }
+
+    # Filtrar personajes y cartas que cumplan condiciones_aparicion
+    p_elegibles = [p for p in personajes_docs if evaluar_condiciones(p.get("condiciones_aparicion", []), estado_eval)]
+    if len(p_elegibles) >= 3:
+        personajes_docs = p_elegibles
+
+    c_elegibles = [c for c in cartas_docs if evaluar_condiciones(c.get("condiciones_aparicion", []), estado_eval)]
+    if len(c_elegibles) >= 3:
+        cartas_docs = c_elegibles
 
     return SetupDesafioResponse(
         date=date,
@@ -212,6 +229,11 @@ async def iniciar_partida(user_id: int, req: IniciarPartidaRequest) -> IniciarPa
         for c in cartas_docs:
             run["adquisiciones"][str(c["_id"])] = {"mes": 1, "tipo": "carta"}
         run["modificadores_pasivos"] = []
+        run["limites"] = {
+            k: {"min": r.get("min", 0), "max": r.get("max", 100)}
+            for k, r in recursos_mapa.items()
+        }
+        run["variables"] = {}
 
         cat_acciones, cat_frecuencias = await obtener_catalogos_universo(universo_id, db)
 
@@ -244,7 +266,17 @@ async def iniciar_partida(user_id: int, req: IniciarPartidaRequest) -> IniciarPa
         derrota = await verificar_colapso_recursos(run)
         if not derrota:
             pool_mensuales = cfg.get("pool_cartas_mensuales_ids", [])
-            cartas_ofrecidas_mes = random.sample(pool_mensuales, min(3, len(pool_mensuales)))
+            disponibles = [cid for cid in pool_mensuales if cid not in run.get("cartas_en_mano", [])]
+            if len(disponibles) < 3:
+                disponibles = pool_mensuales
+
+            cartas_docs_map = {c["_id"]: c for c in await db[COLL_CARDS].find({"_id": {"$in": disponibles}}).to_list(None)}
+            elegibles = [
+                cid for cid in disponibles
+                if evaluar_condiciones(cartas_docs_map.get(cid, {}).get("condiciones_aparicion", []), run)
+            ]
+            candidatas = elegibles if len(elegibles) >= 3 else (elegibles + [cid for cid in disponibles if cid not in elegibles])
+            cartas_ofrecidas_mes = random.sample(candidatas, min(3, len(candidatas)))
             run["turno_actual"]["cartas_ofrecidas_ids"] = cartas_ofrecidas_mes
 
         try:

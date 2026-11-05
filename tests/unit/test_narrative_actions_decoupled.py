@@ -194,3 +194,157 @@ def test_despachar_efectos_frecuencia_relativa_desde_adquisicion():
         catalogo_frecuencias=catalogo_frecuencias,
     )
     assert run_data["recursos"]["oro"] == 125
+
+
+def test_mutar_estado_operaciones_matematicas():
+    from app.features.narrative.enums import OperacionMatematicaEnum
+    run_data = {"recursos": {"oro": 100}}
+
+    # 1. Multiplicar: 100 * 1.5 = 150
+    accion_mul = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="recursos.oro",
+            operacion_matematica=OperacionMatematicaEnum.MULTIPLICAR,
+            valor=1.5,
+        ),
+    )
+    ejecutar_accion(accion_mul, run_data)
+    assert run_data["recursos"]["oro"] == 150
+
+    # 2. Dividir: 150 / 3 = 50
+    accion_div = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="recursos.oro",
+            operacion_matematica=OperacionMatematicaEnum.DIVIDIR,
+            valor=3,
+        ),
+    )
+    ejecutar_accion(accion_div, run_data)
+    assert run_data["recursos"]["oro"] == 50
+
+    # 3. División por cero: mantiene 50
+    accion_div_cero = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="recursos.oro",
+            operacion_matematica=OperacionMatematicaEnum.DIVIDIR,
+            valor=0,
+        ),
+    )
+    ejecutar_accion(accion_div_cero, run_data)
+    assert run_data["recursos"]["oro"] == 50
+
+    # 4. Porcentual: 50 + 20% = 60
+    accion_pct = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="recursos.oro",
+            operacion_matematica=OperacionMatematicaEnum.PORCENTUAL,
+            valor=20,
+        ),
+    )
+    ejecutar_accion(accion_pct, run_data)
+    assert run_data["recursos"]["oro"] == 60
+
+    # 5. Fijar: 60 -> 77
+    accion_fijar = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="recursos.oro",
+            operacion_matematica=OperacionMatematicaEnum.FIJAR,
+            valor=77,
+        ),
+    )
+    ejecutar_accion(accion_fijar, run_data)
+    assert run_data["recursos"]["oro"] == 77
+
+
+def test_mutar_estado_limites_dinamicos():
+    from app.features.narrative.enums import OperacionMatematicaEnum
+    run_data = {
+        "recursos": {"oro": 100},
+        "limites": {"oro": {"min": 0, "max": 120}},
+    }
+
+    # Reducir el límite máximo a 80 -> el recurso actual (100) debe ajustarse a 80 inmediatamente
+    accion_max = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="limites.oro.max",
+            operacion_matematica=OperacionMatematicaEnum.FIJAR,
+            valor=80,
+        ),
+    )
+    ejecutar_accion(accion_max, run_data)
+    assert run_data["limites"]["oro"]["max"] == 80
+    assert run_data["recursos"]["oro"] == 80
+
+    # Subir el límite mínimo a 50
+    accion_min = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="limites.oro.min",
+            operacion_matematica=OperacionMatematicaEnum.FIJAR,
+            valor=50,
+        ),
+    )
+    ejecutar_accion(accion_min, run_data)
+    assert run_data["limites"]["oro"]["min"] == 50
+
+
+def test_mutar_estado_afinidad_y_variables():
+    from app.features.narrative.enums import OperacionMatematicaEnum
+    run_data = {
+        "afinidad": {"pj_canciller": 40},
+        "variables": {},
+    }
+
+    # Afinidad portador
+    accion_af = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="afinidad.portador",
+            operacion_matematica=OperacionMatematicaEnum.SUMAR,
+            valor=25,
+        ),
+    )
+    ejecutar_accion(accion_af, run_data, duenio_id="pj_canciller")
+    assert run_data["afinidad"]["pj_canciller"] == 65
+
+    # Variable personalizada
+    accion_var = AccionReferenciadaSchema(
+        accion_id="mutar_estado",
+        parametros=ParametrosAccionSchema(
+            ruta="variables.inflacion",
+            operacion_matematica=OperacionMatematicaEnum.SUMAR,
+            valor=12.5,
+        ),
+    )
+    ejecutar_accion(accion_var, run_data)
+    assert run_data["variables"]["inflacion"] == 12.5
+
+
+def test_condiciones_aparicion_evaluacion():
+    run_data = {
+        "recursos": {"oro": 100},
+        "tags_activos": ["nobles_aliados"],
+        "afinidad": {"pj_canciller": 80},
+    }
+
+    # Carta 1: Requiere oro >= 50 (cumple)
+    cond_oro = CondicionSchema(
+        tipo=TipoCondicionEnum.COMPARAR_RECURSO,
+        clave="oro",
+        operador=OperadorEnum.MAYOR_IGUAL,
+        valor=50,
+    )
+    assert evaluar_condiciones([cond_oro], run_data) is True
+
+    # Carta 2: Requiere tag 'plebeyos_rebeldes' (no cumple)
+    cond_tag = CondicionSchema(
+        tipo=TipoCondicionEnum.TIENE_TAG,
+        tag="plebeyos_rebeldes",
+    )
+    assert evaluar_condiciones([cond_tag], run_data) is False

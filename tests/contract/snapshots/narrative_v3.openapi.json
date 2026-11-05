@@ -1726,6 +1726,18 @@
         ],
         "title": "OpcionClienteSchema"
       },
+      "OperacionMatematicaEnum": {
+        "type": "string",
+        "enum": [
+          "sumar",
+          "restar",
+          "multiplicar",
+          "dividir",
+          "porcentual",
+          "fijar"
+        ],
+        "title": "OperacionMatematicaEnum"
+      },
       "OperadorEnum": {
         "type": "string",
         "enum": [
@@ -1816,6 +1828,28 @@
               }
             ],
             "title": "Clave"
+          },
+          "ruta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ruta"
+          },
+          "operacion_matematica": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OperacionMatematicaEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "sumar"
           },
           "valor": {
             "anyOf": [

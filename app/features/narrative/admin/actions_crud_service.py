@@ -61,6 +61,21 @@ CATALOGO_PRIMITIVAS: List[Dict[str, Any]] = [
         "parametros_requeridos": ["clave", "valor"],
         "permitido_en": ["carta", "personaje"],
     },
+    {
+        "primitiva": PrimitivaOperacionEnum.MUTAR_ESTADO.value,
+        "nombre": "Mutar estado genérico",
+        "descripcion": "Mutación matemática sobre recursos, límites dinámicos, afinidades o variables con soporte aditivo, multiplicativo, divisorio, porcentual o fijado.",
+        "parametros_requeridos": ["ruta", "operacion_matematica", "valor"],
+        "soporta_operaciones": ["sumar", "restar", "multiplicar", "dividir", "porcentual", "fijar"],
+        "ejemplos_rutas": [
+            "recursos.<clave>",
+            "limites.<clave>.max",
+            "limites.<clave>.min",
+            "afinidad.<target>",
+            "variables.<clave>"
+        ],
+        "permitido_en": ["carta", "personaje"],
+    },
 ]
 
 # Eventos soportados por el ciclo de vida del motor

@@ -32,6 +32,14 @@ class TipoCalculoEnum(str, Enum):
     FIJO = "fijo"
     PORCENTUAL = "porcentual"
 
+class OperacionMatematicaEnum(str, Enum):
+    SUMAR = "sumar"
+    RESTAR = "restar"
+    MULTIPLICAR = "multiplicar"
+    DIVIDIR = "dividir"
+    PORCENTUAL = "porcentual"
+    FIJAR = "fijar"
+
 class RunPhaseEnum(str, Enum):
     SETUP_CORTE = "SETUP_CORTE"
     SETUP_CARTAS = "SETUP_CARTAS"

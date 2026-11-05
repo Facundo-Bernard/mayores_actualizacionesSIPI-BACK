@@ -36,7 +36,7 @@ from app.features.narrative.schemas.game_schemas import (
     AvanzarMesV2Response
 )
 from app.features.narrative.schemas.rules_schemas import EfectoSchema
-from app.features.narrative.engine.rule_engine import despachar_efectos
+from app.features.narrative.engine.rule_engine import despachar_efectos, evaluar_condiciones
 from app.features.narrative.engine.catalog_loader import obtener_catalogos_universo
 from app.features.narrative.game.endings_service import (
     verificar_colapso_recursos,
@@ -163,14 +163,20 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Respo
             puntos_ganados=puntos_ganados,
         )
 
-    # Sortear 3 cartas para el nuevo mes
+    # Sortear 3 cartas para el nuevo mes aplicando condiciones_aparicion
     challenge = await db[COLL_CHALLENGES].find_one({"game_id": "narrativo", "date": req.date})
     pool_mensuales = challenge.get("config", {}).get("pool_cartas_mensuales_ids", [])
     disponibles = [cid for cid in pool_mensuales if cid not in run["cartas_en_mano"]]
     if len(disponibles) < 3:
         disponibles = pool_mensuales
 
-    cartas_sorteadas = random.sample(disponibles, min(3, len(disponibles)))
+    cartas_docs_map = {c["_id"]: c for c in await db[COLL_CARDS].find({"_id": {"$in": disponibles}}).to_list(None)}
+    elegibles = [
+        cid for cid in disponibles
+        if evaluar_condiciones(cartas_docs_map.get(cid, {}).get("condiciones_aparicion", []), run)
+    ]
+    candidatas = elegibles if len(elegibles) >= 3 else (elegibles + [cid for cid in disponibles if cid not in elegibles])
+    cartas_sorteadas = random.sample(candidatas, min(3, len(candidatas)))
     run["turno_actual"] = {
         "cartas_ofrecidas_ids": cartas_sorteadas,
         "carta_elegida_id": None,

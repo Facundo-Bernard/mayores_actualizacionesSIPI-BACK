@@ -33,9 +33,13 @@ async def verificar_colapso_recursos(run_doc: Dict[str, Any]) -> Optional[Dict[s
     como 'game_over' y 'FINALIZADA', persistiendo el epílogo de la derrota.
     """
     recursos = run_doc.get("recursos", {})
+    limites = run_doc.get("limites", {})
     recurso_agotado = None
     for k, val in recursos.items():
-        if val is not None and float(val) <= 0:
+        limite_min = 0.0
+        if isinstance(limites.get(k), dict) and "min" in limites[k]:
+            limite_min = float(limites[k]["min"])
+        if val is not None and float(val) <= limite_min:
             recurso_agotado = k
             break
 
