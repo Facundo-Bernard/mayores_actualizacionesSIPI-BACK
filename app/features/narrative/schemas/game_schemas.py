@@ -108,6 +108,11 @@ class AvanzarMesRequest(BaseModel):
 
 class ReiniciarPartidaRequest(BaseModel):
     date: str
+    expected_version: Optional[int] = Field(
+        None,
+        ge=0,
+        description="Versión leída antes de reiniciar; si cambió, la operación responde 409.",
+    )
 
 class ConversacionesPosiblesRequest(BaseModel):
     personajes_ids: List[str] = Field(..., description="Lista de IDs de personajes en mano o corte")

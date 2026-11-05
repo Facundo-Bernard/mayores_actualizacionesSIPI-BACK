@@ -22,6 +22,7 @@ from app.features.daily_challenges.crucigrama.templates_facil import CRUCIGRAMA_
 from app.features.daily_challenges.crucigrama_admin.service import (
     get_scheduled_published_config,
 )
+from app.features.daily_challenges.games import crucigrama as crucigrama_game
 from app.main import app
 
 BASE = "/api/challenges/admin/crucigrama/templates"
@@ -409,7 +410,7 @@ async def _ejecutar_flujo():
 
             # Simular un mes de un solo día para no generar 28 tableros
             llamadas_generador = []
-            generador_real = daily_service.generate_crucigrama_challenge_for_date
+            generador_real = crucigrama_game.generate_crucigrama_challenge_for_date
 
             def _espia(fecha, dificultad, **kwargs):
                 llamadas_generador.append(
@@ -417,16 +418,16 @@ async def _ejecutar_flujo():
                 )
                 return generador_real(fecha, dificultad, **kwargs)
 
-            original_monthrange = daily_service.calendar.monthrange
-            daily_service.generate_crucigrama_challenge_for_date = _espia
-            daily_service.calendar.monthrange = lambda year, month: (0, 1)
+            original_monthrange = crucigrama_game.calendar.monthrange
+            crucigrama_game.generate_crucigrama_challenge_for_date = _espia
+            crucigrama_game.calendar.monthrange = lambda year, month: (0, 1)
             try:
                 resultado = await daily_service.generate_and_save_crucigrama_month(
                     2027, 2, force=True
                 )
             finally:
-                daily_service.generate_crucigrama_challenge_for_date = generador_real
-                daily_service.calendar.monthrange = original_monthrange
+                crucigrama_game.generate_crucigrama_challenge_for_date = generador_real
+                crucigrama_game.calendar.monthrange = original_monthrange
 
             assert resultado["success"]
             assert (FECHA_GENERACION, "facil") not in [

@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = ""
     JWT_SECRET_FALLBACK: Optional[str] = None
     JWT_EXPIRATION_DAYS: int = 180
+    GUEST_CREDENTIAL_EXPIRATION_DAYS: int = 30
     FRONTEND_URL: str = "http://localhost:5173"
 
     # Microservicio Autenticador Central (SSOT)

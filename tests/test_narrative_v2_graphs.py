@@ -31,6 +31,7 @@ from app.features.narrative.schemas.v2_graph_schemas import (
     ImpactoAfinidadSchema
 )
 from app.features.narrative.game.motor_v2.graph_engine import graph_engine
+from app.features.narrative.game.run_repository import persistir_run
 from app.scripts.seed_narrative_v2_graphs import seed_v2_graphs
 
 def test_v2_graph_full_suite():
@@ -40,8 +41,8 @@ async def _ejecutar_tests_v2():
     await connect_to_mongo()
     db = get_database()
 
-    # Asegurar siembra de grafos V2
-    if await db[COLL_V2_EVENTS].count_documents({}) == 0:
+    # Asegurar siembra de grafos V2: el seed usa $setOnInsert, así que no pisa contenido editado.
+    if await db[COLL_V2_EVENTS].count_documents({"_id": "evt_cometa_caido_v2"}) == 0:
         await seed_v2_graphs()
 
     # ========================================================================
@@ -198,6 +199,7 @@ async def _ejecutar_tests_v2():
         tipo="conversacion",
         fase="RESOLVER_CONVERSACION"
     )
+    await persistir_run(run_db)
 
     transport = ASGITransport(app=app)
     token = create_access_token({"id": test_user_id})

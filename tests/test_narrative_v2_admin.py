@@ -5,7 +5,7 @@ from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.core.database import connect_to_mongo, get_database
 
-def test_narrative_v2_admin_crud():
+def test_narrative_v2_admin_crud(admin_override):
     asyncio.run(_ejecutar_tests_admin())
 
 async def _ejecutar_tests_admin():

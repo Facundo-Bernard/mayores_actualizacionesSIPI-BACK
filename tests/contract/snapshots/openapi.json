@@ -162,6 +162,56 @@
         }
       }
     },
+    "/api/auth/guest-credential": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "summary": "Emitir o renovar una credencial firmada de invitado para el narrativo",
+        "description": "Devuelve una identidad de invitado verificable; el cliente no puede elegirla.",
+        "operationId": "endpoint_guest_credential_api_auth_guest_credential_post",
+        "parameters": [
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestCredentialResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/challenges/today": {
       "get": {
         "tags": [
@@ -2054,22 +2104,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2083,6 +2117,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2116,25 +2166,9 @@
           "Narrativo - Flujo de Juego"
         ],
         "summary": "Reiniciar partida de hoy para volver a Fase 0 (Setup limpio)",
-        "description": "Elimina la run en curso para permitir comenzar de nuevo desde el setup.",
+        "description": "Archiva la run en curso y habilita una nueva generación desde el setup.",
         "operationId": "endpoint_reiniciar_partida_api_narrative_partida_reiniciar_post",
         "parameters": [
-          {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
           {
             "name": "authorization",
             "in": "header",
@@ -2149,6 +2183,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2192,24 +2242,6 @@
         "summary": "Obtener conversaciones habilitadas según una mano de personajes (vía POST)",
         "description": "Retorna los diálogos de corte disponibles según los personajes provistos vía payload JSON.",
         "operationId": "endpoint_conversaciones_posibles_post_api_narrative_partida_conversaciones_posibles_post",
-        "parameters": [
-          {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2283,22 +2315,6 @@
               "title": "Universo Id"
             },
             "description": "Filtro opcional por universo"
-          },
-          {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
           }
         ],
         "responses": {
@@ -2351,22 +2367,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2380,6 +2380,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2429,22 +2445,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2458,6 +2458,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2507,22 +2523,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2536,6 +2536,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2585,22 +2601,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2614,6 +2614,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2664,22 +2680,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2693,6 +2693,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2751,22 +2767,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2780,6 +2780,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2838,22 +2854,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2867,6 +2867,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2925,22 +2941,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -2954,6 +2954,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -2995,22 +3011,6 @@
         "operationId": "endpoint_v2_iniciar_partida_api_narrative_v2_partida_iniciar_post",
         "parameters": [
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3024,6 +3024,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3071,22 +3087,6 @@
         "operationId": "endpoint_v2_elegir_carta_mes_api_narrative_v2_partida_elegir_carta_mes_post",
         "parameters": [
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3100,6 +3100,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3148,22 +3164,6 @@
         "deprecated": true,
         "parameters": [
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3177,6 +3177,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3225,22 +3241,6 @@
         "deprecated": true,
         "parameters": [
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3254,6 +3254,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3301,22 +3317,6 @@
         "operationId": "endpoint_v2_avanzar_mes_api_narrative_v2_partida_avanzar_mes_post",
         "parameters": [
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3330,6 +3330,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3389,22 +3405,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3418,6 +3418,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3455,22 +3471,6 @@
         "operationId": "endpoint_v2_avanzar_nodo_api_narrative_v2_partida_avanzar_nodo_post",
         "parameters": [
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3484,6 +3484,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3543,22 +3559,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3572,6 +3572,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3629,22 +3645,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3658,6 +3658,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -3707,22 +3723,6 @@
             "description": "Fecha YYYY-MM-DD"
           },
           {
-            "name": "x-guest-id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Guest-Id"
-            }
-          },
-          {
             "name": "authorization",
             "in": "header",
             "required": false,
@@ -3736,6 +3736,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "name": "x-guest-credential",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Guest-Credential"
             }
           }
         ],
@@ -6203,6 +6219,609 @@
         ]
       }
     },
+    "/api/narrative/admin/operaciones": {
+      "get": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Get Operaciones Motor",
+        "description": "Catálogo canónico de operaciones/primitivas ejecutables por el motor.",
+        "operationId": "get_operaciones_motor_api_narrative_admin_operaciones_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Get Operaciones Motor Api Narrative Admin Operaciones Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/narrative/admin/eventos-motor": {
+      "get": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Get Eventos Motor",
+        "description": "Eventos del ciclo de vida del motor donde se pueden despachar efectos.",
+        "operationId": "get_eventos_motor_api_narrative_admin_eventos_motor_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Get Eventos Motor Api Narrative Admin Eventos Motor Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/narrative/admin/acciones": {
+      "get": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Get Acciones",
+        "description": "Lista las acciones registradas en el catálogo.",
+        "operationId": "get_acciones_api_narrative_admin_acciones_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universo_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por universo",
+              "title": "Universo Id"
+            },
+            "description": "Filtrar por universo"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccionCatalogoResponse"
+                  },
+                  "title": "Response Get Acciones Api Narrative Admin Acciones Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Post Accion",
+        "description": "Crea una nueva acción en el catálogo de un universo.",
+        "operationId": "post_accion_api_narrative_admin_acciones_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccionCatalogoCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccionCatalogoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/narrative/admin/acciones/{accion_id}": {
+      "get": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Get Accion",
+        "description": "Obtiene el detalle de una acción de catálogo.",
+        "operationId": "get_accion_api_narrative_admin_acciones__accion_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID de la acción",
+              "title": "Accion Id"
+            },
+            "description": "ID de la acción"
+          },
+          {
+            "name": "universo_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Universo opcional",
+              "title": "Universo Id"
+            },
+            "description": "Universo opcional"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccionCatalogoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Put Accion",
+        "description": "Actualiza una acción existente con control de concurrencia optimista.",
+        "operationId": "put_accion_api_narrative_admin_acciones__accion_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID de la acción",
+              "title": "Accion Id"
+            },
+            "description": "ID de la acción"
+          },
+          {
+            "name": "universo_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Universo opcional",
+              "title": "Universo Id"
+            },
+            "description": "Universo opcional"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccionCatalogoUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccionCatalogoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Delete Accion",
+        "description": "Elimina una acción si no está siendo utilizada por cartas o personajes.",
+        "operationId": "delete_accion_api_narrative_admin_acciones__accion_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID de la acción",
+              "title": "Accion Id"
+            },
+            "description": "ID de la acción"
+          },
+          {
+            "name": "universo_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Universo opcional",
+              "title": "Universo Id"
+            },
+            "description": "Universo opcional"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/narrative/admin/acciones/{accion_id}/usos": {
+      "get": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Get Usos Accion",
+        "description": "Reporta qué cartas y personajes hacen referencia a esta acción.",
+        "operationId": "get_usos_accion_api_narrative_admin_acciones__accion_id__usos_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID de la acción",
+              "title": "Accion Id"
+            },
+            "description": "ID de la acción"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/narrative/admin/frecuencias": {
+      "get": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Get Frecuencias",
+        "description": "Obtiene el documento de frecuencias configurado para el universo.",
+        "operationId": "get_frecuencias_api_narrative_admin_frecuencias_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universo_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "ID del universo",
+              "default": "corte_medieval",
+              "title": "Universo Id"
+            },
+            "description": "ID del universo"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrecuenciasUniversoDocument"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/narrative/admin/frecuencias/{universo_id}": {
+      "put": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Put Frecuencias",
+        "description": "Actualiza el catálogo de frecuencias del universo con OCC.",
+        "operationId": "put_frecuencias_api_narrative_admin_frecuencias__universo_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universo_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID del universo",
+              "title": "Universo Id"
+            },
+            "description": "ID del universo"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FrecuenciasUniversoUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrecuenciasUniversoDocument"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/narrative/admin/frecuencias/{frecuencia_id}/usos": {
+      "get": {
+        "tags": [
+          "Narrativo - Administración"
+        ],
+        "summary": "Get Usos Frecuencia",
+        "description": "Reporta qué cartas y personajes hacen referencia a esta frecuencia.",
+        "operationId": "get_usos_frecuencia_api_narrative_admin_frecuencias__frecuencia_id__usos_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "frecuencia_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID de la frecuencia",
+              "title": "Frecuencia Id"
+            },
+            "description": "ID de la frecuencia"
+          },
+          {
+            "name": "universo_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Universo opcional",
+              "title": "Universo Id"
+            },
+            "description": "Universo opcional"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/sso/canjear-ticket": {
       "post": {
         "tags": [
@@ -6350,6 +6969,224 @@
   },
   "components": {
     "schemas": {
+      "AccionCatalogoCreateRequest": {
+        "properties": {
+          "_id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Identificador único de la acción en el universo"
+          },
+          "universo_id": {
+            "type": "string",
+            "title": "Universo Id",
+            "description": "ID del universo al que pertenece"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre",
+            "description": "Nombre amigable para el catálogo"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion",
+            "description": "Descripción detallada",
+            "default": ""
+          },
+          "primitiva": {
+            "$ref": "#/components/schemas/PrimitivaOperacionEnum",
+            "description": "Primitiva del motor que ejecuta la mutación"
+          },
+          "permitido_en": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permitido En",
+            "description": "['carta', 'personaje']"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo",
+            "description": "Si está disponible para seleccionar",
+            "default": true
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "description": "Versión para control de concurrencia OCC",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "_id",
+          "universo_id",
+          "nombre",
+          "primitiva"
+        ],
+        "title": "AccionCatalogoCreateRequest"
+      },
+      "AccionCatalogoResponse": {
+        "properties": {
+          "_id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "universo_id": {
+            "type": "string",
+            "title": "Universo Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion",
+            "default": ""
+          },
+          "primitiva": {
+            "$ref": "#/components/schemas/PrimitivaOperacionEnum"
+          },
+          "permitido_en": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permitido En",
+            "default": [
+              "carta",
+              "personaje"
+            ]
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo",
+            "default": true
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "default": 1
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "_id",
+          "universo_id",
+          "nombre",
+          "primitiva"
+        ],
+        "title": "AccionCatalogoResponse"
+      },
+      "AccionCatalogoUpdateRequest": {
+        "properties": {
+          "nombre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre"
+          },
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "primitiva": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrimitivaOperacionEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "permitido_en": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permitido En"
+          },
+          "activo": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activo"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          }
+        },
+        "type": "object",
+        "title": "AccionCatalogoUpdateRequest"
+      },
+      "AccionReferenciadaSchema": {
+        "properties": {
+          "accion_id": {
+            "type": "string",
+            "title": "Accion Id"
+          },
+          "parametros": {
+            "$ref": "#/components/schemas/ParametrosAccionSchema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "accion_id"
+        ],
+        "title": "AccionReferenciadaSchema"
+      },
       "AccionSchema": {
         "properties": {
           "tipo": {
@@ -6416,7 +7253,8 @@
         "required": [
           "tipo"
         ],
-        "title": "AccionSchema"
+        "title": "AccionSchema",
+        "description": "Schema legacy de acción embebida directa."
       },
       "AdjustUserEconomyRequest": {
         "properties": {
@@ -8608,8 +9446,37 @@
       },
       "EfectoSchema": {
         "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "frecuencia_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frecuencia Id"
+          },
           "disparador": {
-            "$ref": "#/components/schemas/DisparadorEnum"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DisparadorEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "condiciones": {
             "items": {
@@ -8619,15 +9486,26 @@
             "title": "Condiciones",
             "default": []
           },
+          "acciones": {
+            "items": {
+              "$ref": "#/components/schemas/AccionReferenciadaSchema"
+            },
+            "type": "array",
+            "title": "Acciones",
+            "default": []
+          },
           "accion": {
-            "$ref": "#/components/schemas/AccionSchema"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccionSchema"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
-        "required": [
-          "disparador",
-          "accion"
-        ],
         "title": "EfectoSchema"
       },
       "ElegirCartaMesRequest": {
@@ -9454,6 +10332,102 @@
         ],
         "title": "FinalizacionResponse"
       },
+      "FrecuenciasUniversoDocument": {
+        "properties": {
+          "_id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "universo_id": {
+            "type": "string",
+            "title": "Universo Id"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "default": 1
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemFrecuenciaSchema"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "_id",
+          "universo_id"
+        ],
+        "title": "FrecuenciasUniversoDocument"
+      },
+      "FrecuenciasUniversoUpdateRequest": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemFrecuenciaSchema"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "FrecuenciasUniversoUpdateRequest"
+      },
+      "GuestCredentialResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "guest_id": {
+            "type": "string",
+            "title": "Guest Id"
+          },
+          "credential": {
+            "type": "string",
+            "title": "Credential"
+          },
+          "expires_in_days": {
+            "type": "integer",
+            "title": "Expires In Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "guest_id",
+          "credential",
+          "expires_in_days"
+        ],
+        "title": "GuestCredentialResponse"
+      },
       "GuestMigrationRequest": {
         "properties": {
           "guest_id": {
@@ -9884,6 +10858,59 @@
           "tags_activos"
         ],
         "title": "InventarioPartidaResponse"
+      },
+      "ItemFrecuenciaSchema": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Identificador de la frecuencia ej: 'al_obtener', 'cada_2_meses'"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre",
+            "description": "Nombre legible ej: 'Cada 2 meses'"
+          },
+          "evento_motor": {
+            "type": "string",
+            "title": "Evento Motor",
+            "description": "'al_obtener' | 'inicio_mes'"
+          },
+          "cada": {
+            "type": "integer",
+            "maximum": 12.0,
+            "minimum": 1.0,
+            "title": "Cada",
+            "description": "Intervalo de meses (solo si evento_motor='inicio_mes')",
+            "default": 1
+          },
+          "desfase": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Desfase",
+            "description": "Desfase de meses antes del primer disparo",
+            "default": 0
+          },
+          "conteo_desde": {
+            "type": "string",
+            "title": "Conteo Desde",
+            "description": "'adquisicion' | 'inicio_partida'",
+            "default": "adquisicion"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo",
+            "description": "Si está activa",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "evento_motor"
+        ],
+        "title": "ItemFrecuenciaSchema"
       },
       "LoginCodigoRequest": {
         "properties": {
@@ -10344,6 +11371,91 @@
         ],
         "title": "OperadorEnum"
       },
+      "ParametrosAccionSchema": {
+        "properties": {
+          "clave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clave"
+          },
+          "valor": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor",
+            "default": 0.0
+          },
+          "tipo_calculo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TipoCalculoEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "fijo"
+          },
+          "destino": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destino",
+            "default": "portador"
+          },
+          "personaje_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Personaje Id"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tag"
+          },
+          "porcentaje": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Porcentaje"
+          }
+        },
+        "type": "object",
+        "title": "ParametrosAccionSchema"
+      },
       "PersonajeConversacionProbabilidad": {
         "properties": {
           "idConversacion": {
@@ -10545,6 +11657,17 @@
         ],
         "title": "PersonajeResponse"
       },
+      "PrimitivaOperacionEnum": {
+        "type": "string",
+        "enum": [
+          "modificar_recurso",
+          "modificar_afinidad",
+          "otorgar_tag",
+          "remover_tag",
+          "amortiguar_danio"
+        ],
+        "title": "PrimitivaOperacionEnum"
+      },
       "ProbabilidadDesenlaceCalculada": {
         "properties": {
           "resultado_id": {
@@ -10722,6 +11845,19 @@
           "date": {
             "type": "string",
             "title": "Date"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version",
+            "description": "Versión leída antes de reiniciar; si cambió, la operación responde 409."
           }
         },
         "type": "object",

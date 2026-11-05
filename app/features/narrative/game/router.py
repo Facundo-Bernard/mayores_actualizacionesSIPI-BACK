@@ -5,10 +5,9 @@ Controladores FastAPI del módulo de Juego Narrativo:
 - router_v2 (/api/narrative/v2/partida): Ciclo reactivo nativo V2 (iniciar, draft, evento, diálogo, avance, estado).
 """
 
-from fastapi import APIRouter, Header, Query, HTTPException, Depends
+from fastapi import APIRouter, Query, Depends
 from typing import Optional, List
 
-from app.core.security import decode_access_token
 from app.features.narrative.schemas.game_schemas import (
     IniciarPartidaRequest,
     ElegirCartaMesRequest,
@@ -69,24 +68,10 @@ from app.features.narrative.game.motor_v1.modals import (
     obtener_draft_actual_partida
 )
 from app.features.narrative.game.turn_state import obtener_turno_actual
-from app.features.narrative.game.identity import cargar_guest_id
+from app.features.narrative.game.identity import obtener_identidad_narrativa
 from app.features.narrative.admin.crud_service import (
     obtener_conversaciones_posibles_por_personajes
 )
-
-def _get_current_user_id(authorization: Optional[str] = Header(None)) -> int:
-    """Extrae el ID del usuario del JWT Bearer token o usa invitado (0) si no hay cabecera."""
-    if not authorization:
-        return 0
-    parts = authorization.split()
-    if len(parts) == 2 and parts[0].lower() == "bearer":
-        payload = decode_access_token(parts[1])
-        if payload and "id" in payload:
-            try:
-                return int(payload["id"])
-            except (ValueError, TypeError):
-                return 0
-    return 0
 
 # ============================================================================
 # ROUTER V2: CICLO MENSUAL NATIVO LIGERO (/api/narrative/v2/partida)
@@ -94,7 +79,6 @@ def _get_current_user_id(authorization: Optional[str] = Header(None)) -> int:
 
 router_v2 = APIRouter(
     prefix="/api/narrative/v2/partida",
-    dependencies=[Depends(cargar_guest_id)],
 )
 
 @router_v2.post(
@@ -105,7 +89,7 @@ router_v2 = APIRouter(
 )
 async def endpoint_v2_iniciar_partida(
     req: IniciarPartidaRequest,
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Inicia la partida para la fecha actual devolviendo recursos y mazo de draft inicial."""
     return await iniciar_partida(user_id=user_id, req=req)
@@ -118,7 +102,7 @@ async def endpoint_v2_iniciar_partida(
 )
 async def endpoint_v2_elegir_carta_mes(
     req: ElegirCartaMesRequest,
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Aplica la carta seleccionada y retorna el evento sorteado del mes (o finalización si colapsó)."""
     return await elegir_carta_mes(user_id=user_id, req=req)
@@ -132,7 +116,7 @@ async def endpoint_v2_elegir_carta_mes(
 )
 async def endpoint_v2_decidir_evento(
     req: DecidirEventoRequest,
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Resuelve la tirada plana V1. En partidas V2 responde 409 y se debe usar /avanzar-nodo."""
     return await decidir_evento(user_id=user_id, req=req)
@@ -146,7 +130,7 @@ async def endpoint_v2_decidir_evento(
 )
 async def endpoint_v2_responder_conversacion(
     req: ResponderConversacionRequest,
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Resuelve el diálogo plano V1. En partidas V2 responde 409 y se debe usar /avanzar-nodo."""
     return await responder_conversacion(user_id=user_id, req=req)
@@ -159,7 +143,7 @@ async def endpoint_v2_responder_conversacion(
 )
 async def endpoint_v2_avanzar_mes(
     req: AvanzarMesRequest,
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Aplica pasivos mensuales, guarda el historial y avanza al siguiente mes (o decreta fin de año)."""
     return await avanzar_mes(user_id=user_id, req=req)
@@ -172,7 +156,7 @@ async def endpoint_v2_avanzar_mes(
 )
 async def endpoint_v2_obtener_estado_turno(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Permite al frontend restaurar el estado exacto del turno tras recargar la página."""
     return await obtener_turno_actual(user_id=user_id, date=date)
@@ -185,7 +169,7 @@ async def endpoint_v2_obtener_estado_turno(
 )
 async def endpoint_v2_avanzar_nodo(
     req: AvanzarNodoV2Request,
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """
     Avanza un paso en el árbol narrativo activo.
@@ -202,7 +186,7 @@ async def endpoint_v2_avanzar_nodo(
 )
 async def endpoint_v2_obtener_grafo_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Permite restaurar el nodo activo tras recargar la página."""
     return await obtener_grafo_actual_v2(user_id=user_id, date=date)
@@ -215,7 +199,7 @@ async def endpoint_v2_obtener_grafo_actual(
 )
 async def endpoint_v2_iniciar_evento_grafo(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Inicia un evento V2 del pool respetando arcos narrativos y requisitos previos."""
     return await iniciar_evento_mes_v2(user_id=user_id, date=date)
@@ -228,7 +212,7 @@ async def endpoint_v2_iniciar_evento_grafo(
 )
 async def endpoint_v2_iniciar_conversacion_grafo(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Inicia una conversación V2 si los requisitos de consejeros activos se cumplen."""
     return await iniciar_conversacion_mes_v2(user_id=user_id, date=date)
@@ -239,7 +223,6 @@ async def endpoint_v2_iniciar_conversacion_grafo(
 
 router = APIRouter(
     prefix="/api/narrative/partida",
-    dependencies=[Depends(cargar_guest_id)],
 )
 
 @router.get(
@@ -250,7 +233,7 @@ router = APIRouter(
 )
 async def endpoint_obtener_setup(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Consulta los 5 personajes y 5 cartas ofrecidas para la selección inicial del día."""
     return await obtener_setup_desafio(user_id=user_id, date=date)
@@ -262,10 +245,14 @@ async def endpoint_obtener_setup(
 )
 async def endpoint_reiniciar_partida(
     req: ReiniciarPartidaRequest,
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
-    """Elimina la run en curso para permitir comenzar de nuevo desde el setup."""
-    return await reiniciar_partida(user_id=user_id, date=req.date)
+    """Archiva la run en curso y habilita una nueva generación desde el setup."""
+    return await reiniciar_partida(
+        user_id=user_id,
+        date=req.date,
+        expected_version=req.expected_version,
+    )
 
 @router.post(
     "/conversaciones-posibles",
@@ -305,7 +292,7 @@ async def endpoint_conversaciones_posibles_get(
 )
 async def endpoint_obtener_historial_partida(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Retorna la bitácora histórica mes a mes con todas las elecciones y balances."""
     return await obtener_historial_partida(user_id=user_id, date=date)
@@ -318,7 +305,7 @@ async def endpoint_obtener_historial_partida(
 )
 async def endpoint_obtener_inventario_partida(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Retorna el mazo de cartas acumuladas y los tags activos del jugador."""
     return await obtener_inventario_partida(user_id=user_id, date=date)
@@ -331,7 +318,7 @@ async def endpoint_obtener_inventario_partida(
 )
 async def endpoint_obtener_corte_partida(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Retorna los 3 consejeros de la corte y su nivel de afinidad actual (0 a 100)."""
     return await obtener_corte_partida(user_id=user_id, date=date)
@@ -344,7 +331,7 @@ async def endpoint_obtener_corte_partida(
 )
 async def endpoint_obtener_finalizacion_partida(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Retorna los datos del epílogo final (derrota o victoria anual)."""
     return await obtener_finalizacion_partida(user_id=user_id, date=date)
@@ -358,7 +345,7 @@ async def endpoint_obtener_finalizacion_partida(
 )
 async def endpoint_obtener_evento_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Retorna únicamente el evento del mes activo con sus opciones y probabilidades."""
     return await obtener_evento_actual_partida(user_id=user_id, date=date)
@@ -372,7 +359,7 @@ async def endpoint_obtener_evento_actual(
 )
 async def endpoint_obtener_conversacion_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Retorna únicamente el diálogo activo del mes o null si no se activó diálogo."""
     return await obtener_conversacion_actual_partida(user_id=user_id, date=date)
@@ -386,7 +373,7 @@ async def endpoint_obtener_conversacion_actual(
 )
 async def endpoint_obtener_resultado_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Retorna únicamente el resultado obtenido tras resolver el evento."""
     return await obtener_resultado_actual_partida(user_id=user_id, date=date)
@@ -400,7 +387,7 @@ async def endpoint_obtener_resultado_actual(
 )
 async def endpoint_obtener_draft_actual(
     date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Fecha YYYY-MM-DD"),
-    user_id: int = Depends(_get_current_user_id)
+    user_id: int = Depends(obtener_identidad_narrativa)
 ):
     """Retorna únicamente las 3 cartas ofrecidas en el draft mensual activo."""
     return await obtener_draft_actual_partida(user_id=user_id, date=date)

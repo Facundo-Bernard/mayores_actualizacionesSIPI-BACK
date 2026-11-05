@@ -2,8 +2,8 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "metadata": {
     "titulo": "Especificación de Endpoints POST - Motor Narrativo Roguelite",
-    "version": "1.0.0",
-    "fecha_actualizacion": "2026-10-15",
+    "version": "1.1.0",
+    "fecha_actualizacion": "2026-11-05",
     "base_url_desarrollo": "http://localhost:8080",
     "base_url_produccion": "/api/narrative",
     "headers_requeridos": {
@@ -14,7 +14,8 @@
       "El campo '_id' o 'id' representa la clave primaria única de cada entidad.",
       "Todos los campos numéricos de afinidad manejan rango de 0 a 100 (50 por defecto).",
       "El patrón ECA (Event - Condition - Action) es compartido por Personajes, Cartas, Desenlaces y Eventos.",
-      "Para los endpoints de administración, todas las referencias relacionales (universo_id, personajeId, resultado_id) deben existir previamente en la base de datos."
+      "Para los endpoints de administración, todas las referencias relacionales (universo_id, personajeId, resultado_id) deben existir previamente en la base de datos.",
+      "Los endpoints de partida aceptan Authorization: Bearer <JWT_TOKEN> o, para invitados, X-Guest-Credential con la credencial emitida por POST /api/auth/guest-credential. Sin credencial válida responden 401."
     ]
   },
   "catalogo_enums": {
@@ -546,9 +547,10 @@
     "6_reiniciar_partida": {
       "metodo": "POST",
       "url": "/api/narrative/partida/reiniciar",
-      "descripcion": "Reinicia el estado de la partida viva del alumno para el desafío del día indicado.",
+      "descripcion": "Archiva la generación activa de la partida del alumno y habilita una nueva desde el setup. No otorga una recompensa nueva por el mismo día. Si se envía expected_version y no coincide con la versión vigente, responde 409.",
       "ejemplo_payload": {
-        "date": "2026-10-15"
+        "date": "2026-10-15",
+        "expected_version": 3
       }
     }
   }

@@ -96,6 +96,18 @@ def make_token():
     return _make
 
 
+@pytest.fixture
+def make_guest_credential():
+    """Emite una credencial de invitado firmada y sus headers para pruebas HTTP."""
+    from app.core.security import crear_credencial_invitado, generar_guest_id
+
+    def _make(guest_id: str | None = None):
+        guest_id = guest_id or generar_guest_id()
+        return guest_id, {"X-Guest-Credential": crear_credencial_invitado(guest_id)}
+
+    return _make
+
+
 class _Cleanup:
     def __init__(self):
         self._ops = []

@@ -12,6 +12,7 @@ from app.features.daily_challenges.crucigrama.bans import clean_words
 from app.features.daily_challenges.crucigrama.generator import (
     generate_crucigrama_challenge_for_date,
 )
+from app.features.daily_challenges.games import crucigrama as crucigrama_game
 
 
 def test_clean_words_normaliza_deduplica_y_ordena():
@@ -67,9 +68,9 @@ async def _mensual():
     await coleccion.delete_many({"game_id": "crucigrama", "date": fecha})
     llamadas = []
 
-    original_monthrange = daily_service.calendar.monthrange
-    original_generador = daily_service.generate_crucigrama_challenge_for_date
-    original_bans = daily_service.get_global_banned_words
+    original_monthrange = crucigrama_game.calendar.monthrange
+    original_generador = crucigrama_game.generate_crucigrama_challenge_for_date
+    original_bans = crucigrama_game.get_global_banned_words
 
     async def _bans_falsos():
         return ["NOCHE"]
@@ -85,17 +86,17 @@ async def _mensual():
             "date": fecha_dia,
         }
 
-    daily_service.calendar.monthrange = lambda year, month: (0, 1)
-    daily_service.get_global_banned_words = _bans_falsos
-    daily_service.generate_crucigrama_challenge_for_date = _generador_falso
+    crucigrama_game.calendar.monthrange = lambda year, month: (0, 1)
+    crucigrama_game.get_global_banned_words = _bans_falsos
+    crucigrama_game.generate_crucigrama_challenge_for_date = _generador_falso
     try:
         resultado = await daily_service.generate_and_save_crucigrama_month(
             2029, 1, force=True
         )
     finally:
-        daily_service.calendar.monthrange = original_monthrange
-        daily_service.generate_crucigrama_challenge_for_date = original_generador
-        daily_service.get_global_banned_words = original_bans
+        crucigrama_game.calendar.monthrange = original_monthrange
+        crucigrama_game.generate_crucigrama_challenge_for_date = original_generador
+        crucigrama_game.get_global_banned_words = original_bans
         await coleccion.delete_many({"game_id": "crucigrama", "date": fecha})
 
     assert resultado["success"]

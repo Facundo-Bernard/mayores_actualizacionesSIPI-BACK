@@ -234,15 +234,13 @@ class GraphTraversalEngine:
         nodo_schema = NodoNarrativoSchema(**nodo_raiz_dict)
         nodo_cliente = nodo_schema.to_cliente_schema(run)
 
-        # Actualizar partida
+        # La preparación es en memoria; el coordinador confirma la transición completa.
         run["grafo_activo"] = {
             "tipo": tipo,
             "grafo_id": grafo_id,
             "nodo_actual_id": nodo_raiz_id
         }
         run["fase_actual"] = fase
-
-        await persistir_run(run, ["grafo_activo", "fase_actual"])
 
         return EstadoGrafoV2Response(
             fase_actual=fase,

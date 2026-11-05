@@ -20,6 +20,7 @@ from app.features.narrative.schemas.v2_graph_schemas import (
 )
 from app.features.narrative.game.motor_v2.graph_engine import graph_engine
 from app.features.narrative.game.identity import filtro_run
+from app.features.narrative.game.run_repository import persistir_run
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +78,11 @@ async def obtener_grafo_actual_v2(user_id: int, date: str) -> Optional[EstadoGra
     Si no hay ningún grafo activo en la partida, retorna None.
     """
     run = await _obtener_run_activo(user_id, date)
+    return await proyectar_grafo_actual(run)
+
+
+async def proyectar_grafo_actual(run: Dict[str, Any]) -> Optional[EstadoGrafoV2Response]:
+    """Proyecta el grafo desde una copia de run ya leída, sin volver a consultar por usuario/fecha."""
     grafo_activo = run.get("grafo_activo")
     if not grafo_activo:
         return None
@@ -158,12 +164,14 @@ async def iniciar_evento_mes_v2(user_id: int, date: str) -> EstadoGrafoV2Respons
             detail="No se encontraron eventos V2 disponibles o elegibles para sortear."
         )
 
-    return await graph_engine.iniciar_grafo_en_partida(
+    estado = await graph_engine.iniciar_grafo_en_partida(
         run=run,
         grafo=evento,
         tipo="evento",
         fase=RunPhaseEnum.TOMA_DECISION_EVENTO.value
     )
+    await persistir_run(run)
+    return estado
 
 async def iniciar_conversacion_mes_v2(user_id: int, date: str) -> Optional[EstadoGrafoV2Response]:
     """
@@ -185,9 +193,11 @@ async def iniciar_conversacion_mes_v2(user_id: int, date: str) -> Optional[Estad
     if not conv:
         return None
 
-    return await graph_engine.iniciar_grafo_en_partida(
+    estado = await graph_engine.iniciar_grafo_en_partida(
         run=run,
         grafo=conv,
         tipo="conversacion",
         fase=RunPhaseEnum.RESOLVER_CONVERSACION.value
     )
+    await persistir_run(run)
+    return estado

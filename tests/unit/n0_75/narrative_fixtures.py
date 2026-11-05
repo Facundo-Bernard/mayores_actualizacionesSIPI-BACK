@@ -35,11 +35,15 @@ class FakeCollection:
         self.find_queries.append(deepcopy(query))
         return FakeCursor([doc for doc in self.documents if self._matches(doc, query)])
 
-    async def find_one(self, query, projection=None):
+    async def find_one(self, query, projection=None, sort=None):
         self.find_one_queries.append(deepcopy(query))
+        matches = [doc for doc in self.documents if self._matches(doc, query)]
+        if sort:
+            for key, direction in reversed(list(sort)):
+                matches.sort(key=lambda doc: doc.get(key, 0) or 0, reverse=direction < 0)
         # Motor entrega un dict mutable al servicio; conservar esa referencia permite
         # observar exactamente las mutaciones de dominio sin implementar escrituras.
-        return next((doc for doc in self.documents if self._matches(doc, query)), None)
+        return matches[0] if matches else None
 
 
 class FakeDB:

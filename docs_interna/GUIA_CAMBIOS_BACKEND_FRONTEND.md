@@ -1,8 +1,8 @@
 # Cambios de backend para el frontend
 
-> **Estado:** 4/11/2026 · rama `feature/refactor-backend`.
+> **Estado:** 5/11/2026 · rama `feature/refactor-backend`.
 > **Alcance:** contrato que consume la SPA de juegos (Ionic) y el juego narrativo. El panel administrativo queda fuera de esta guía.
-> **Premisa:** el contrato se mantuvo. No hay rutas, métodos, campos obligatorios ni códigos del camino feliz eliminados o renombrados. Lo nuevo es aditivo y el frontend puede seguir funcionando sin cambios; las acciones marcadas como **requeridas** son para corregir bugs o aprovechar datos que hoy se pierden.
+> **Premisa:** en clásicos y economía el contrato sigue siendo aditivo. En el **narrativo cambió la autenticación**: ya no existe el invitado compartido; el invitado debe usar una credencial firmada por el backend (§3.3). Las acciones marcadas como **requeridas** son necesarias para no romper el flujo de invitado o para aprovechar datos que hoy se pierden.
 
 ---
 

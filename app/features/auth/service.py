@@ -1,8 +1,14 @@
 import httpx
 from datetime import datetime, date, timezone
+from typing import Optional
 from fastapi import HTTPException, status
 from app.core.database import get_database
-from app.core.security import create_access_token
+from app.core.security import (
+    GUEST_ID_PATTERN,
+    crear_credencial_invitado,
+    decode_guest_credential,
+    generar_guest_id,
+)
 from app.core.config import settings
 from app.features.auth.schemas import (
     LoginSistemasRequest, LoginCodigoRequest, VerificarTokenRequest,
@@ -319,4 +325,29 @@ async def register_usuario(req: RegisterRequest, is_admin_creation: bool = False
         "message": data.get("message") or "Usuario registrado con éxito.",
         "token": token,
         "user": format_user_response(local_user)
+    }
+
+
+def emitir_credencial_invitado(credencial_actual: Optional[str]) -> dict:
+    """
+    Emite una credencial de invitado firmada por el backend.
+
+    Si el cliente presenta una credencial vigente, se reutiliza su ``guest_id`` para
+    que el invitado conserve su partida; si no, se genera una identidad nueva.
+    """
+    guest_id = None
+    if credencial_actual:
+        payload = decode_guest_credential(credencial_actual)
+        candidato = (payload or {}).get("sub")
+        if isinstance(candidato, str) and GUEST_ID_PATTERN.match(candidato):
+            guest_id = candidato
+
+    if not guest_id:
+        guest_id = generar_guest_id()
+
+    return {
+        "success": True,
+        "guest_id": guest_id,
+        "credential": crear_credencial_invitado(guest_id),
+        "expires_in_days": settings.GUEST_CREDENTIAL_EXPIRATION_DAYS,
     }

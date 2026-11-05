@@ -75,6 +75,65 @@ async def test_derrota_no_acredita_ni_consume_clave(test_db, cleanup, seeded_use
 
     intento = await test_db[COLL_USER_ATTEMPTS].find_one({"user_id": user_id, "date": DATE})
     assert intento["status"] == "failed"
+    assert intento["score"] == 0
+    assert intento["stars"] == 0
+
+
+@pytest.mark.asyncio
+async def test_intento_narrativo_usa_catalogo_editable_del_panel(
+    test_db, cleanup, seeded_user
+):
+    user = await seeded_user(puntos=0)
+    user_id = user["id"]
+    await test_db["configuracion_economia"].replace_one(
+        {"_id": "global_economy"},
+        {"puntos_por_calificacion": {"S": 123, "A": 90, "B": 75, "C": 50, "F": 0}},
+        upsert=True,
+    )
+    cleanup.add("configuracion_economia", {"_id": "global_economy"})
+
+    assert await sincronizar_intento_usuario(_run(user_id, rango="S")) == 123
+
+    intento = await test_db[COLL_USER_ATTEMPTS].find_one({"user_id": user_id, "date": DATE})
+    assert intento["score"] == 123
+    assert intento["stars"] == 3
+
+
+@pytest.mark.asyncio
+async def test_reinicio_no_degrada_intento_completado(test_db, cleanup, seeded_user):
+    user = await seeded_user(puntos=0)
+    user_id = user["id"]
+    esperado = await _puntos_por_rango("S")
+
+    assert await sincronizar_intento_usuario(_run(user_id, rango="S")) == esperado
+
+    derrota_generacion_2 = _run(user_id, status="game_over", rango="F")
+    derrota_generacion_2["generation"] = 2
+    assert await sincronizar_intento_usuario(derrota_generacion_2) == 0
+
+    intento = await test_db[COLL_USER_ATTEMPTS].find_one({"user_id": user_id, "date": DATE})
+    assert intento["status"] == "completed"
+    assert intento["grade"] == "S"
+    usuario = await test_db["usuarios"].find_one({"id": user_id})
+    assert usuario["puntos"] == esperado
+
+
+@pytest.mark.asyncio
+async def test_completado_posterior_reemplaza_derrota_sin_doblar_puntos(
+    test_db, cleanup, seeded_user
+):
+    user = await seeded_user(puntos=0)
+    user_id = user["id"]
+    esperado = await _puntos_por_rango("A")
+
+    assert await sincronizar_intento_usuario(_run(user_id, status="game_over", rango="F")) == 0
+    assert await sincronizar_intento_usuario(_run(user_id, rango="A")) == esperado
+
+    intento = await test_db[COLL_USER_ATTEMPTS].find_one({"user_id": user_id, "date": DATE})
+    assert intento["status"] == "completed"
+    assert intento["grade"] == "A"
+    usuario = await test_db["usuarios"].find_one({"id": user_id})
+    assert usuario["puntos"] == esperado
 
 
 @pytest.mark.asyncio

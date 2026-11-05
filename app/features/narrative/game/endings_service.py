@@ -9,6 +9,8 @@ import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
+from pymongo.errors import DuplicateKeyError
+
 from app.core.database import get_database
 from app.features.narrative.constants import (
     COLL_SETTINGS,
@@ -127,6 +129,74 @@ def calcular_finalizacion_victoria(
         "rango": rango
     }
 
+# Estrellas por rango: mismo criterio que muestra el panel de administración.
+ESTRELLAS_POR_RANGO = {"S": 3, "A": 3, "B": 2, "C": 1, "F": 0}
+
+
+def estrellas_por_rango(rango: str) -> int:
+    return ESTRELLAS_POR_RANGO.get(rango, 0)
+
+
+def calificar_intento(
+    rango: str,
+    puntos_por_calificacion: Dict[str, int],
+    *,
+    completado: bool,
+) -> tuple[int, int]:
+    """Puntaje y estrellas del intento según el catálogo editable del panel."""
+    if not completado:
+        return 0, 0
+    return int(puntos_por_calificacion.get(rango, 0)), estrellas_por_rango(rango)
+
+
+async def registrar_intento_narrativo(
+    user_id: int,
+    date_str: str,
+    *,
+    status_str: str,
+    attempts: int,
+    stars: int,
+    score: int,
+    grade: str,
+    game_data: Dict[str, Any],
+) -> None:
+    """Upsert del intento diario; el primer intento completado no se degrada.
+
+    El filtro con ``status != completed`` y el upsert dejan que una derrota
+    cree el intento o actualice uno fallido, pero nunca pise uno completado:
+    un reinicio en el mismo día no puede quitar la racha ni bajar el score.
+    """
+    try:
+        await get_database()[COLL_USER_ATTEMPTS].update_one(
+            {
+                "user_id": user_id,
+                "game_id": "narrativo",
+                "date": date_str,
+                "status": {"$ne": "completed"},
+            },
+            {
+                "$set": {
+                    "user_id": user_id,
+                    "game_id": "narrativo",
+                    "date": date_str,
+                    "difficulty": "normal",
+                    "mode": "daily",
+                    "status": status_str,
+                    "attempts": attempts,
+                    "stars": stars,
+                    "score": score,
+                    "grade": grade,
+                    "game_data": game_data,
+                    "updated_at": datetime.now(timezone.utc),
+                }
+            },
+            upsert=True,
+        )
+    except DuplicateKeyError:
+        # Ya existe el intento completado del día; se conserva sin degradar.
+        pass
+
+
 async def sincronizar_intento_usuario(run_doc: Dict[str, Any]) -> int:
     """
     Registra el intento narrativo y acredita puntos al cerrar la partida.
@@ -177,43 +247,31 @@ async def sincronizar_intento_usuario(run_doc: Dict[str, Any]) -> int:
             return puntos
 
         status_str = "completed" if is_completed else "failed"
+        puntos_config = await obtener_puntos_por_calificacion()
+        score, stars = calificar_intento(
+            grade, puntos_config, completado=is_completed
+        )
 
-        scores_map = {"S": 1000, "A": 850, "B": 700, "C": 500, "F": 250}
-        stars_map = {"S": 3, "A": 3, "B": 2, "C": 1, "F": 1}
-        score = scores_map.get(rango, 250)
-        stars = stars_map.get(rango, 1)
-
-        await db[COLL_USER_ATTEMPTS].find_one_and_update(
-            {"user_id": user_id, "game_id": "narrativo", "date": date_str},
-            {
-                "$set": {
-                    "user_id": user_id,
-                    "game_id": "narrativo",
-                    "date": date_str,
-                    "difficulty": "normal",
-                    "mode": "daily",
-                    "status": status_str,
-                    "attempts": run_doc.get("mes_actual", 1),
-                    "stars": stars,
-                    "score": score,
-                    "grade": grade,
-                    "game_data": {
-                        "rango": rango,
-                        "mes_final": run_doc.get("mes_actual", 1),
-                        "recursos_finales": run_doc.get("recursos", {}),
-                        "finalizacion": run_doc.get("finalizacion"),
-                    },
-                    "updated_at": datetime.now(timezone.utc),
-                }
+        await registrar_intento_narrativo(
+            user_id,
+            date_str,
+            status_str=status_str,
+            attempts=run_doc.get("mes_actual", 1),
+            stars=stars,
+            score=score,
+            grade=grade,
+            game_data={
+                "rango": rango,
+                "mes_final": run_doc.get("mes_actual", 1),
+                "recursos_finales": run_doc.get("recursos", {}),
+                "finalizacion": run_doc.get("finalizacion"),
             },
-            upsert=True,
         )
 
         if not is_completed:
             return 0
 
-        puntos_config = await obtener_puntos_por_calificacion()
-        puntos = int(puntos_config.get(grade, 0))
+        puntos = score
         if puntos <= 0:
             return 0
 

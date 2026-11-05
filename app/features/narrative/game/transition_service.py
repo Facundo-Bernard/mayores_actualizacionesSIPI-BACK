@@ -37,6 +37,7 @@ from app.features.narrative.schemas.game_schemas import (
 )
 from app.features.narrative.schemas.rules_schemas import EfectoSchema
 from app.features.narrative.engine.rule_engine import despachar_efectos
+from app.features.narrative.engine.catalog_loader import obtener_catalogos_universo
 from app.features.narrative.game.endings_service import (
     verificar_colapso_recursos,
     calcular_finalizacion_victoria,
@@ -112,19 +113,38 @@ async def avanzar_mes(user_id: int, req: AvanzarMesRequest) -> AvanzarMesV2Respo
     run["mes_actual"] = mes_actual + 1
     run["fase_actual"] = RunPhaseEnum.DRAFT_MENSUAL.value
 
-    # Aplicar efectos pasivos "cada_mes"
+    # Aplicar efectos pasivos "cada_mes" con periodicidad relativa y catalogo desacoplado
     recursos_mapa = await obtener_mapa_recursos_universo(run["universo_id"])
     corte_ids = list(run.get("afinidad", {}).keys()) or run.get("corte_activa", [])
     personajes_docs = await db[COLL_CHARACTERS].find({"_id": {"$in": corte_ids}}).to_list(None)
     cartas_docs = await db[COLL_CARDS].find({"_id": {"$in": run["cartas_en_mano"]}}).to_list(None)
+    cat_acciones, cat_frecuencias = await obtener_catalogos_universo(run["universo_id"], db)
 
     for p in personajes_docs:
         efectos_p = [EfectoSchema(**e) for e in p.get("efectos", [])]
-        despachar_efectos(DisparadorEnum.CADA_MES, run, efectos_p, recursos_mapa)
+        despachar_efectos(
+            DisparadorEnum.CADA_MES,
+            run,
+            efectos_p,
+            recursos_mapa,
+            duenio_id=str(p["_id"]),
+            mes_actual=run["mes_actual"],
+            catalogo_acciones=cat_acciones,
+            catalogo_frecuencias=cat_frecuencias,
+        )
 
     for c in cartas_docs:
         efectos_c = [EfectoSchema(**e) for e in c.get("efectos", [])]
-        despachar_efectos(DisparadorEnum.CADA_MES, run, efectos_c, recursos_mapa)
+        despachar_efectos(
+            DisparadorEnum.CADA_MES,
+            run,
+            efectos_c,
+            recursos_mapa,
+            duenio_id=str(c["_id"]),
+            mes_actual=run["mes_actual"],
+            catalogo_acciones=cat_acciones,
+            catalogo_frecuencias=cat_frecuencias,
+        )
 
     # Si algún recurso colapsó por costos mensuales pasivos:
     derrota = await verificar_colapso_recursos(run)

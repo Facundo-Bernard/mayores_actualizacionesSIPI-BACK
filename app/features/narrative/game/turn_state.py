@@ -21,7 +21,7 @@ from app.features.narrative.schemas.game_schemas import (
     EstadoTurnoResponse,
 )
 from app.features.narrative.engine.event_director import calcular_opciones_evento
-from app.features.narrative.game.motor_v2.v2_graph_service import obtener_grafo_actual_v2
+from app.features.narrative.game.motor_v2.v2_graph_service import proyectar_grafo_actual
 from app.features.narrative.game.identity import filtro_run
 
 
@@ -69,6 +69,6 @@ async def obtener_turno_actual(user_id: int, date: str) -> EstadoTurnoResponse:
         resultado_actual=ResultadoResponse(**res_doc) if res_doc else None,
         conversacion_actual=ConversacionResponse(**conv_doc) if conv_doc else None,
         finalizacion=FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None,
-        grafo_actual=await obtener_grafo_actual_v2(user_id, date),
+        grafo_actual=await proyectar_grafo_actual(run),
         motor=run.get("motor", "v1"),
     )

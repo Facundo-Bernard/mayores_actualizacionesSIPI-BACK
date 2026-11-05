@@ -19,6 +19,7 @@ from app.features.narrative.constants import (
     COLL_CHARACTERS,
     COLL_CARDS,
     COLL_RUNS,
+    COLL_RUNS_ARCHIVE,
     COLL_CHALLENGES,
 )
 from app.features.narrative.enums import RunPhaseEnum, DisparadorEnum
@@ -34,15 +35,54 @@ from app.features.narrative.schemas.game_schemas import (
 )
 from app.features.narrative.schemas.rules_schemas import EfectoSchema
 from app.features.narrative.engine.rule_engine import despachar_efectos
+from app.features.narrative.engine.catalog_loader import obtener_catalogos_universo
 from app.features.narrative.game.endings_service import (
     verificar_colapso_recursos,
     sincronizar_intento_usuario,
 )
-from app.features.narrative.game.run_repository import crear_run
+from app.features.narrative.game.run_repository import (
+    RunAlreadyExistsError,
+    archivar_run,
+    crear_run,
+)
 from app.features.narrative.game.identity import filtro_run, id_run, resolver_identidad
 from app.features.narrative.game.universe_resources import obtener_mapa_recursos_universo
 
 logger = logging.getLogger(__name__)
+
+
+async def _proxima_generacion(user_id: int, date: str) -> int:
+    """La primera run es 1; tras archivar la activa, la siguiente continúa la secuencia."""
+    db = get_database()
+    filtro = filtro_run(user_id, date)
+    activa = await db[COLL_RUNS].find_one(filtro, {"generation": 1})
+    if activa:
+        return int(activa.get("generation") or 1)
+
+    archivada = await db[COLL_RUNS_ARCHIVE].find_one(
+        filtro,
+        {"generation": 1},
+        sort=[("generation", -1)],
+    )
+    return int((archivada or {}).get("generation") or 0) + 1
+
+
+def _respuesta_inicio(
+    run: Dict[str, Any],
+    cartas_draft_actual: list,
+    puntos_ganados: int | None = None,
+) -> IniciarPartidaV2Response:
+    fin_resp = FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None
+    return IniciarPartidaV2Response(
+        mes_actual=run["mes_actual"],
+        fase_actual=run["fase_actual"],
+        recursos=run["recursos"],
+        afinidad=run["afinidad"],
+        cartas_draft_actual=cartas_draft_actual,
+        finalizacion=fin_resp,
+        motor=run.get("motor", "v1"),
+        puntos_ganados=puntos_ganados,
+    )
 
 
 async def obtener_setup_desafio(user_id: int, date: str) -> SetupDesafioResponse:
@@ -131,11 +171,13 @@ async def iniciar_partida(user_id: int, req: IniciarPartidaRequest) -> IniciarPa
             for t in c.get("tags", []):
                 tags_activos.add(t)
 
+        generation = await _proxima_generacion(user_id, req.date)
         run = {
-            "_id": id_run(user_id, req.date),
+            "_id": id_run(user_id, req.date, generation),
             "user_id": resolver_identidad(user_id)[0],
             "date": req.date,
             "game_id": "narrativo",
+            "generation": generation,
             "universo_id": universo_id,
             "motor": motor,
             "mes_actual": 1,
@@ -163,57 +205,91 @@ async def iniciar_partida(user_id: int, req: IniciarPartidaRequest) -> IniciarPa
         if guest_id:
             run["guest_id"] = guest_id
 
+        # Inicializar tracking de adquisiciones relativas y modificadores
+        run["adquisiciones"] = {}
+        for p in personajes_docs:
+            run["adquisiciones"][str(p["_id"])] = {"mes": 1, "tipo": "personaje"}
+        for c in cartas_docs:
+            run["adquisiciones"][str(c["_id"])] = {"mes": 1, "tipo": "carta"}
+        run["modificadores_pasivos"] = []
+
+        cat_acciones, cat_frecuencias = await obtener_catalogos_universo(universo_id, db)
+
         for p in personajes_docs:
             efectos_p = [EfectoSchema(**e) for e in p.get("efectos", [])]
-            despachar_efectos(DisparadorEnum.AL_OBTENER, run, efectos_p, recursos_mapa)
+            despachar_efectos(
+                DisparadorEnum.AL_OBTENER,
+                run,
+                efectos_p,
+                recursos_mapa,
+                duenio_id=str(p["_id"]),
+                mes_actual=1,
+                catalogo_acciones=cat_acciones,
+                catalogo_frecuencias=cat_frecuencias,
+            )
 
         for c in cartas_docs:
             efectos_c = [EfectoSchema(**e) for e in c.get("efectos", [])]
-            despachar_efectos(DisparadorEnum.AL_OBTENER, run, efectos_c, recursos_mapa)
-
-        derrota = await verificar_colapso_recursos(run)
-        if derrota:
-            await crear_run(run)
-            puntos_ganados = await sincronizar_intento_usuario(run)
-            fin_resp = FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None
-            return IniciarPartidaV2Response(
-                mes_actual=run["mes_actual"],
-                fase_actual=run["fase_actual"],
-                recursos=run["recursos"],
-                afinidad=run["afinidad"],
-                cartas_draft_actual=[],
-                finalizacion=fin_resp,
-                motor=run.get("motor", "v1"),
-                puntos_ganados=puntos_ganados,
+            despachar_efectos(
+                DisparadorEnum.AL_OBTENER,
+                run,
+                efectos_c,
+                recursos_mapa,
+                duenio_id=str(c["_id"]),
+                mes_actual=1,
+                catalogo_acciones=cat_acciones,
+                catalogo_frecuencias=cat_frecuencias,
             )
 
-        pool_mensuales = cfg.get("pool_cartas_mensuales_ids", [])
-        cartas_ofrecidas_mes = random.sample(pool_mensuales, min(3, len(pool_mensuales)))
-        run["turno_actual"]["cartas_ofrecidas_ids"] = cartas_ofrecidas_mes
-        await crear_run(run)
+        derrota = await verificar_colapso_recursos(run)
+        if not derrota:
+            pool_mensuales = cfg.get("pool_cartas_mensuales_ids", [])
+            cartas_ofrecidas_mes = random.sample(pool_mensuales, min(3, len(pool_mensuales)))
+            run["turno_actual"]["cartas_ofrecidas_ids"] = cartas_ofrecidas_mes
+
+        try:
+            await crear_run(run)
+        except RunAlreadyExistsError:
+            run = await db[COLL_RUNS].find_one(filtro_run(user_id, req.date))
+            if not run:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Otra petición creó la partida; recargá el estado antes de reintentar.",
+                )
+        else:
+            if derrota:
+                puntos_ganados = await sincronizar_intento_usuario(run)
+                return _respuesta_inicio(run, [], puntos_ganados)
 
     draft_ids = run.get("turno_actual", {}).get("cartas_ofrecidas_ids", [])
     draft_docs = await db[COLL_CARDS].find({"_id": {"$in": draft_ids}}).to_list(None) if draft_ids else []
     cartas_draft_resp = [CartaResponse(**c) for c in draft_docs]
-
-    fin_resp = FinalizacionResponse(**run["finalizacion"]) if run.get("finalizacion") else None
-    return IniciarPartidaV2Response(
-        mes_actual=run["mes_actual"],
-        fase_actual=run["fase_actual"],
-        recursos=run["recursos"],
-        afinidad=run["afinidad"],
-        cartas_draft_actual=cartas_draft_resp,
-        finalizacion=fin_resp,
-        motor=run.get("motor", "v1"),
-    )
+    return _respuesta_inicio(run, cartas_draft_resp)
 
 
-async def reiniciar_partida(user_id: int, date: str) -> Dict[str, Any]:
-    """Elimina la run del día para reiniciar la partida limpia desde Fase 0."""
+async def reiniciar_partida(
+    user_id: int,
+    date: str,
+    expected_version: int | None = None,
+) -> Dict[str, Any]:
+    """Archiva la generación activa y habilita una nueva sin borrar su evidencia."""
     db = get_database()
-    res = await db[COLL_RUNS].delete_one(filtro_run(user_id, date))
+    run = await db[COLL_RUNS].find_one(filtro_run(user_id, date))
+    if not run:
+        return {
+            "success": False,
+            "message": f"No hay una partida activa para reiniciar el {date}.",
+            "eliminada": False,
+            "previous_run_id": None,
+            "next_generation": None,
+        }
+
+    generacion_anterior = int(run.get("generation") or 1)
+    await archivar_run(run, expected_version)
     return {
         "success": True,
-        "message": f"Partida del {date} reiniciada con éxito.",
-        "eliminada": res.deleted_count > 0,
+        "message": f"Partida del {date} reiniciada con una nueva generación.",
+        "eliminada": True,
+        "previous_run_id": run["_id"],
+        "next_generation": generacion_anterior + 1,
     }

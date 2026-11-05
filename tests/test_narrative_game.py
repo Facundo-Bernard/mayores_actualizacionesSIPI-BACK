@@ -6,9 +6,10 @@ from httpx import AsyncClient, ASGITransport
 
 from app.main import app
 from app.core.database import connect_to_mongo, close_mongo_connection, get_database
+from app.core.security import crear_credencial_invitado, generar_guest_id
 from app.scripts.seed_narrative import seed_narrative_game
 
-def test_narrative_queries_and_modals():
+def test_narrative_queries_and_modals(admin_override):
     """
     Test de integración para endpoints de catálogo, setup y consultas bajo demanda (modales):
     1. Verifica catálogo de reglas ECA y configuración de universos.
@@ -34,6 +35,8 @@ async def _ejecutar_pruebas_consultas():
         await generar_mes_narrativo(year=now.year, month=now.month, universo_id="corte_medieval")
 
     transport = ASGITransport(app=app)
+    guest_id = generar_guest_id()
+    guest_headers = {"X-Guest-Credential": crear_credencial_invitado(guest_id)}
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         # 1. Catálogo de reglas
         resp = await client.get("/api/narrative/admin/catalogo-reglas")
@@ -53,9 +56,12 @@ async def _ejecutar_pruebas_consultas():
         # 3. Setup de partida
         today_str = datetime.datetime.now().strftime("%Y-%m-%d")
         db = get_database()
-        await db["narrative_runs"].delete_one({"user_id": 0, "date": today_str, "game_id": "narrativo"})
+        await db["narrative_runs"].delete_one({"guest_id": guest_id, "date": today_str, "game_id": "narrativo"})
 
-        resp = await client.get(f"/api/narrative/partida/setup?date={today_str}")
+        resp = await client.get(
+            f"/api/narrative/partida/setup?date={today_str}",
+            headers=guest_headers,
+        )
         assert resp.status_code == 200, resp.text
         setup_data = resp.json()
         assert setup_data["tiene_partida_activa"] is False
@@ -71,35 +77,55 @@ async def _ejecutar_pruebas_consultas():
             "corte_elegida_ids": corte_elegida,
             "cartas_iniciales_ids": cartas_elegidas
         }
-        resp = await client.post("/api/narrative/v2/partida/iniciar", json=init_payload)
+        resp = await client.post(
+            "/api/narrative/v2/partida/iniciar",
+            json=init_payload,
+            headers=guest_headers,
+        )
         assert resp.status_code == 200, resp.text
 
         # 5. Consultas bajo demanda (modales)
         # Corte
-        resp = await client.get(f"/api/narrative/partida/corte?date={today_str}")
+        resp = await client.get(
+            f"/api/narrative/partida/corte?date={today_str}",
+            headers=guest_headers,
+        )
         assert resp.status_code == 200
         corte_data = resp.json()
         assert len(corte_data["corte"]) == 3
 
         # Inventario
-        resp = await client.get(f"/api/narrative/partida/inventario?date={today_str}")
+        resp = await client.get(
+            f"/api/narrative/partida/inventario?date={today_str}",
+            headers=guest_headers,
+        )
         assert resp.status_code == 200
         inv_data = resp.json()
         assert len(inv_data["cartas"]) == 3
 
         # Historial
-        resp = await client.get(f"/api/narrative/partida/historial?date={today_str}")
+        resp = await client.get(
+            f"/api/narrative/partida/historial?date={today_str}",
+            headers=guest_headers,
+        )
         assert resp.status_code == 200
         hist_data = resp.json()
         assert hist_data["mes_actual"] == 1
 
         # 6. Reiniciar partida
-        resp = await client.post("/api/narrative/partida/reiniciar", json={"date": today_str})
+        resp = await client.post(
+            "/api/narrative/partida/reiniciar",
+            json={"date": today_str},
+            headers=guest_headers,
+        )
         assert resp.status_code == 200
         assert resp.json()["eliminada"] is True
 
         # Verificar que el setup vuelve a marcar sin partida activa
-        resp = await client.get(f"/api/narrative/partida/setup?date={today_str}")
+        resp = await client.get(
+            f"/api/narrative/partida/setup?date={today_str}",
+            headers=guest_headers,
+        )
         assert resp.status_code == 200
         assert resp.json()["tiene_partida_activa"] is False
 

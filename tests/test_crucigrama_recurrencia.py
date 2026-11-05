@@ -15,6 +15,7 @@ from app.core.database import connect_to_mongo, db_instance, get_database
 from app.core.dependencies import get_current_admin
 from app.features.daily_challenges import service as daily_service
 from app.features.daily_challenges.games import crucigrama as crucigrama_game
+from app.features.daily_challenges.crucigrama import published_templates
 from app.features.daily_challenges.crucigrama.bans import (
     get_global_banned_words,
     set_global_banned_words,
@@ -118,13 +119,13 @@ async def _ejecutar_flujo():
 
             # 4. Resolución recurrente: re-resuelve con semilla derivada de la fecha
             llamadas = []
-            validate_original = admin_service.validate_pattern
+            validate_original = published_templates.validate_pattern
 
             def _espia_validate(*args, **kwargs):
                 llamadas.append(kwargs.get("seed"))
                 return validate_original(*args, **kwargs)
 
-            admin_service.validate_pattern = _espia_validate
+            published_templates.validate_pattern = _espia_validate
             try:
                 config_enero = await admin_service.get_recurring_published_config(
                     "2031-01-04", "facil"
@@ -139,7 +140,7 @@ async def _ejecutar_flujo():
                     "2031-02-28", "facil"
                 )
             finally:
-                admin_service.validate_pattern = validate_original
+                published_templates.validate_pattern = validate_original
 
             assert config_enero is not None
             assert config_enero["theme"] == THEME

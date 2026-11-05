@@ -27,6 +27,7 @@ from app.features.narrative.schemas.game_schemas import (
     ElegirCartaMesV2Response,
 )
 from app.features.narrative.engine.rule_engine import despachar_efectos
+from app.features.narrative.engine.catalog_loader import obtener_catalogos_universo
 from app.features.narrative.game.endings_service import (
     verificar_colapso_recursos,
     sincronizar_intento_usuario
@@ -59,6 +60,8 @@ async def elegir_carta_mes(user_id: int, req: ElegirCartaMesRequest) -> ElegirCa
 
     # 1. Agregar carta al inventario y registrar nuevos tags
     run["cartas_en_mano"].append(req.carta_id)
+    mes_actual = run.get("mes_actual", 1)
+    run.setdefault("adquisiciones", {})[req.carta_id] = {"mes": mes_actual, "tipo": "carta"}
     carta_doc = await db[COLL_CARDS].find_one({"_id": req.carta_id})
     if carta_doc:
         for t in carta_doc.get("tags", []):
@@ -66,8 +69,18 @@ async def elegir_carta_mes(user_id: int, req: ElegirCartaMesRequest) -> ElegirCa
                 run["tags_activos"].append(t)
 
         recursos_mapa = await obtener_mapa_recursos_universo(run["universo_id"])
+        cat_acciones, cat_frecuencias = await obtener_catalogos_universo(run["universo_id"], db)
         efectos_carta = [EfectoSchema(**e) for e in carta_doc.get("efectos", [])]
-        despachar_efectos(DisparadorEnum.AL_OBTENER, run, efectos_carta, recursos_mapa)
+        despachar_efectos(
+            DisparadorEnum.AL_OBTENER,
+            run,
+            efectos_carta,
+            recursos_mapa,
+            duenio_id=req.carta_id,
+            mes_actual=mes_actual,
+            catalogo_acciones=cat_acciones,
+            catalogo_frecuencias=cat_frecuencias,
+        )
 
     turno["carta_elegida_id"] = req.carta_id
 

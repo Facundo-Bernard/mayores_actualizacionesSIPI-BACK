@@ -430,6 +430,22 @@
   },
   "components": {
     "schemas": {
+      "AccionReferenciadaSchema": {
+        "properties": {
+          "accion_id": {
+            "type": "string",
+            "title": "Accion Id"
+          },
+          "parametros": {
+            "$ref": "#/components/schemas/ParametrosAccionSchema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "accion_id"
+        ],
+        "title": "AccionReferenciadaSchema"
+      },
       "AccionSchema": {
         "properties": {
           "tipo": {
@@ -496,7 +512,8 @@
         "required": [
           "tipo"
         ],
-        "title": "AccionSchema"
+        "title": "AccionSchema",
+        "description": "Schema legacy de acción embebida directa."
       },
       "AvanzarMesCommand": {
         "properties": {
@@ -1108,8 +1125,37 @@
       },
       "EfectoSchema": {
         "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "frecuencia_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frecuencia Id"
+          },
           "disparador": {
-            "$ref": "#/components/schemas/DisparadorEnum"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DisparadorEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "condiciones": {
             "items": {
@@ -1119,15 +1165,26 @@
             "title": "Condiciones",
             "default": []
           },
+          "acciones": {
+            "items": {
+              "$ref": "#/components/schemas/AccionReferenciadaSchema"
+            },
+            "type": "array",
+            "title": "Acciones",
+            "default": []
+          },
           "accion": {
-            "$ref": "#/components/schemas/AccionSchema"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccionSchema"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
-        "required": [
-          "disparador",
-          "accion"
-        ],
         "title": "EfectoSchema"
       },
       "ElegirCartaMensualCommand": {
@@ -1746,6 +1803,91 @@
           "origenId"
         ],
         "title": "OrigenConsecuencia"
+      },
+      "ParametrosAccionSchema": {
+        "properties": {
+          "clave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clave"
+          },
+          "valor": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor",
+            "default": 0.0
+          },
+          "tipo_calculo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TipoCalculoEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "fijo"
+          },
+          "destino": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destino",
+            "default": "portador"
+          },
+          "personaje_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Personaje Id"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tag"
+          },
+          "porcentaje": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Porcentaje"
+          }
+        },
+        "type": "object",
+        "title": "ParametrosAccionSchema"
       },
       "PayloadVacio": {
         "properties": {},

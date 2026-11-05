@@ -53,6 +53,13 @@ class TokenVerifyResponse(BaseModel):
     message: str = "Token verificado con éxito"
 
 
+class GuestCredentialResponse(BaseModel):
+    success: bool = True
+    guest_id: str
+    credential: str
+    expires_in_days: int
+
+
 class GenericMessageResponse(BaseModel):
     message: str
     success: bool = True

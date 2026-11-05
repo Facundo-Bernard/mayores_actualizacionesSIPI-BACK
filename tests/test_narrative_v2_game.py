@@ -6,6 +6,7 @@ from httpx import AsyncClient, ASGITransport
 
 from app.main import app
 from app.core.database import connect_to_mongo, close_mongo_connection, get_database
+from app.core.security import crear_credencial_invitado, generar_guest_id
 from app.scripts.seed_narrative import seed_narrative_game
 
 def test_narrative_v2_full_cycle():
@@ -39,9 +40,11 @@ async def _ejecutar_ciclo_v2():
         challenge = await db["daily_challenges"].find_one({"game_id": "narrativo", "date": today_str})
 
     transport = ASGITransport(app=app)
+    guest_id = generar_guest_id()
+    guest_headers = {"X-Guest-Credential": crear_credencial_invitado(guest_id)}
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         # Limpiar run previa para test limpio
-        await db["narrative_runs"].delete_one({"user_id": 0, "date": today_str, "game_id": "narrativo"})
+        await db["narrative_runs"].delete_one({"guest_id": guest_id, "date": today_str, "game_id": "narrativo"})
         cfg = challenge["config"]
 
         corte_elegida = cfg["setup_corte_ofrecidos_ids"][:3]
@@ -58,7 +61,7 @@ async def _ejecutar_ciclo_v2():
                 "corte_elegida_ids": corte_elegida,
                 "cartas_iniciales_ids": cartas_elegidas
             },
-            headers={"Authorization": "Bearer fake_token"}  # user_id 0
+            headers=guest_headers,
         )
         assert resp.status_code == 200, resp.text
         data_v2 = resp.json()
@@ -72,7 +75,8 @@ async def _ejecutar_ciclo_v2():
             carta_id = data_v2["cartas_draft_actual"][0]["_id"]
             resp = await client.post(
                 "/api/narrative/v2/partida/elegir-carta-mes",
-                json={"date": today_str, "carta_id": carta_id}
+                json={"date": today_str, "carta_id": carta_id},
+                headers=guest_headers,
             )
             assert resp.status_code == 200, resp.text
             data_v2 = resp.json()
@@ -90,7 +94,8 @@ async def _ejecutar_ciclo_v2():
             opcion = next(op for op in opciones if not op.get("bloqueada"))
             resp = await client.post(
                 "/api/narrative/v2/partida/decidir-evento",
-                json={"date": today_str, "opcion_id": opcion["id"]}
+                json={"date": today_str, "opcion_id": opcion["id"]},
+                headers=guest_headers,
             )
             assert resp.status_code == 200, resp.text
             data_v2 = resp.json()
@@ -105,7 +110,8 @@ async def _ejecutar_ciclo_v2():
                 assert data_v2["conversacion_actual"] is not None
                 resp = await client.post(
                     "/api/narrative/v2/partida/responder-conversacion",
-                    json={"date": today_str, "opcion_numero": 1}
+                    json={"date": today_str, "opcion_numero": 1},
+                    headers=guest_headers,
                 )
                 assert resp.status_code == 200, resp.text
                 data_v2 = resp.json()
@@ -119,7 +125,8 @@ async def _ejecutar_ciclo_v2():
             assert data_v2["fase_actual"] == "BALANCE_MES"
             resp = await client.post(
                 "/api/narrative/v2/partida/avanzar-mes",
-                json={"date": today_str}
+                json={"date": today_str},
+                headers=guest_headers,
             )
             assert resp.status_code == 200, resp.text
             data_v2 = resp.json()

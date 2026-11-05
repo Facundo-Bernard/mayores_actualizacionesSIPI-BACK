@@ -1,8 +1,13 @@
 import bcrypt
 import jwt
+import re
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 from app.core.config import settings
+
+GUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+GUEST_CREDENTIAL_TYPE = "guest"
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
@@ -68,9 +73,59 @@ def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
             continue
         try:
             payload = jwt.decode(token_clean, secret, algorithms=["HS256"])
+            if payload.get("typ") == GUEST_CREDENTIAL_TYPE:
+                continue
             return payload
         except jwt.ExpiredSignatureError:
             return None
         except jwt.InvalidTokenError:
             continue
+    return None
+
+
+def generar_guest_id() -> str:
+    """Identificador de invitado emitido por el backend (no controlado por el cliente)."""
+    return secrets.token_urlsafe(16)
+
+
+def crear_credencial_invitado(
+    guest_id: str,
+    expires_delta: Optional[timedelta] = None,
+) -> str:
+    """Firma una credencial de invitado verificable; nunca se acepta un id declarado a mano."""
+    now = datetime.now(timezone.utc)
+    expire = now + (expires_delta or timedelta(days=settings.GUEST_CREDENTIAL_EXPIRATION_DAYS))
+    claims = {
+        "sub": guest_id,
+        "typ": GUEST_CREDENTIAL_TYPE,
+        "iat": int(now.timestamp()),
+        "exp": int(expire.timestamp()),
+    }
+    return jwt.encode(claims, settings.JWT_SECRET, algorithm="HS256")
+
+
+def decode_guest_credential(token: str) -> Optional[Dict[str, Any]]:
+    """Valida firma, expiración y tipo; devuelve los claims solo si es una credencial de invitado."""
+    if not token or not isinstance(token, str):
+        return None
+
+    keys_to_try = [settings.JWT_SECRET]
+    if getattr(settings, "JWT_SECRET_FALLBACK", None):
+        keys_to_try.append(settings.JWT_SECRET_FALLBACK)
+
+    for secret in keys_to_try:
+        if not secret:
+            continue
+        try:
+            payload = jwt.decode(token.strip(), secret, algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return None
+        except jwt.InvalidTokenError:
+            continue
+        if payload.get("typ") != GUEST_CREDENTIAL_TYPE:
+            return None
+        guest_id = payload.get("sub")
+        if not isinstance(guest_id, str) or not GUEST_ID_PATTERN.match(guest_id):
+            return None
+        return payload
     return None

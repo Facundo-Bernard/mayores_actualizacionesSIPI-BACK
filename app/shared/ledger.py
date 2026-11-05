@@ -152,12 +152,16 @@ class MongoPointsLedger:
         idempotency_key: str | None = None,
         metadata: dict | None = None,
         status: str = "recorded",
-    ) -> None:
-        """Registra un evento de auditoría (replay, ajuste admin) sin tocar el saldo."""
+    ) -> bool:
+        """Registra un evento de auditoría sin tocar el saldo.
+
+        Devuelve ``True`` solo si esta llamada insertó el evento; un reintento
+        con la misma clave devuelve ``False`` y no vuelve a entregar la recompensa.
+        """
         db = get_database()
         clave = idempotency_key or f"{motivo}:{user_id}:{now_utc().isoformat()}"
         now = now_utc()
-        await db[COLLECTION].update_one(
+        resultado = await db[COLLECTION].update_one(
             {"_id": clave},
             {
                 "$setOnInsert": {
@@ -176,6 +180,7 @@ class MongoPointsLedger:
             },
             upsert=True,
         )
+        return resultado.upserted_id is not None
 
 
 _ledger = MongoPointsLedger()

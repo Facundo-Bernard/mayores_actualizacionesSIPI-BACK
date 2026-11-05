@@ -1,44 +1,88 @@
 """
 identity.py
-Identidad de las partidas narrativas: usuarios autenticados o invitados aislados por ``X-Guest-Id``.
+Identidad efectiva de las partidas narrativas.
 
-Los invitados no tienen fila en ``usuarios``. Para que sus partidas no compartan el
-documento de ``user_id = 0`` se derivan claves internas estables y negativas a partir
-del ``guest_id``. El identificador original siempre queda guardado en ``guest_id``.
+Dos transportes, ambos verificados por el backend:
+
+- ``Authorization: Bearer`` con JWT válido: valida firma, expiración, permisos del
+  servicio y estado de la cuenta.
+- ``X-Guest-Credential`` emitido por ``POST /api/auth/guest-credential``: credencial
+  firmada cuyo ``guest_id`` no puede elegir el cliente.
+
+Un JWT inválido o una credencial ausente/inválida responde 401: nunca se degrada la
+sesión a un usuario compartido. Los invitados siguen sin fila en ``usuarios``: sus
+partidas se aíslan con una clave interna negativa derivada del ``guest_id`` firmado.
 """
 
 import hashlib
-import re
 from contextvars import ContextVar
 from typing import Optional, Tuple
 
-from fastapi import Header, HTTPException
+from fastapi import Header, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials
 
-_GUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+from app.core.dependencies import get_current_user
+from app.core.security import GUEST_ID_PATTERN, decode_guest_credential
+
 _guest_id_actual: ContextVar[Optional[str]] = ContextVar("narrative_guest_id", default=None)
 
 
-def _normalizar_guest_id(valor: Optional[str]) -> Optional[str]:
+def _no_autorizado(detalle: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=detalle,
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+def _guest_id_valido(valor: Optional[str]) -> Optional[str]:
     if not valor:
         return None
     limpio = valor.strip()
-    if not limpio:
+    if not limpio or not GUEST_ID_PATTERN.match(limpio):
         return None
-    if not _GUEST_ID_PATTERN.match(limpio):
-        raise HTTPException(
-            status_code=400,
-            detail="El header 'X-Guest-Id' solo admite letras, números, guiones y guiones bajos (máx. 64).",
-        )
     return limpio
 
 
-async def cargar_guest_id(x_guest_id: Optional[str] = Header(None)) -> None:
-    """Dependencia de request: publica el ``X-Guest-Id`` en un ContextVar."""
-    token = _guest_id_actual.set(_normalizar_guest_id(x_guest_id))
+async def obtener_identidad_narrativa(
+    authorization: Optional[str] = Header(None),
+    x_guest_credential: Optional[str] = Header(None),
+) -> int:
+    """
+    Dependencia de request: autentica usuario o invitado y publica la identidad
+    efectiva en ContextVars. Devuelve el id de usuario (0 para invitado).
+    """
+    if authorization is not None:
+        partes = authorization.split()
+        if len(partes) != 2 or partes[0].lower() != "bearer" or not partes[1]:
+            raise _no_autorizado("Token de autenticación inválido o expirado.")
+
+        user = await get_current_user(
+            HTTPAuthorizationCredentials(scheme="Bearer", credentials=partes[1])
+        )
+        user_id = int(user["id"])
+        token_guest = _guest_id_actual.set(None)
+        try:
+            yield user_id
+        finally:
+            _guest_id_actual.reset(token_guest)
+        return
+
+    if not x_guest_credential:
+        raise _no_autorizado(
+            "Se requiere autenticación: token Bearer o credencial de invitado."
+        )
+
+    payload = decode_guest_credential(x_guest_credential)
+    guest_id = _guest_id_valido((payload or {}).get("sub"))
+    if not guest_id:
+        raise _no_autorizado("Credencial de invitado inválida o expirada.")
+
+    token_guest = _guest_id_actual.set(guest_id)
     try:
-        yield
+        yield 0
     finally:
-        _guest_id_actual.reset(token)
+        _guest_id_actual.reset(token_guest)
 
 
 def guest_id_actual() -> Optional[str]:
@@ -56,7 +100,7 @@ def resolver_identidad(user_id: int) -> Tuple[int, Optional[str]]:
 
 
 def filtro_run(user_id: int, date: str) -> dict:
-    """Filtro de partida que aísla invitados cuando envían ``X-Guest-Id``."""
+    """Filtro de partida que aísla invitados usando la credencial verificada."""
     interno, guest_id = resolver_identidad(user_id)
     filtro = {"user_id": interno, "date": date, "game_id": "narrativo"}
     if guest_id:
@@ -64,8 +108,7 @@ def filtro_run(user_id: int, date: str) -> dict:
     return filtro
 
 
-def id_run(user_id: int, date: str) -> str:
+def id_run(user_id: int, date: str, generation: int = 1) -> str:
     interno, guest_id = resolver_identidad(user_id)
-    if guest_id:
-        return f"run_guest_{guest_id}_{date}"
-    return f"run_{interno}_{date}"
+    prefijo = f"run_guest_{guest_id}_{date}" if guest_id else f"run_{interno}_{date}"
+    return prefijo if generation <= 1 else f"{prefijo}_g{generation}"

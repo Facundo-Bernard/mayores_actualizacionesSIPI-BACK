@@ -1,16 +1,23 @@
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 
 from app.features.narrative.enums import (
     DisparadorEnum,
     OperadorEnum,
     TipoCondicionEnum,
     TipoAccionEnum,
-    TipoCalculoEnum
+    TipoCalculoEnum,
 )
-from app.features.narrative.schemas.rules_schemas import CondicionSchema, AccionSchema, EfectoSchema
+from app.features.narrative.schemas.rules_schemas import (
+    CondicionSchema,
+    AccionSchema,
+    EfectoSchema,
+    AccionReferenciadaSchema,
+    PrimitivaOperacionEnum,
+)
 
 logger = logging.getLogger(__name__)
+
 
 def evaluar_condicion(condicion: Any, run_data: Dict[str, Any]) -> bool:
     """
@@ -59,6 +66,7 @@ def evaluar_condicion(condicion: Any, run_data: Dict[str, Any]) -> bool:
 
     return False
 
+
 def evaluar_condiciones(condiciones: List[Any], run_data: Dict[str, Any]) -> bool:
     """
     Evalúa una lista de condiciones bajo operador lógico AND.
@@ -67,6 +75,7 @@ def evaluar_condiciones(condiciones: List[Any], run_data: Dict[str, Any]) -> boo
     if not condiciones:
         return True
     return all(evaluar_condicion(c, run_data) for c in condiciones)
+
 
 def _comparar_valores(actual: float, operador: Optional[OperadorEnum], objetivo: float) -> bool:
     """
@@ -86,32 +95,90 @@ def _comparar_valores(actual: float, operador: Optional[OperadorEnum], objetivo:
         return actual != objetivo
     return False
 
+
+def _extraer_primitiva_y_params(
+    accion: Any,
+    catalogo_acciones: Optional[Dict[str, Any]] = None,
+) -> tuple[str, Dict[str, Any]]:
+    """
+    Extrae la primitiva ejecutable y los parámetros normalizados tanto de
+    AccionSchema (legacy) como de AccionReferenciadaSchema (nuevo desacoplado).
+    """
+    if isinstance(accion, AccionReferenciadaSchema):
+        accion_id = accion.accion_id
+        params = accion.parametros.model_dump()
+    elif isinstance(accion, dict) and "accion_id" in accion:
+        accion_id = accion["accion_id"]
+        params = accion.get("parametros", {})
+    elif isinstance(accion, AccionSchema):
+        accion_id = accion.tipo.value
+        params = {
+            "clave": accion.clave,
+            "valor": accion.valor,
+            "tipo_calculo": accion.tipo_calculo.value if accion.tipo_calculo else "fijo",
+            "personaje_id": accion.personaje_id,
+            "tag": accion.tag,
+            "destino": "portador" if not accion.personaje_id else "personaje",
+        }
+    elif isinstance(accion, dict) and "tipo" in accion:
+        accion_id = accion["tipo"]
+        params = {
+            "clave": accion.get("clave"),
+            "valor": accion.get("valor", 0),
+            "tipo_calculo": accion.get("tipo_calculo", "fijo"),
+            "personaje_id": accion.get("personaje_id"),
+            "tag": accion.get("tag"),
+            "destino": "portador" if not accion.get("personaje_id") else "personaje",
+        }
+    else:
+        return "", {}
+
+    # Resolver la primitiva a través del catálogo si existe la referencia
+    primitiva = accion_id
+    if catalogo_acciones and accion_id in catalogo_acciones:
+        cat_item = catalogo_acciones[accion_id]
+        primitiva = cat_item.get("primitiva") or cat_item.get("tipo_accion") or accion_id
+
+    return str(primitiva), params
+
+
 def ejecutar_accion(
     accion: Any,
     run_data: Dict[str, Any],
-    recursos_definicion: Optional[Dict[str, Dict[str, Any]]] = None
+    recursos_definicion: Optional[Dict[str, Dict[str, Any]]] = None,
+    duenio_id: Optional[str] = None,
+    catalogo_acciones: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Modifica el estado en memoria de run_data según el tipo de acción.
-    Acepta tanto AccionSchema como dict de MongoDB.
+    Soporta formato legacy AccionSchema y nuevo AccionReferenciadaSchema desacoplado.
     """
-    if isinstance(accion, dict):
-        accion = AccionSchema(**accion)
-
-    tipo = accion.tipo
+    primitiva, params = _extraer_primitiva_y_params(accion, catalogo_acciones)
+    if not primitiva:
+        return
 
     # 1. Modificar Recurso
-    if tipo == TipoAccionEnum.MODIFICAR_RECURSO:
-        clave = accion.clave
+    if primitiva in (TipoAccionEnum.MODIFICAR_RECURSO.value, PrimitivaOperacionEnum.MODIFICAR_RECURSO.value):
+        clave = params.get("clave")
         if not clave:
             return
         recursos = run_data.setdefault("recursos", {})
         valor_actual = float(recursos.get(clave, 0))
+        tipo_calc = params.get("tipo_calculo")
+        valor_num = float(params.get("valor") or 0)
 
-        if accion.tipo_calculo == TipoCalculoEnum.PORCENTUAL:
-            delta = valor_actual * (float(accion.valor or 0) / 100.0)
+        if tipo_calc in (TipoCalculoEnum.PORCENTUAL.value, "porcentual"):
+            delta = valor_actual * (valor_num / 100.0)
         else:
-            delta = float(accion.valor or 0)
+            delta = valor_num
+
+        # Si el delta es negativo (daño/pérdida), verificar amortiguadores pasivos
+        if delta < 0:
+            for mod in run_data.get("modificadores_pasivos", []):
+                if mod.get("tipo") == "amortiguar_danio" and (not mod.get("clave") or mod.get("clave") == clave):
+                    reduccion = float(mod.get("reduccion_porcentual", 0))
+                    if 0 < reduccion <= 100:
+                        delta *= (1.0 - (reduccion / 100.0))
 
         nuevo_valor = round(valor_actual + delta)
 
@@ -124,36 +191,147 @@ def ejecutar_accion(
         recursos[clave] = int(nuevo_valor)
 
     # 2. Modificar Afinidad con Personaje
-    elif tipo == TipoAccionEnum.MODIFICAR_AFINIDAD:
-        personaje_id = accion.personaje_id
-        if not personaje_id:
+    elif primitiva in (TipoAccionEnum.MODIFICAR_AFINIDAD.value, PrimitivaOperacionEnum.MODIFICAR_AFINIDAD.value):
+        destino = params.get("destino", "personaje")
+        personaje_target = duenio_id if (destino == "portador" and duenio_id) else params.get("personaje_id")
+        if not personaje_target:
             return
         afinidades = run_data.setdefault("afinidad", {})
-        actual = int(afinidades.get(personaje_id, 50))
-        delta = int(accion.valor or 0)
-        afinidades[personaje_id] = max(0, min(100, actual + delta))
+        actual = int(afinidades.get(personaje_target, 50))
+        delta = int(float(params.get("valor") or 0))
+        afinidades[personaje_target] = max(0, min(100, actual + delta))
 
     # 3. Otorgar Tag Pasivo
-    elif tipo == TipoAccionEnum.OTORGAR_TAG:
-        tag = accion.tag
+    elif primitiva in (TipoAccionEnum.OTORGAR_TAG.value, PrimitivaOperacionEnum.OTORGAR_TAG.value):
+        tag = params.get("tag")
         if tag:
             tags = run_data.setdefault("tags_activos", [])
             if tag not in tags:
                 tags.append(tag)
 
+    # 4. Remover Tag Pasivo
+    elif primitiva == PrimitivaOperacionEnum.REMOVER_TAG.value:
+        tag = params.get("tag")
+        if tag:
+            tags = run_data.setdefault("tags_activos", [])
+            if tag in tags:
+                tags.remove(tag)
+
+    # 5. Amortiguar Daño Pasivo
+    elif primitiva in (TipoAccionEnum.AMORTIGUAR_DANIO.value, PrimitivaOperacionEnum.AMORTIGUAR_DANIO.value):
+        clave = params.get("clave")
+        reduccion = float(params.get("valor") or params.get("porcentaje") or 0)
+        mods = run_data.setdefault("modificadores_pasivos", [])
+        mods.append({
+            "tipo": "amortiguar_danio",
+            "clave": clave,
+            "reduccion_porcentual": reduccion,
+            "fuente": duenio_id,
+        })
+
+
+def _frecuencia_coincide(
+    efecto: EfectoSchema,
+    disparador: Any,
+    run_data: Dict[str, Any],
+    duenio_id: Optional[str] = None,
+    mes_actual: Optional[int] = None,
+    catalogo_frecuencias: Optional[Dict[str, Any]] = None,
+) -> bool:
+    """
+    Determina si un efecto debe ejecutarse según el disparador del motor,
+    evaluando si es 'al_obtener' o una periodicidad relativa calculada
+    desde el mes de adquisición de la carta/personaje.
+    """
+    disp_valor = disparador.value if hasattr(disparador, "value") else str(disparador)
+
+    # Coincidencia directa por disparador legacy
+    if efecto.disparador:
+        leg_disp = efecto.disparador.value if hasattr(efecto.disparador, "value") else str(efecto.disparador)
+        if leg_disp == disp_valor:
+            return True
+
+    frec_id = efecto.frecuencia_id
+    if not frec_id:
+        return False
+
+    # 1. Disparador AL_OBTENER
+    if disp_valor == "al_obtener":
+        if frec_id == "al_obtener":
+            return True
+        if catalogo_frecuencias and frec_id in catalogo_frecuencias:
+            return catalogo_frecuencias[frec_id].get("evento_motor") == "al_obtener"
+        return False
+
+    # 2. Disparador CADA_MES / INICIO_MES
+    if disp_valor in ("cada_mes", "inicio_mes"):
+        if frec_id in ("cada_mes", "mensual"):
+            return True
+
+        if catalogo_frecuencias and frec_id in catalogo_frecuencias:
+            frec_item = catalogo_frecuencias[frec_id]
+            if frec_item.get("evento_motor") != "inicio_mes":
+                return False
+
+            cada = int(frec_item.get("cada", 1))
+            desfase = int(frec_item.get("desfase", 0))
+            conteo_desde = frec_item.get("conteo_desde", "adquisicion")
+
+            cur_mes = mes_actual or run_data.get("mes_actual", 1)
+
+            if conteo_desde == "adquisicion" and duenio_id:
+                adqs = run_data.get("adquisiciones", {})
+                mes_adq = adqs.get(duenio_id, {}).get("mes", 1)
+                delta = cur_mes - mes_adq
+                # Dispara si pasó al menos 1 mes desde la adquisición y cumple el intervalo
+                return delta > 0 and (delta - desfase) >= 0 and ((delta - desfase) % cada == 0)
+            else:
+                return (cur_mes - desfase) > 0 and ((cur_mes - desfase) % cada == 0)
+
+    return False
+
+
 def despachar_efectos(
-    disparador: DisparadorEnum,
+    disparador: Any,
     run_data: Dict[str, Any],
     efectos: List[Any],
-    recursos_definicion: Optional[Dict[str, Dict[str, Any]]] = None
+    recursos_definicion: Optional[Dict[str, Dict[str, Any]]] = None,
+    duenio_id: Optional[str] = None,
+    mes_actual: Optional[int] = None,
+    catalogo_acciones: Optional[Dict[str, Any]] = None,
+    catalogo_frecuencias: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Filtra los efectos por el disparador solicitado, evalúa sus condiciones
     y ejecuta las acciones correspondientes mutando run_data.
+    Soporta lista de acciones ordenadas y cálculo de periodicidad relativa.
     """
-    for efecto in efectos:
-        if isinstance(efecto, dict):
-            efecto = EfectoSchema(**efecto)
-        if efecto.disparador == disparador:
+    for efecto_raw in efectos:
+        if isinstance(efecto_raw, dict):
+            efecto = EfectoSchema(**efecto_raw)
+        else:
+            efecto = efecto_raw
+
+        if _frecuencia_coincide(
+            efecto, disparador, run_data, duenio_id, mes_actual, catalogo_frecuencias
+        ):
             if evaluar_condiciones(efecto.condiciones, run_data):
-                ejecutar_accion(efecto.accion, run_data, recursos_definicion)
+                # Ejecutar lista ordenada de acciones desacopladas
+                if efecto.acciones:
+                    for accion in efecto.acciones:
+                        ejecutar_accion(
+                            accion,
+                            run_data,
+                            recursos_definicion,
+                            duenio_id=duenio_id,
+                            catalogo_acciones=catalogo_acciones,
+                        )
+                # Fallback legacy si viniera únicamente `accion`
+                elif efecto.accion:
+                    ejecutar_accion(
+                        efecto.accion,
+                        run_data,
+                        recursos_definicion,
+                        duenio_id=duenio_id,
+                        catalogo_acciones=catalogo_acciones,
+                    )

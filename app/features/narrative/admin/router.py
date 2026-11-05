@@ -1,3 +1,4 @@
+from app.features.narrative.admin.actions_router import actions_admin_router
 """
 router.py
 Controlador FastAPI de la Torre de Control y Administración (/api/narrative/admin).
@@ -472,3 +473,6 @@ async def endpoint_validar_grafos_v2(req: ValidarGrafoV2Request):
         "invalidos": sum(1 for r in resultados if not r.valido)
     }
 
+
+# Incluir subrouter de acciones y frecuencias desacopladas
+router.include_router(actions_admin_router)
