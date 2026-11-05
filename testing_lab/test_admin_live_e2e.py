@@ -162,7 +162,7 @@ def run_tests():
         # 13. Verificar archivos estaticos del panel admin
         resp_admin_html = client.get("/admin/")
         assert resp_admin_html.status_code == 200
-        assert "index-mKOUGd19.js" in resp_admin_html.text
+        assert "index-CZnIYBWe.js" in resp_admin_html.text
         print("[OK] Admin UI estatico verificado sirviendo el bundle actualizado en /admin/.")
 
         print("\nTODOS LOS TESTS E2E DEL PANEL Y BACKEND PASARON EXITOSAMENTE.")
