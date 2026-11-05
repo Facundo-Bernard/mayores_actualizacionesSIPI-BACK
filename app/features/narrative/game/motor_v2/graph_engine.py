@@ -23,7 +23,10 @@ from app.features.narrative.constants import (
     AFINIDAD_UMBRAL_LEALTAD,
     AFINIDAD_UMBRAL_TRAICION
 )
-from app.features.narrative.enums import RunPhaseEnum
+from app.features.narrative.enums import RunPhaseEnum, DisparadorEnum
+from app.features.narrative.schemas.rules_schemas import EfectoSchema
+from app.features.narrative.engine.rule_engine import despachar_efectos
+from app.features.narrative.engine.catalog_loader import obtener_catalogos_universo
 from app.features.narrative.schemas.v2_graph_schemas import (
     NodoNarrativoSchema,
     NodoClienteSchema,
@@ -429,14 +432,65 @@ class GraphTraversalEngine:
         # Límites min/max de recursos configurados para el universo
         recursos_mapa = await obtener_mapa_recursos_universo(run.get("universo_id", "corte_medieval"))
 
-        # 1. Aplicar Impactos de Recursos
+        # 1. Aplicar Impactos de Recursos con amortiguadores pasivos y límites dinámicos
         for imp_rec in siguiente_nodo.impactos_recursos:
             rec_clave = imp_rec.recurso.lower()
             if rec_clave in recursos:
-                meta = recursos_mapa.get(rec_clave, {})
-                limite_min = meta.get("min", 0)
-                limite_max = meta.get("max", 100)
-                recursos[rec_clave] = max(limite_min, min(limite_max, recursos[rec_clave] + imp_rec.delta))
+                delta = float(imp_rec.delta)
+                # Amortiguación pasiva si es pérdida
+                if delta < 0:
+                    for mod in run.get("modificadores_pasivos", []):
+                        if mod.get("tipo") == "amortiguar_danio" and (not mod.get("clave") or mod.get("clave") == rec_clave):
+                            reduccion = float(mod.get("reduccion_porcentual", 0))
+                            if 0 < reduccion <= 100:
+                                delta *= (1.0 - (reduccion / 100.0))
+
+                nuevo_val = recursos[rec_clave] + delta
+
+                # Clamping dinámico: prioridad a run['limites'], fallback a recursos_mapa
+                limites_run = run.get("limites", {}).get(rec_clave, {})
+                lim_min = limites_run.get("min")
+                if lim_min is None:
+                    lim_min = recursos_mapa.get(rec_clave, {}).get("min", 0)
+
+                lim_max = limites_run.get("max")
+                if lim_max is None:
+                    lim_max = recursos_mapa.get(rec_clave, {}).get("max", 100)
+
+                recursos[rec_clave] = int(max(float(lim_min), min(float(lim_max), round(nuevo_val))))
+
+        # 1.5 Despachar disparadores reactivos de eventos (positivo/negativo) sobre cartas y corte
+        db = get_database()
+        cat_acciones, cat_frecuencias = await obtener_catalogos_universo(run.get("universo_id", "corte_medieval"), db)
+        net_delta = sum(imp.delta for imp in siguiente_nodo.impactos_recursos)
+        disparador_reactivo = DisparadorEnum.EN_EVENTO_NEGATIVO if net_delta < 0 else (DisparadorEnum.EN_EVENTO_POSITIVO if net_delta > 0 else None)
+        if disparador_reactivo:
+            for cid in run.get("cartas_en_mano", []):
+                cdoc = await db[COLL_CARDS].find_one({"_id": cid})
+                if cdoc and cdoc.get("efectos"):
+                    despachar_efectos(
+                        disparador_reactivo,
+                        run,
+                        [EfectoSchema(**e) for e in cdoc["efectos"]],
+                        recursos_mapa,
+                        duenio_id=cid,
+                        mes_actual=run.get("mes_actual", 1),
+                        catalogo_acciones=cat_acciones,
+                        catalogo_frecuencias=cat_frecuencias,
+                    )
+            for pid in run.get("afinidad", {}).keys():
+                pdoc = await db[COLL_CHARACTERS].find_one({"_id": pid})
+                if pdoc and pdoc.get("efectos"):
+                    despachar_efectos(
+                        disparador_reactivo,
+                        run,
+                        [EfectoSchema(**e) for e in pdoc["efectos"]],
+                        recursos_mapa,
+                        duenio_id=pid,
+                        mes_actual=run.get("mes_actual", 1),
+                        catalogo_acciones=cat_acciones,
+                        catalogo_frecuencias=cat_frecuencias,
+                    )
 
         # 2. Aplicar Impactos de Afinidad
         afinidad_before = dict(afinidad)
